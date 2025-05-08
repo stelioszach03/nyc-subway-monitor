@@ -10,8 +10,8 @@ import { ROUTE_COLORS } from '../types/subway';
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic3RlbGlvc3phY2gwMDMiLCJhIjoiY205bmNqanJuMGpyZzJqc2VibG91aHh6MSJ9._RaxW8Cprc33mxaUfsMEnw';
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-// NYC Subway Stations GeoJSON URL
-const SUBWAY_STATIONS_URL = 'https://raw.githubusercontent.com/kevin-brown/nyc-open-geojson/master/transportation/subway-stations.geojson';
+// NYC Subway Stations GeoJSON URL - local file
+const SUBWAY_STATIONS_URL = '/subway-stations.geojson';
 
 // MTA official line colors
 const MTA_LINE_COLORS: Record<string, string> = {
@@ -30,22 +30,6 @@ const MTA_LINE_COLORS: Record<string, string> = {
 interface SubwayMapProps {
   selectedRoute: string | null;
 }
-
-// Helper function to extract station names and routes from description
-const processStationDescription = (description: string) => {
-  const name = description.match(/\*\s*NAME:\s*([^\n]+)/i)?.[1]?.trim();
-  const routesStr = description.match(/\*\s*LINE:\s*([^\n]+)/i)?.[1] ?? '';
-  const routes = routesStr
-    .replace(/ Express/gi, '')
-    .split(/[-\s]+/)
-    .filter(Boolean);
-
-  return {
-    station_name: name ?? 'Unknown',
-    routes,
-    primary_route: routes[0] ?? ''
-  };
-};
 
 const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -119,25 +103,15 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
 
         // Fetch and process subway stations
         try {
+          console.log('Fetching subway stations data from:', SUBWAY_STATIONS_URL);
           const response = await fetch(SUBWAY_STATIONS_URL);
-          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(`Failed to fetch subway stations: ${response.status}`);
+          }
           
-          // Process each feature to extract station name and routes
-          data.features.forEach((feature: any) => {
-            const description = feature.properties.description || '';
-            const { station_name, routes, primary_route } = processStationDescription(description);
-            
-            // Add parsed data back to the feature
-            feature.properties.station_name = station_name;
-            feature.properties.routes = routes;
-            feature.properties.primary_route = primary_route;
-            
-            // Set the color based on primary route
-            feature.properties.color = 
-              MTA_LINE_COLORS[primary_route] || 
-              (primary_route ? ROUTE_COLORS[primary_route] : '#808183'); // Fallback to our colors or gray
-          });
-
+          const data = await response.json();
+          console.log(`Successfully loaded ${data.features.length} stations`);
+          
           // Add subway stations source
           map.current?.addSource('subway-stations', {
             type: 'geojson',
@@ -189,7 +163,7 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
             }
           });
 
-          console.log('Subway stations loaded');
+          console.log('Subway stations loaded and displayed');
         } catch (error) {
           console.error('Error loading subway stations:', error);
         }
@@ -264,26 +238,30 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
 
         // Add click event for subway stations
         map.current?.on('click', 'subway-stations-layer', (e) => {
-          if (e.features && e.features.length > 0) {
-            const feature = e.features[0];
-            const props = feature.properties;
-            const coordinates = (feature.geometry as any).coordinates.slice();
-            
-            if (props && coordinates) {
-              const routesList = props.routes ? props.routes.join(', ') : 'None';
-              
-              // Create popup for station
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(`
-                  <div class="p-2">
-                    <h3 class="font-bold text-base">${props.station_name}</h3>
-                    <p class="text-sm text-gray-600 mt-1">Lines: ${routesList}</p>
-                  </div>
-                `)
-                .addTo(map.current!);
-            }
-          }
+          if (!e.features || e.features.length === 0) return;
+          
+          const feature = e.features[0];
+          const props = feature.properties;
+          
+          if (!props) return;
+          
+          const coordinates = (feature.geometry as any).coordinates.slice();
+          if (!coordinates) return;
+          
+          // Create HTML for popup
+          const stationName = props.station_name || 'Unknown Station';
+          const stopId = props.stop_id || '';
+          
+          // Create popup for station
+          new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(`
+              <div class="p-2">
+                <h3 class="font-bold text-base">${stationName}</h3>
+                <p class="text-sm text-gray-600 mt-1">ID: ${stopId}</p>
+              </div>
+            `)
+            .addTo(map.current!);
         });
 
         // Change cursor on hover for both trains and stations
@@ -446,17 +424,21 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
   useEffect(() => {
     if (!mapLoaded || !map.current) return;
     
-    map.current.setLayoutProperty(
-      'subway-stations-layer',
-      'visibility',
-      showStations ? 'visible' : 'none'
-    );
-    
-    map.current.setLayoutProperty(
-      'subway-stations-labels',
-      'visibility',
-      showStations ? 'visible' : 'none'
-    );
+    try {
+      map.current.setLayoutProperty(
+        'subway-stations-layer',
+        'visibility',
+        showStations ? 'visible' : 'none'
+      );
+      
+      map.current.setLayoutProperty(
+        'subway-stations-labels',
+        'visibility',
+        showStations ? 'visible' : 'none'
+      );
+    } catch (err) {
+      console.error('Error updating station visibility:', err);
+    }
   }, [showStations, mapLoaded]);
 
   // Toggle map style
