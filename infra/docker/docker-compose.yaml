@@ -1,0 +1,177 @@
+# nyc-subway-monitor/infra/docker/docker-compose.yaml
+services:
+  # Data Ingestion Service
+  ingest:
+    build:
+      context: ../../services/ingest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    networks:
+      - subway-net
+
+  # Streaming Pipeline
+  stream:
+    build:
+      context: ../../services/stream
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - POSTGRES_HOST=timescaledb
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - kafka
+      - timescaledb
+      - redis
+    networks:
+      - subway-net
+
+  # ML Service
+  ml:
+    build:
+      context: ../../services/ml
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MODEL_PATH=/app/models/anomaly_model.onnx
+    depends_on:
+      - redis
+    volumes:
+      - ml_models:/app/models
+    networks:
+      - subway-net
+
+  # API Gateway
+  api:
+    build:
+      context: ../../services/api
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=timescaledb
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://ml:8000
+    depends_on:
+      - timescaledb
+      - redis
+      - ml
+    networks:
+      - subway-net
+
+  # Web Frontend
+  web:
+    build:
+      context: ../../web
+      args:
+        - VITE_API_URL=http://localhost:8000
+        - VITE_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    ports:
+      - "3000:80"
+    networks:
+      - subway-net
+
+  # Infrastructure Services
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+    networks:
+      - subway-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0  # Άλλαξα από 4.0.0 σε 7.4.0 για συμβατότητα
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - subway-net
+
+  timescaledb:
+    image: postgres:15-alpine  # Άλλαξα από timescaledb/timescaledb:latest-pg15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - subway-net
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    networks:
+      - subway-net
+
+  # Observability
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - subway-net
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - subway-net
+
+  # Airflow for ML training
+  airflow:
+    image: apache/airflow:2.8.0
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB}
+    volumes:
+      - ../../services/ml/dags:/opt/airflow/dags
+      - ml_models:/opt/airflow/ml_models
+    ports:
+      - "8080:8080"
+    depends_on:
+      - timescaledb
+    networks:
+      - subway-net
+
+networks:
+  subway-net:
+    driver: bridge
+
+volumes:
+  zookeeper_data:
+  kafka_data:
+  timescaledb_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  ml_models:
