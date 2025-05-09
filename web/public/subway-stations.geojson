@@ -13,7 +13,8 @@
       "properties": {
         "stop_id": "101",
         "station_name": "Van Cortlandt Park-242 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -28,7 +29,8 @@
       "properties": {
         "stop_id": "103",
         "station_name": "238 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -43,7 +45,8 @@
       "properties": {
         "stop_id": "104",
         "station_name": "231 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -58,7 +61,8 @@
       "properties": {
         "stop_id": "106",
         "station_name": "Marble Hill-225 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -73,7 +77,8 @@
       "properties": {
         "stop_id": "107",
         "station_name": "215 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -88,7 +93,8 @@
       "properties": {
         "stop_id": "108",
         "station_name": "207 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -103,7 +109,8 @@
       "properties": {
         "stop_id": "109",
         "station_name": "Dyckman St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -118,7 +125,8 @@
       "properties": {
         "stop_id": "110",
         "station_name": "191 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -133,7 +141,8 @@
       "properties": {
         "stop_id": "111",
         "station_name": "181 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -148,7 +157,8 @@
       "properties": {
         "stop_id": "112",
         "station_name": "168 St-Washington Hts",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -163,7 +173,8 @@
       "properties": {
         "stop_id": "113",
         "station_name": "157 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -178,7 +189,8 @@
       "properties": {
         "stop_id": "114",
         "station_name": "145 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -193,7 +205,8 @@
       "properties": {
         "stop_id": "115",
         "station_name": "137 St-City College",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -208,7 +221,8 @@
       "properties": {
         "stop_id": "116",
         "station_name": "125 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -223,7 +237,8 @@
       "properties": {
         "stop_id": "117",
         "station_name": "116 St-Columbia University",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -238,7 +253,8 @@
       "properties": {
         "stop_id": "118",
         "station_name": "Cathedral Pkwy (110 St)",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -253,7 +269,8 @@
       "properties": {
         "stop_id": "119",
         "station_name": "103 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -268,7 +285,8 @@
       "properties": {
         "stop_id": "120",
         "station_name": "96 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -283,7 +301,8 @@
       "properties": {
         "stop_id": "121",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -298,7 +317,8 @@
       "properties": {
         "stop_id": "122",
         "station_name": "79 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -313,7 +333,8 @@
       "properties": {
         "stop_id": "123",
         "station_name": "72 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -328,7 +349,8 @@
       "properties": {
         "stop_id": "124",
         "station_name": "66 St-Lincoln Center",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -343,7 +365,8 @@
       "properties": {
         "stop_id": "125",
         "station_name": "59 St-Columbus Circle",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -358,7 +381,8 @@
       "properties": {
         "stop_id": "126",
         "station_name": "50 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -373,7 +397,8 @@
       "properties": {
         "stop_id": "127",
         "station_name": "Times Sq-42 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -388,7 +413,8 @@
       "properties": {
         "stop_id": "128",
         "station_name": "34 St-Penn",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -403,7 +429,8 @@
       "properties": {
         "stop_id": "129",
         "station_name": "28 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -418,7 +445,8 @@
       "properties": {
         "stop_id": "130",
         "station_name": "23 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -433,7 +461,8 @@
       "properties": {
         "stop_id": "131",
         "station_name": "18 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -448,7 +477,8 @@
       "properties": {
         "stop_id": "132",
         "station_name": "14 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -463,7 +493,8 @@
       "properties": {
         "stop_id": "133",
         "station_name": "Christopher St-Stonewall",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -478,7 +509,8 @@
       "properties": {
         "stop_id": "134",
         "station_name": "Houston St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -493,7 +525,8 @@
       "properties": {
         "stop_id": "135",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -508,7 +541,8 @@
       "properties": {
         "stop_id": "136",
         "station_name": "Franklin St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -523,7 +557,8 @@
       "properties": {
         "stop_id": "137",
         "station_name": "Chambers St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -538,7 +573,8 @@
       "properties": {
         "stop_id": "138",
         "station_name": "WTC Cortlandt",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -553,7 +589,8 @@
       "properties": {
         "stop_id": "139",
         "station_name": "Rector St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -568,7 +605,8 @@
       "properties": {
         "stop_id": "140",
         "station_name": "South Ferry Loop",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -583,7 +621,8 @@
       "properties": {
         "stop_id": "142",
         "station_name": "South Ferry",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "1"
       }
     },
     {
@@ -598,7 +637,8 @@
       "properties": {
         "stop_id": "201",
         "station_name": "Wakefield-241 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -613,7 +653,8 @@
       "properties": {
         "stop_id": "204",
         "station_name": "Nereid Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -628,7 +669,8 @@
       "properties": {
         "stop_id": "205",
         "station_name": "233 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -643,7 +685,8 @@
       "properties": {
         "stop_id": "206",
         "station_name": "225 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -658,7 +701,8 @@
       "properties": {
         "stop_id": "207",
         "station_name": "219 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -673,7 +717,8 @@
       "properties": {
         "stop_id": "208",
         "station_name": "Gun Hill Rd",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -688,7 +733,8 @@
       "properties": {
         "stop_id": "209",
         "station_name": "Burke Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -703,7 +749,8 @@
       "properties": {
         "stop_id": "210",
         "station_name": "Allerton Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -718,7 +765,8 @@
       "properties": {
         "stop_id": "211",
         "station_name": "Pelham Pkwy",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -733,7 +781,8 @@
       "properties": {
         "stop_id": "212",
         "station_name": "Bronx Park East",
-        "color": "#FB8C00"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -748,7 +797,8 @@
       "properties": {
         "stop_id": "213",
         "station_name": "E 180 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -763,7 +813,8 @@
       "properties": {
         "stop_id": "214",
         "station_name": "West Farms Sq-E Tremont Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -778,7 +829,8 @@
       "properties": {
         "stop_id": "215",
         "station_name": "174 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -793,7 +845,8 @@
       "properties": {
         "stop_id": "216",
         "station_name": "Freeman St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -808,7 +861,8 @@
       "properties": {
         "stop_id": "217",
         "station_name": "Simpson St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -823,7 +877,8 @@
       "properties": {
         "stop_id": "218",
         "station_name": "Intervale Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -838,7 +893,8 @@
       "properties": {
         "stop_id": "219",
         "station_name": "Prospect Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -853,7 +909,8 @@
       "properties": {
         "stop_id": "220",
         "station_name": "Jackson Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -868,7 +925,8 @@
       "properties": {
         "stop_id": "221",
         "station_name": "3 Av-149 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -883,7 +941,8 @@
       "properties": {
         "stop_id": "222",
         "station_name": "149 St-Grand Concourse",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -898,7 +957,8 @@
       "properties": {
         "stop_id": "224",
         "station_name": "135 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -913,7 +973,8 @@
       "properties": {
         "stop_id": "225",
         "station_name": "125 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -928,7 +989,8 @@
       "properties": {
         "stop_id": "226",
         "station_name": "116 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -943,7 +1005,8 @@
       "properties": {
         "stop_id": "227",
         "station_name": "Central Park North (110 St)",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -958,7 +1021,8 @@
       "properties": {
         "stop_id": "228",
         "station_name": "Park Place",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -973,7 +1037,8 @@
       "properties": {
         "stop_id": "229",
         "station_name": "Fulton St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -988,7 +1053,8 @@
       "properties": {
         "stop_id": "230",
         "station_name": "Wall St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1003,7 +1069,8 @@
       "properties": {
         "stop_id": "231",
         "station_name": "Clark St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1018,7 +1085,8 @@
       "properties": {
         "stop_id": "232",
         "station_name": "Borough Hall",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1033,7 +1101,8 @@
       "properties": {
         "stop_id": "233",
         "station_name": "Hoyt St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1048,7 +1117,8 @@
       "properties": {
         "stop_id": "234",
         "station_name": "Nevins St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1063,7 +1133,8 @@
       "properties": {
         "stop_id": "235",
         "station_name": "Atlantic Av-Barclays Ctr",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1078,7 +1149,8 @@
       "properties": {
         "stop_id": "236",
         "station_name": "Bergen St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1093,7 +1165,8 @@
       "properties": {
         "stop_id": "237",
         "station_name": "Grand Army Plaza",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1108,7 +1181,8 @@
       "properties": {
         "stop_id": "238",
         "station_name": "Eastern Pkwy-Brooklyn Museum",
-        "color": "#43A047"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1123,7 +1197,8 @@
       "properties": {
         "stop_id": "239",
         "station_name": "Franklin Av-Medgar Evers College",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1138,7 +1213,8 @@
       "properties": {
         "stop_id": "241",
         "station_name": "President St-Medgar Evers College",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1153,7 +1229,8 @@
       "properties": {
         "stop_id": "242",
         "station_name": "Sterling St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1168,7 +1245,8 @@
       "properties": {
         "stop_id": "243",
         "station_name": "Winthrop St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1183,7 +1261,8 @@
       "properties": {
         "stop_id": "244",
         "station_name": "Church Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1198,7 +1277,8 @@
       "properties": {
         "stop_id": "245",
         "station_name": "Beverly Rd",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1213,7 +1293,8 @@
       "properties": {
         "stop_id": "246",
         "station_name": "Newkirk Av-Little Haiti",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1228,7 +1309,8 @@
       "properties": {
         "stop_id": "247",
         "station_name": "Flatbush Av-Brooklyn College",
-        "color": "#43A047"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1243,7 +1325,8 @@
       "properties": {
         "stop_id": "248",
         "station_name": "Nostrand Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1258,7 +1341,8 @@
       "properties": {
         "stop_id": "249",
         "station_name": "Kingston Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1273,7 +1357,8 @@
       "properties": {
         "stop_id": "250",
         "station_name": "Crown Hts-Utica Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1288,7 +1373,8 @@
       "properties": {
         "stop_id": "251",
         "station_name": "Sutter Av-Rutland Rd",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1303,7 +1389,8 @@
       "properties": {
         "stop_id": "252",
         "station_name": "Saratoga Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1318,7 +1405,8 @@
       "properties": {
         "stop_id": "253",
         "station_name": "Rockaway Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1333,7 +1421,8 @@
       "properties": {
         "stop_id": "254",
         "station_name": "Junius St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1348,7 +1437,8 @@
       "properties": {
         "stop_id": "255",
         "station_name": "Pennsylvania Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1363,7 +1453,8 @@
       "properties": {
         "stop_id": "256",
         "station_name": "Van Siclen Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1378,7 +1469,8 @@
       "properties": {
         "stop_id": "257",
         "station_name": "New Lots Av",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "2"
       }
     },
     {
@@ -1393,7 +1485,8 @@
       "properties": {
         "stop_id": "301",
         "station_name": "Harlem-148 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "3"
       }
     },
     {
@@ -1408,7 +1501,8 @@
       "properties": {
         "stop_id": "302",
         "station_name": "145 St",
-        "color": "#1E88E5"
+        "color": "#EE352E",
+        "lines": "3"
       }
     },
     {
@@ -1423,7 +1517,8 @@
       "properties": {
         "stop_id": "401",
         "station_name": "Woodlawn",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1438,7 +1533,8 @@
       "properties": {
         "stop_id": "402",
         "station_name": "Mosholu Pkwy",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1453,7 +1549,8 @@
       "properties": {
         "stop_id": "405",
         "station_name": "Bedford Park Blvd-Lehman College",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1468,7 +1565,8 @@
       "properties": {
         "stop_id": "406",
         "station_name": "Kingsbridge Rd",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1483,7 +1581,8 @@
       "properties": {
         "stop_id": "407",
         "station_name": "Fordham Rd",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1498,7 +1597,8 @@
       "properties": {
         "stop_id": "408",
         "station_name": "183 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1513,7 +1613,8 @@
       "properties": {
         "stop_id": "409",
         "station_name": "Burnside Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1528,7 +1629,8 @@
       "properties": {
         "stop_id": "410",
         "station_name": "176 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1543,7 +1645,8 @@
       "properties": {
         "stop_id": "411",
         "station_name": "Mt Eden Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1558,7 +1661,8 @@
       "properties": {
         "stop_id": "412",
         "station_name": "170 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1573,7 +1677,8 @@
       "properties": {
         "stop_id": "413",
         "station_name": "167 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1588,7 +1693,8 @@
       "properties": {
         "stop_id": "414",
         "station_name": "161 St-Yankee Stadium",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1603,7 +1709,8 @@
       "properties": {
         "stop_id": "415",
         "station_name": "149 St-Grand Concourse",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1618,7 +1725,8 @@
       "properties": {
         "stop_id": "416",
         "station_name": "138 St-Grand Concourse",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1633,7 +1741,8 @@
       "properties": {
         "stop_id": "418",
         "station_name": "Fulton St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1648,7 +1757,8 @@
       "properties": {
         "stop_id": "419",
         "station_name": "Wall St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1663,7 +1773,8 @@
       "properties": {
         "stop_id": "420",
         "station_name": "Bowling Green",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1678,7 +1789,8 @@
       "properties": {
         "stop_id": "423",
         "station_name": "Borough Hall",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "4"
       }
     },
     {
@@ -1693,7 +1805,8 @@
       "properties": {
         "stop_id": "501",
         "station_name": "Eastchester-Dyre Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "5"
       }
     },
     {
@@ -1708,7 +1821,8 @@
       "properties": {
         "stop_id": "502",
         "station_name": "Baychester Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "5"
       }
     },
     {
@@ -1723,7 +1837,8 @@
       "properties": {
         "stop_id": "503",
         "station_name": "Gun Hill Rd",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "5"
       }
     },
     {
@@ -1738,7 +1853,8 @@
       "properties": {
         "stop_id": "504",
         "station_name": "Pelham Pkwy",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "5"
       }
     },
     {
@@ -1753,7 +1869,8 @@
       "properties": {
         "stop_id": "505",
         "station_name": "Morris Park",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "5"
       }
     },
     {
@@ -1768,7 +1885,8 @@
       "properties": {
         "stop_id": "601",
         "station_name": "Pelham Bay Park",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1783,7 +1901,8 @@
       "properties": {
         "stop_id": "602",
         "station_name": "Buhre Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1798,7 +1917,8 @@
       "properties": {
         "stop_id": "603",
         "station_name": "Middletown Rd",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1813,7 +1933,8 @@
       "properties": {
         "stop_id": "604",
         "station_name": "Westchester Sq-E Tremont Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1828,7 +1949,8 @@
       "properties": {
         "stop_id": "606",
         "station_name": "Zerega Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1843,7 +1965,8 @@
       "properties": {
         "stop_id": "607",
         "station_name": "Castle Hill Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1858,7 +1981,8 @@
       "properties": {
         "stop_id": "608",
         "station_name": "Parkchester",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1873,7 +1997,8 @@
       "properties": {
         "stop_id": "609",
         "station_name": "St Lawrence Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1888,7 +2013,8 @@
       "properties": {
         "stop_id": "610",
         "station_name": "Morrison Av-Soundview",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1903,7 +2029,8 @@
       "properties": {
         "stop_id": "611",
         "station_name": "Elder Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1918,7 +2045,8 @@
       "properties": {
         "stop_id": "612",
         "station_name": "Whitlock Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1933,7 +2061,8 @@
       "properties": {
         "stop_id": "613",
         "station_name": "Hunts Point Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1948,7 +2077,8 @@
       "properties": {
         "stop_id": "614",
         "station_name": "Longwood Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1963,7 +2093,8 @@
       "properties": {
         "stop_id": "615",
         "station_name": "E 149 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1978,7 +2109,8 @@
       "properties": {
         "stop_id": "616",
         "station_name": "E 143 St-St Mary's St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -1993,7 +2125,8 @@
       "properties": {
         "stop_id": "617",
         "station_name": "Cypress Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2008,7 +2141,8 @@
       "properties": {
         "stop_id": "618",
         "station_name": "Brook Av",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2023,7 +2157,8 @@
       "properties": {
         "stop_id": "619",
         "station_name": "3 Av-138 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2038,7 +2173,8 @@
       "properties": {
         "stop_id": "621",
         "station_name": "125 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2053,7 +2189,8 @@
       "properties": {
         "stop_id": "622",
         "station_name": "116 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2068,7 +2205,8 @@
       "properties": {
         "stop_id": "623",
         "station_name": "110 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2083,7 +2221,8 @@
       "properties": {
         "stop_id": "624",
         "station_name": "103 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2098,7 +2237,8 @@
       "properties": {
         "stop_id": "625",
         "station_name": "96 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2113,7 +2253,8 @@
       "properties": {
         "stop_id": "626",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2128,7 +2269,8 @@
       "properties": {
         "stop_id": "627",
         "station_name": "77 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2143,7 +2285,8 @@
       "properties": {
         "stop_id": "628",
         "station_name": "68 St-Hunter College",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2158,7 +2301,8 @@
       "properties": {
         "stop_id": "629",
         "station_name": "59 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2173,7 +2317,8 @@
       "properties": {
         "stop_id": "630",
         "station_name": "51 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2188,7 +2333,8 @@
       "properties": {
         "stop_id": "631",
         "station_name": "Grand Central-42 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2203,7 +2349,8 @@
       "properties": {
         "stop_id": "632",
         "station_name": "33 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2218,7 +2365,8 @@
       "properties": {
         "stop_id": "633",
         "station_name": "28 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2233,7 +2381,8 @@
       "properties": {
         "stop_id": "634",
         "station_name": "23 St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2248,7 +2397,8 @@
       "properties": {
         "stop_id": "635",
         "station_name": "14 St-Union Sq",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2263,7 +2413,8 @@
       "properties": {
         "stop_id": "636",
         "station_name": "Astor Pl",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2278,7 +2429,8 @@
       "properties": {
         "stop_id": "637",
         "station_name": "Bleecker St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2293,7 +2445,8 @@
       "properties": {
         "stop_id": "638",
         "station_name": "Spring St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2308,7 +2461,8 @@
       "properties": {
         "stop_id": "639",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2323,7 +2477,8 @@
       "properties": {
         "stop_id": "640",
         "station_name": "Brooklyn Bridge-City Hall",
-        "color": "#43A047"
+        "color": "#00933C",
+        "lines": "6"
       }
     },
     {
@@ -2338,7 +2493,8 @@
       "properties": {
         "stop_id": "701",
         "station_name": "Flushing-Main St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2353,7 +2509,8 @@
       "properties": {
         "stop_id": "702",
         "station_name": "Mets-Willets Point",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2368,7 +2525,8 @@
       "properties": {
         "stop_id": "705",
         "station_name": "111 St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2383,7 +2541,8 @@
       "properties": {
         "stop_id": "706",
         "station_name": "103 St-Corona Plaza",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2398,7 +2557,8 @@
       "properties": {
         "stop_id": "707",
         "station_name": "Junction Blvd",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2413,7 +2573,8 @@
       "properties": {
         "stop_id": "708",
         "station_name": "90 St-Elmhurst Av",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2428,7 +2589,8 @@
       "properties": {
         "stop_id": "709",
         "station_name": "82 St-Jackson Hts",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2443,7 +2605,8 @@
       "properties": {
         "stop_id": "710",
         "station_name": "74 St-Broadway",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2458,7 +2621,8 @@
       "properties": {
         "stop_id": "711",
         "station_name": "69 St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2473,7 +2637,8 @@
       "properties": {
         "stop_id": "712",
         "station_name": "61 St-Woodside",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2488,7 +2653,8 @@
       "properties": {
         "stop_id": "713",
         "station_name": "52 St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2503,7 +2669,8 @@
       "properties": {
         "stop_id": "714",
         "station_name": "46 St-Bliss St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2518,7 +2685,8 @@
       "properties": {
         "stop_id": "715",
         "station_name": "40 St-Lowery St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2533,7 +2701,8 @@
       "properties": {
         "stop_id": "716",
         "station_name": "33 St-Rawson St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2548,7 +2717,8 @@
       "properties": {
         "stop_id": "718",
         "station_name": "Queensboro Plaza",
-        "color": "#8E24AA"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2563,7 +2733,8 @@
       "properties": {
         "stop_id": "719",
         "station_name": "Court Sq",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2578,7 +2749,8 @@
       "properties": {
         "stop_id": "720",
         "station_name": "Hunters Point Av",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2593,7 +2765,8 @@
       "properties": {
         "stop_id": "721",
         "station_name": "Vernon Blvd-Jackson Av",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2608,7 +2781,8 @@
       "properties": {
         "stop_id": "723",
         "station_name": "Grand Central-42 St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2623,7 +2797,8 @@
       "properties": {
         "stop_id": "724",
         "station_name": "5 Av",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2638,7 +2813,8 @@
       "properties": {
         "stop_id": "725",
         "station_name": "Times Sq-42 St",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2653,7 +2829,8 @@
       "properties": {
         "stop_id": "726",
         "station_name": "34 St-Hudson Yards",
-        "color": "#1E88E5"
+        "color": "#B933AD",
+        "lines": "7"
       }
     },
     {
@@ -2668,7 +2845,8 @@
       "properties": {
         "stop_id": "901",
         "station_name": "Grand Central-42 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -2683,7 +2861,8 @@
       "properties": {
         "stop_id": "902",
         "station_name": "Times Sq-42 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -2698,7 +2877,8 @@
       "properties": {
         "stop_id": "A02",
         "station_name": "Inwood-207 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2713,7 +2893,8 @@
       "properties": {
         "stop_id": "A03",
         "station_name": "Dyckman St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2728,7 +2909,8 @@
       "properties": {
         "stop_id": "A05",
         "station_name": "190 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2743,7 +2925,8 @@
       "properties": {
         "stop_id": "A06",
         "station_name": "181 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2758,7 +2941,8 @@
       "properties": {
         "stop_id": "A07",
         "station_name": "175 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2773,7 +2957,8 @@
       "properties": {
         "stop_id": "A09",
         "station_name": "168 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2788,7 +2973,8 @@
       "properties": {
         "stop_id": "A10",
         "station_name": "163 St-Amsterdam Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2803,7 +2989,8 @@
       "properties": {
         "stop_id": "A11",
         "station_name": "155 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2818,7 +3005,8 @@
       "properties": {
         "stop_id": "A12",
         "station_name": "145 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2833,7 +3021,8 @@
       "properties": {
         "stop_id": "A14",
         "station_name": "135 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2848,7 +3037,8 @@
       "properties": {
         "stop_id": "A15",
         "station_name": "125 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2863,7 +3053,8 @@
       "properties": {
         "stop_id": "A16",
         "station_name": "116 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2878,7 +3069,8 @@
       "properties": {
         "stop_id": "A17",
         "station_name": "Cathedral Pkwy (110 St)",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2893,7 +3085,8 @@
       "properties": {
         "stop_id": "A18",
         "station_name": "103 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2908,7 +3101,8 @@
       "properties": {
         "stop_id": "A19",
         "station_name": "96 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2923,7 +3117,8 @@
       "properties": {
         "stop_id": "A20",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2938,7 +3133,8 @@
       "properties": {
         "stop_id": "A21",
         "station_name": "81 St-Museum of Natural History",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2953,7 +3149,8 @@
       "properties": {
         "stop_id": "A22",
         "station_name": "72 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2968,7 +3165,8 @@
       "properties": {
         "stop_id": "A24",
         "station_name": "59 St-Columbus Circle",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2983,7 +3181,8 @@
       "properties": {
         "stop_id": "A25",
         "station_name": "50 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -2998,7 +3197,8 @@
       "properties": {
         "stop_id": "A27",
         "station_name": "42 St-Port Authority Bus Terminal",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3013,7 +3213,8 @@
       "properties": {
         "stop_id": "A28",
         "station_name": "34 St-Penn",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3028,7 +3229,8 @@
       "properties": {
         "stop_id": "A30",
         "station_name": "23 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3043,7 +3245,8 @@
       "properties": {
         "stop_id": "A31",
         "station_name": "14 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3058,7 +3261,8 @@
       "properties": {
         "stop_id": "A32",
         "station_name": "W 4 St-Wash Sq",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3073,7 +3277,8 @@
       "properties": {
         "stop_id": "A33",
         "station_name": "Spring St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3088,7 +3293,8 @@
       "properties": {
         "stop_id": "A34",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3103,7 +3309,8 @@
       "properties": {
         "stop_id": "A36",
         "station_name": "Chambers St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3118,7 +3325,8 @@
       "properties": {
         "stop_id": "A38",
         "station_name": "Fulton St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3133,7 +3341,8 @@
       "properties": {
         "stop_id": "A40",
         "station_name": "High St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3148,7 +3357,8 @@
       "properties": {
         "stop_id": "A41",
         "station_name": "Jay St-MetroTech",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3163,7 +3373,8 @@
       "properties": {
         "stop_id": "A42",
         "station_name": "Hoyt-Schermerhorn Sts",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3178,7 +3389,8 @@
       "properties": {
         "stop_id": "A43",
         "station_name": "Lafayette Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3193,7 +3405,8 @@
       "properties": {
         "stop_id": "A44",
         "station_name": "Clinton-Washington Avs",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3208,7 +3421,8 @@
       "properties": {
         "stop_id": "A45",
         "station_name": "Franklin Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3223,7 +3437,8 @@
       "properties": {
         "stop_id": "A46",
         "station_name": "Nostrand Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3238,7 +3453,8 @@
       "properties": {
         "stop_id": "A47",
         "station_name": "Kingston-Throop Avs",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3253,7 +3469,8 @@
       "properties": {
         "stop_id": "A48",
         "station_name": "Utica Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3268,7 +3485,8 @@
       "properties": {
         "stop_id": "A49",
         "station_name": "Ralph Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3283,7 +3501,8 @@
       "properties": {
         "stop_id": "A50",
         "station_name": "Rockaway Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3298,7 +3517,8 @@
       "properties": {
         "stop_id": "A51",
         "station_name": "Broadway Junction",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3313,7 +3533,8 @@
       "properties": {
         "stop_id": "A52",
         "station_name": "Liberty Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3328,7 +3549,8 @@
       "properties": {
         "stop_id": "A53",
         "station_name": "Van Siclen Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3343,7 +3565,8 @@
       "properties": {
         "stop_id": "A54",
         "station_name": "Shepherd Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3358,7 +3581,8 @@
       "properties": {
         "stop_id": "A55",
         "station_name": "Euclid Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3373,7 +3597,8 @@
       "properties": {
         "stop_id": "A57",
         "station_name": "Grant Av",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3388,7 +3613,8 @@
       "properties": {
         "stop_id": "A59",
         "station_name": "80 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3403,7 +3629,8 @@
       "properties": {
         "stop_id": "A60",
         "station_name": "88 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3418,7 +3645,8 @@
       "properties": {
         "stop_id": "A61",
         "station_name": "Rockaway Blvd",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3433,7 +3661,8 @@
       "properties": {
         "stop_id": "A63",
         "station_name": "104 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3448,7 +3677,8 @@
       "properties": {
         "stop_id": "A64",
         "station_name": "111 St",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3463,7 +3693,8 @@
       "properties": {
         "stop_id": "A65",
         "station_name": "Ozone Park-Lefferts Blvd",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "A,C,E"
       }
     },
     {
@@ -3478,7 +3709,8 @@
       "properties": {
         "stop_id": "B04",
         "station_name": "21 St-Queensbridge",
-        "color": "#8E24AA"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3493,7 +3725,8 @@
       "properties": {
         "stop_id": "B06",
         "station_name": "Roosevelt Island",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3508,7 +3741,8 @@
       "properties": {
         "stop_id": "B08",
         "station_name": "Lexington Av/63 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3523,7 +3757,8 @@
       "properties": {
         "stop_id": "B10",
         "station_name": "57 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3538,7 +3773,8 @@
       "properties": {
         "stop_id": "B12",
         "station_name": "9 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3553,7 +3789,8 @@
       "properties": {
         "stop_id": "B13",
         "station_name": "Fort Hamilton Pkwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3568,7 +3805,8 @@
       "properties": {
         "stop_id": "B14",
         "station_name": "50 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3583,7 +3821,8 @@
       "properties": {
         "stop_id": "B15",
         "station_name": "55 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3598,7 +3837,8 @@
       "properties": {
         "stop_id": "B16",
         "station_name": "62 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3613,7 +3853,8 @@
       "properties": {
         "stop_id": "B17",
         "station_name": "71 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3628,7 +3869,8 @@
       "properties": {
         "stop_id": "B18",
         "station_name": "79 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3643,7 +3885,8 @@
       "properties": {
         "stop_id": "B19",
         "station_name": "18 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3658,7 +3901,8 @@
       "properties": {
         "stop_id": "B20",
         "station_name": "20 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3673,7 +3917,8 @@
       "properties": {
         "stop_id": "B21",
         "station_name": "Bay Pkwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3688,7 +3933,8 @@
       "properties": {
         "stop_id": "B22",
         "station_name": "25 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3703,7 +3949,8 @@
       "properties": {
         "stop_id": "B23",
         "station_name": "Bay 50 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3718,7 +3965,8 @@
       "properties": {
         "stop_id": "D01",
         "station_name": "Norwood-205 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3733,7 +3981,8 @@
       "properties": {
         "stop_id": "D03",
         "station_name": "Bedford Park Blvd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3748,7 +3997,8 @@
       "properties": {
         "stop_id": "D04",
         "station_name": "Kingsbridge Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3763,7 +4013,8 @@
       "properties": {
         "stop_id": "D05",
         "station_name": "Fordham Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3778,7 +4029,8 @@
       "properties": {
         "stop_id": "D06",
         "station_name": "182-183 Sts",
-        "color": "#EE352E"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3793,7 +4045,8 @@
       "properties": {
         "stop_id": "D07",
         "station_name": "Tremont Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3808,7 +4061,8 @@
       "properties": {
         "stop_id": "D08",
         "station_name": "174-175 Sts",
-        "color": "#00933C"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3823,7 +4077,8 @@
       "properties": {
         "stop_id": "D09",
         "station_name": "170 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3838,7 +4093,8 @@
       "properties": {
         "stop_id": "D10",
         "station_name": "167 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3853,7 +4109,8 @@
       "properties": {
         "stop_id": "D11",
         "station_name": "161 St-Yankee Stadium",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3868,7 +4125,8 @@
       "properties": {
         "stop_id": "D12",
         "station_name": "155 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3883,7 +4141,8 @@
       "properties": {
         "stop_id": "D13",
         "station_name": "145 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3898,7 +4157,8 @@
       "properties": {
         "stop_id": "D14",
         "station_name": "7 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3913,7 +4173,8 @@
       "properties": {
         "stop_id": "D15",
         "station_name": "47-50 Sts-Rockefeller Ctr",
-        "color": "#B933AD"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3928,7 +4189,8 @@
       "properties": {
         "stop_id": "D16",
         "station_name": "42 St-Bryant Pk",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3943,7 +4205,8 @@
       "properties": {
         "stop_id": "D17",
         "station_name": "34 St-Herald Sq",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3958,7 +4221,8 @@
       "properties": {
         "stop_id": "D18",
         "station_name": "23 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3973,7 +4237,8 @@
       "properties": {
         "stop_id": "D19",
         "station_name": "14 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -3988,7 +4253,8 @@
       "properties": {
         "stop_id": "D20",
         "station_name": "W 4 St-Wash Sq",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4003,7 +4269,8 @@
       "properties": {
         "stop_id": "D21",
         "station_name": "Broadway-Lafayette St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4018,7 +4285,8 @@
       "properties": {
         "stop_id": "D22",
         "station_name": "Grand St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4033,7 +4301,8 @@
       "properties": {
         "stop_id": "D24",
         "station_name": "Atlantic Av-Barclays Ctr",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4048,7 +4317,8 @@
       "properties": {
         "stop_id": "D25",
         "station_name": "7 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4063,7 +4333,8 @@
       "properties": {
         "stop_id": "D26",
         "station_name": "Prospect Park",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4078,7 +4349,8 @@
       "properties": {
         "stop_id": "D27",
         "station_name": "Parkside Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4093,7 +4365,8 @@
       "properties": {
         "stop_id": "D28",
         "station_name": "Church Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4108,7 +4381,8 @@
       "properties": {
         "stop_id": "D29",
         "station_name": "Beverley Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4123,7 +4397,8 @@
       "properties": {
         "stop_id": "D30",
         "station_name": "Cortelyou Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4138,7 +4413,8 @@
       "properties": {
         "stop_id": "D31",
         "station_name": "Newkirk Plaza",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4153,7 +4429,8 @@
       "properties": {
         "stop_id": "D32",
         "station_name": "Avenue H",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4168,7 +4445,8 @@
       "properties": {
         "stop_id": "D33",
         "station_name": "Avenue J",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4183,7 +4461,8 @@
       "properties": {
         "stop_id": "D34",
         "station_name": "Avenue M",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4198,7 +4477,8 @@
       "properties": {
         "stop_id": "D35",
         "station_name": "Kings Hwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4213,7 +4493,8 @@
       "properties": {
         "stop_id": "D37",
         "station_name": "Avenue U",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4228,7 +4509,8 @@
       "properties": {
         "stop_id": "D38",
         "station_name": "Neck Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4243,7 +4525,8 @@
       "properties": {
         "stop_id": "D39",
         "station_name": "Sheepshead Bay",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4258,7 +4541,8 @@
       "properties": {
         "stop_id": "D40",
         "station_name": "Brighton Beach",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4273,7 +4557,8 @@
       "properties": {
         "stop_id": "D41",
         "station_name": "Ocean Pkwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4288,7 +4573,8 @@
       "properties": {
         "stop_id": "D42",
         "station_name": "W 8 St-NY Aquarium",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4303,7 +4589,8 @@
       "properties": {
         "stop_id": "D43",
         "station_name": "Coney Island-Stillwell Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4318,7 +4605,8 @@
       "properties": {
         "stop_id": "E01",
         "station_name": "World Trade Center",
-        "color": "#1E88E5"
+        "color": "#2850AD",
+        "lines": "E"
       }
     },
     {
@@ -4333,7 +4621,8 @@
       "properties": {
         "stop_id": "F01",
         "station_name": "Jamaica-179 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4348,7 +4637,8 @@
       "properties": {
         "stop_id": "F02",
         "station_name": "169 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4363,7 +4653,8 @@
       "properties": {
         "stop_id": "F03",
         "station_name": "Parsons Blvd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4378,7 +4669,8 @@
       "properties": {
         "stop_id": "F04",
         "station_name": "Sutphin Blvd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4393,7 +4685,8 @@
       "properties": {
         "stop_id": "F05",
         "station_name": "Briarwood",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4408,7 +4701,8 @@
       "properties": {
         "stop_id": "F06",
         "station_name": "Kew Gardens-Union Tpke",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4423,7 +4717,8 @@
       "properties": {
         "stop_id": "F07",
         "station_name": "75 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4438,7 +4733,8 @@
       "properties": {
         "stop_id": "F09",
         "station_name": "Court Sq-23 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4453,7 +4749,8 @@
       "properties": {
         "stop_id": "F11",
         "station_name": "Lexington Av/53 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4468,7 +4765,8 @@
       "properties": {
         "stop_id": "F12",
         "station_name": "5 Av/53 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4483,7 +4781,8 @@
       "properties": {
         "stop_id": "F14",
         "station_name": "2 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4498,7 +4797,8 @@
       "properties": {
         "stop_id": "F15",
         "station_name": "Delancey St-Essex St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4513,7 +4813,8 @@
       "properties": {
         "stop_id": "F16",
         "station_name": "East Broadway",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4528,7 +4829,8 @@
       "properties": {
         "stop_id": "F18",
         "station_name": "York St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4543,7 +4845,8 @@
       "properties": {
         "stop_id": "F20",
         "station_name": "Bergen St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4558,7 +4861,8 @@
       "properties": {
         "stop_id": "F21",
         "station_name": "Carroll St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4573,7 +4877,8 @@
       "properties": {
         "stop_id": "F22",
         "station_name": "Smith-9 Sts",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4588,7 +4893,8 @@
       "properties": {
         "stop_id": "F23",
         "station_name": "4 Av-9 St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4603,7 +4909,8 @@
       "properties": {
         "stop_id": "F24",
         "station_name": "7 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4618,7 +4925,8 @@
       "properties": {
         "stop_id": "F25",
         "station_name": "15 St-Prospect Park",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4633,7 +4941,8 @@
       "properties": {
         "stop_id": "F26",
         "station_name": "Fort Hamilton Pkwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4648,7 +4957,8 @@
       "properties": {
         "stop_id": "F27",
         "station_name": "Church Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4663,7 +4973,8 @@
       "properties": {
         "stop_id": "F29",
         "station_name": "Ditmas Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4678,7 +4989,8 @@
       "properties": {
         "stop_id": "F30",
         "station_name": "18 Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4693,7 +5005,8 @@
       "properties": {
         "stop_id": "F31",
         "station_name": "Avenue I",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4708,7 +5021,8 @@
       "properties": {
         "stop_id": "F32",
         "station_name": "Bay Pkwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4723,7 +5037,8 @@
       "properties": {
         "stop_id": "F33",
         "station_name": "Avenue N",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4738,7 +5053,8 @@
       "properties": {
         "stop_id": "F34",
         "station_name": "Avenue P",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4753,7 +5069,8 @@
       "properties": {
         "stop_id": "F35",
         "station_name": "Kings Hwy",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4768,7 +5085,8 @@
       "properties": {
         "stop_id": "F36",
         "station_name": "Avenue U",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4783,7 +5101,8 @@
       "properties": {
         "stop_id": "F38",
         "station_name": "Avenue X",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4798,7 +5117,8 @@
       "properties": {
         "stop_id": "F39",
         "station_name": "Neptune Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "B,D,F,M"
       }
     },
     {
@@ -4813,7 +5133,8 @@
       "properties": {
         "stop_id": "G05",
         "station_name": "Jamaica Center-Parsons/Archer",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4828,7 +5149,8 @@
       "properties": {
         "stop_id": "G06",
         "station_name": "Sutphin Blvd-Archer Av-JFK Airport",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4843,7 +5165,8 @@
       "properties": {
         "stop_id": "G07",
         "station_name": "Jamaica-Van Wyck",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4858,7 +5181,8 @@
       "properties": {
         "stop_id": "G08",
         "station_name": "Forest Hills-71 Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4873,7 +5197,8 @@
       "properties": {
         "stop_id": "G09",
         "station_name": "67 Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4888,7 +5213,8 @@
       "properties": {
         "stop_id": "G10",
         "station_name": "63 Dr-Rego Park",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4903,7 +5229,8 @@
       "properties": {
         "stop_id": "G11",
         "station_name": "Woodhaven Blvd",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4918,7 +5245,8 @@
       "properties": {
         "stop_id": "G12",
         "station_name": "Grand Av-Newtown",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4933,7 +5261,8 @@
       "properties": {
         "stop_id": "G13",
         "station_name": "Elmhurst Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4948,7 +5277,8 @@
       "properties": {
         "stop_id": "G14",
         "station_name": "Jackson Hts-Roosevelt Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4963,7 +5293,8 @@
       "properties": {
         "stop_id": "G15",
         "station_name": "65 St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4978,7 +5309,8 @@
       "properties": {
         "stop_id": "G16",
         "station_name": "Northern Blvd",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -4993,7 +5325,8 @@
       "properties": {
         "stop_id": "G18",
         "station_name": "46 St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5008,7 +5341,8 @@
       "properties": {
         "stop_id": "G19",
         "station_name": "Steinway St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5023,7 +5357,8 @@
       "properties": {
         "stop_id": "G20",
         "station_name": "36 St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5038,7 +5373,8 @@
       "properties": {
         "stop_id": "G21",
         "station_name": "Queens Plaza",
-        "color": "#8E24AA"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5053,7 +5389,8 @@
       "properties": {
         "stop_id": "G22",
         "station_name": "Court Sq",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5068,7 +5405,8 @@
       "properties": {
         "stop_id": "G24",
         "station_name": "21 St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5083,7 +5421,8 @@
       "properties": {
         "stop_id": "G26",
         "station_name": "Greenpoint Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5098,7 +5437,8 @@
       "properties": {
         "stop_id": "G28",
         "station_name": "Nassau Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5113,7 +5453,8 @@
       "properties": {
         "stop_id": "G29",
         "station_name": "Metropolitan Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5128,7 +5469,8 @@
       "properties": {
         "stop_id": "G30",
         "station_name": "Broadway",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5143,7 +5485,8 @@
       "properties": {
         "stop_id": "G31",
         "station_name": "Flushing Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5158,7 +5501,8 @@
       "properties": {
         "stop_id": "G32",
         "station_name": "Myrtle-Willoughby Avs",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5173,7 +5517,8 @@
       "properties": {
         "stop_id": "G33",
         "station_name": "Bedford-Nostrand Avs",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5188,7 +5533,8 @@
       "properties": {
         "stop_id": "G34",
         "station_name": "Classon Av",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5203,7 +5549,8 @@
       "properties": {
         "stop_id": "G35",
         "station_name": "Clinton-Washington Avs",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5218,7 +5565,8 @@
       "properties": {
         "stop_id": "G36",
         "station_name": "Fulton St",
-        "color": "#1E88E5"
+        "color": "#6CBE45",
+        "lines": "G"
       }
     },
     {
@@ -5233,7 +5581,8 @@
       "properties": {
         "stop_id": "H01",
         "station_name": "Aqueduct Racetrack",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5248,7 +5597,8 @@
       "properties": {
         "stop_id": "H02",
         "station_name": "Aqueduct-N Conduit Av",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5263,7 +5613,8 @@
       "properties": {
         "stop_id": "H03",
         "station_name": "Howard Beach-JFK Airport",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5278,7 +5629,8 @@
       "properties": {
         "stop_id": "H04",
         "station_name": "Broad Channel",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5293,7 +5645,8 @@
       "properties": {
         "stop_id": "H06",
         "station_name": "Beach 67 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5308,7 +5661,8 @@
       "properties": {
         "stop_id": "H07",
         "station_name": "Beach 60 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5323,7 +5677,8 @@
       "properties": {
         "stop_id": "H08",
         "station_name": "Beach 44 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5338,7 +5693,8 @@
       "properties": {
         "stop_id": "H09",
         "station_name": "Beach 36 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5353,7 +5709,8 @@
       "properties": {
         "stop_id": "H10",
         "station_name": "Beach 25 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5368,7 +5725,8 @@
       "properties": {
         "stop_id": "H11",
         "station_name": "Far Rockaway-Mott Av",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5383,7 +5741,8 @@
       "properties": {
         "stop_id": "H12",
         "station_name": "Beach 90 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5398,7 +5757,8 @@
       "properties": {
         "stop_id": "H13",
         "station_name": "Beach 98 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5413,7 +5773,8 @@
       "properties": {
         "stop_id": "H14",
         "station_name": "Beach 105 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5428,7 +5789,8 @@
       "properties": {
         "stop_id": "H15",
         "station_name": "Rockaway Park-Beach 116 St",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5443,7 +5805,8 @@
       "properties": {
         "stop_id": "H19",
         "station_name": "Broad Channel",
-        "color": "#1E88E5"
+        "color": "#1E88E5",
+        "lines": ""
       }
     },
     {
@@ -5458,7 +5821,8 @@
       "properties": {
         "stop_id": "J12",
         "station_name": "121 St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5473,7 +5837,8 @@
       "properties": {
         "stop_id": "J13",
         "station_name": "111 St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5488,7 +5853,8 @@
       "properties": {
         "stop_id": "J14",
         "station_name": "104 St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5503,7 +5869,8 @@
       "properties": {
         "stop_id": "J15",
         "station_name": "Woodhaven Blvd",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5518,7 +5885,8 @@
       "properties": {
         "stop_id": "J16",
         "station_name": "85 St-Forest Pkwy",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5533,7 +5901,8 @@
       "properties": {
         "stop_id": "J17",
         "station_name": "75 St-Elderts Ln",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5548,7 +5917,8 @@
       "properties": {
         "stop_id": "J19",
         "station_name": "Cypress Hills",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5563,7 +5933,8 @@
       "properties": {
         "stop_id": "J20",
         "station_name": "Crescent St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5578,7 +5949,8 @@
       "properties": {
         "stop_id": "J21",
         "station_name": "Norwood Av",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5593,7 +5965,8 @@
       "properties": {
         "stop_id": "J22",
         "station_name": "Cleveland St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5608,7 +5981,8 @@
       "properties": {
         "stop_id": "J23",
         "station_name": "Van Siclen Av",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5623,7 +5997,8 @@
       "properties": {
         "stop_id": "J24",
         "station_name": "Alabama Av",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5638,7 +6013,8 @@
       "properties": {
         "stop_id": "J27",
         "station_name": "Broadway Junction",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5653,7 +6029,8 @@
       "properties": {
         "stop_id": "J28",
         "station_name": "Chauncey St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5668,7 +6045,8 @@
       "properties": {
         "stop_id": "J29",
         "station_name": "Halsey St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5683,7 +6061,8 @@
       "properties": {
         "stop_id": "J30",
         "station_name": "Gates Av",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5698,7 +6077,8 @@
       "properties": {
         "stop_id": "J31",
         "station_name": "Kosciuszko St",
-        "color": "#1E88E5"
+        "color": "#996633",
+        "lines": "J,Z"
       }
     },
     {
@@ -5713,7 +6093,8 @@
       "properties": {
         "stop_id": "L01",
         "station_name": "8 Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5728,7 +6109,8 @@
       "properties": {
         "stop_id": "L02",
         "station_name": "6 Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5743,7 +6125,8 @@
       "properties": {
         "stop_id": "L03",
         "station_name": "14 St-Union Sq",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5758,7 +6141,8 @@
       "properties": {
         "stop_id": "L05",
         "station_name": "3 Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5773,7 +6157,8 @@
       "properties": {
         "stop_id": "L06",
         "station_name": "1 Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5788,7 +6173,8 @@
       "properties": {
         "stop_id": "L08",
         "station_name": "Bedford Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5803,7 +6189,8 @@
       "properties": {
         "stop_id": "L10",
         "station_name": "Lorimer St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5818,7 +6205,8 @@
       "properties": {
         "stop_id": "L11",
         "station_name": "Graham Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5833,7 +6221,8 @@
       "properties": {
         "stop_id": "L12",
         "station_name": "Grand St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5848,7 +6237,8 @@
       "properties": {
         "stop_id": "L13",
         "station_name": "Montrose Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5863,7 +6253,8 @@
       "properties": {
         "stop_id": "L14",
         "station_name": "Morgan Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5878,7 +6269,8 @@
       "properties": {
         "stop_id": "L15",
         "station_name": "Jefferson St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5893,7 +6285,8 @@
       "properties": {
         "stop_id": "L16",
         "station_name": "DeKalb Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5908,7 +6301,8 @@
       "properties": {
         "stop_id": "L17",
         "station_name": "Myrtle-Wyckoff Avs",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5923,7 +6317,8 @@
       "properties": {
         "stop_id": "L19",
         "station_name": "Halsey St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5938,7 +6333,8 @@
       "properties": {
         "stop_id": "L20",
         "station_name": "Wilson Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5953,7 +6349,8 @@
       "properties": {
         "stop_id": "L21",
         "station_name": "Bushwick Av-Aberdeen St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5968,7 +6365,8 @@
       "properties": {
         "stop_id": "L22",
         "station_name": "Broadway Junction",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5983,7 +6381,8 @@
       "properties": {
         "stop_id": "L24",
         "station_name": "Atlantic Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -5998,7 +6397,8 @@
       "properties": {
         "stop_id": "L25",
         "station_name": "Sutter Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -6013,7 +6413,8 @@
       "properties": {
         "stop_id": "L26",
         "station_name": "Livonia Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -6028,7 +6429,8 @@
       "properties": {
         "stop_id": "L27",
         "station_name": "New Lots Av",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -6043,7 +6445,8 @@
       "properties": {
         "stop_id": "L28",
         "station_name": "East 105 St",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -6058,7 +6461,8 @@
       "properties": {
         "stop_id": "L29",
         "station_name": "Canarsie-Rockaway Pkwy",
-        "color": "#1E88E5"
+        "color": "#A7A9AC",
+        "lines": "L"
       }
     },
     {
@@ -6073,7 +6477,8 @@
       "properties": {
         "stop_id": "M01",
         "station_name": "Middle Village-Metropolitan Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6088,7 +6493,8 @@
       "properties": {
         "stop_id": "M04",
         "station_name": "Fresh Pond Rd",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6103,7 +6509,8 @@
       "properties": {
         "stop_id": "M05",
         "station_name": "Forest Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6118,7 +6525,8 @@
       "properties": {
         "stop_id": "M06",
         "station_name": "Seneca Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6133,7 +6541,8 @@
       "properties": {
         "stop_id": "M08",
         "station_name": "Myrtle-Wyckoff Avs",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6148,7 +6557,8 @@
       "properties": {
         "stop_id": "M09",
         "station_name": "Knickerbocker Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6163,7 +6573,8 @@
       "properties": {
         "stop_id": "M10",
         "station_name": "Central Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6178,7 +6589,8 @@
       "properties": {
         "stop_id": "M11",
         "station_name": "Myrtle Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6193,7 +6605,8 @@
       "properties": {
         "stop_id": "M12",
         "station_name": "Flushing Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6208,7 +6621,8 @@
       "properties": {
         "stop_id": "M13",
         "station_name": "Lorimer St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6223,7 +6637,8 @@
       "properties": {
         "stop_id": "M14",
         "station_name": "Hewes St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6238,7 +6653,8 @@
       "properties": {
         "stop_id": "M16",
         "station_name": "Marcy Av",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6253,7 +6669,8 @@
       "properties": {
         "stop_id": "M18",
         "station_name": "Delancey St-Essex St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6268,7 +6685,8 @@
       "properties": {
         "stop_id": "M19",
         "station_name": "Bowery",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6283,7 +6701,8 @@
       "properties": {
         "stop_id": "M20",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6298,7 +6717,8 @@
       "properties": {
         "stop_id": "M21",
         "station_name": "Chambers St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6313,7 +6733,8 @@
       "properties": {
         "stop_id": "M22",
         "station_name": "Fulton St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6328,7 +6749,8 @@
       "properties": {
         "stop_id": "M23",
         "station_name": "Broad St",
-        "color": "#1E88E5"
+        "color": "#FF6319",
+        "lines": "M"
       }
     },
     {
@@ -6343,7 +6765,8 @@
       "properties": {
         "stop_id": "N02",
         "station_name": "8 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6358,7 +6781,8 @@
       "properties": {
         "stop_id": "N03",
         "station_name": "Fort Hamilton Pkwy",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6373,7 +6797,8 @@
       "properties": {
         "stop_id": "N04",
         "station_name": "New Utrecht Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6388,7 +6813,8 @@
       "properties": {
         "stop_id": "N05",
         "station_name": "18 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6403,7 +6829,8 @@
       "properties": {
         "stop_id": "N06",
         "station_name": "20 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6418,7 +6845,8 @@
       "properties": {
         "stop_id": "N07",
         "station_name": "Bay Pkwy",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6433,7 +6861,8 @@
       "properties": {
         "stop_id": "N08",
         "station_name": "Kings Hwy",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6448,7 +6877,8 @@
       "properties": {
         "stop_id": "N09",
         "station_name": "Avenue U",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6463,7 +6893,8 @@
       "properties": {
         "stop_id": "N10",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6478,7 +6909,8 @@
       "properties": {
         "stop_id": "N12",
         "station_name": "S.B. Coney Island",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6493,7 +6925,8 @@
       "properties": {
         "stop_id": "Q01",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6508,7 +6941,8 @@
       "properties": {
         "stop_id": "Q03",
         "station_name": "72 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6523,7 +6957,8 @@
       "properties": {
         "stop_id": "Q04",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6538,7 +6973,8 @@
       "properties": {
         "stop_id": "Q05",
         "station_name": "96 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6553,7 +6989,8 @@
       "properties": {
         "stop_id": "R01",
         "station_name": "Astoria-Ditmars Blvd",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6568,7 +7005,8 @@
       "properties": {
         "stop_id": "R03",
         "station_name": "Astoria Blvd",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6583,7 +7021,8 @@
       "properties": {
         "stop_id": "R04",
         "station_name": "30 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6598,7 +7037,8 @@
       "properties": {
         "stop_id": "R05",
         "station_name": "Broadway",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6613,7 +7053,8 @@
       "properties": {
         "stop_id": "R06",
         "station_name": "36 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6628,7 +7069,8 @@
       "properties": {
         "stop_id": "R08",
         "station_name": "39 Av-Dutch Kills",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6643,7 +7085,8 @@
       "properties": {
         "stop_id": "R09",
         "station_name": "Queensboro Plaza",
-        "color": "#8E24AA"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6658,7 +7101,8 @@
       "properties": {
         "stop_id": "R11",
         "station_name": "Lexington Av/59 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6673,7 +7117,8 @@
       "properties": {
         "stop_id": "R13",
         "station_name": "5 Av/59 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6688,7 +7133,8 @@
       "properties": {
         "stop_id": "R14",
         "station_name": "57 St-7 Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6703,7 +7149,8 @@
       "properties": {
         "stop_id": "R15",
         "station_name": "49 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6718,7 +7165,8 @@
       "properties": {
         "stop_id": "R16",
         "station_name": "Times Sq-42 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6733,7 +7181,8 @@
       "properties": {
         "stop_id": "R17",
         "station_name": "34 St-Herald Sq",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6748,7 +7197,8 @@
       "properties": {
         "stop_id": "R18",
         "station_name": "28 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6763,7 +7213,8 @@
       "properties": {
         "stop_id": "R19",
         "station_name": "23 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6778,7 +7229,8 @@
       "properties": {
         "stop_id": "R20",
         "station_name": "14 St-Union Sq",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6793,7 +7245,8 @@
       "properties": {
         "stop_id": "R21",
         "station_name": "8 St-NYU",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6808,7 +7261,8 @@
       "properties": {
         "stop_id": "R22",
         "station_name": "Prince St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6823,7 +7277,8 @@
       "properties": {
         "stop_id": "R23",
         "station_name": "Canal St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6838,7 +7293,8 @@
       "properties": {
         "stop_id": "R24",
         "station_name": "City Hall",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6853,7 +7309,8 @@
       "properties": {
         "stop_id": "R25",
         "station_name": "Cortlandt St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6868,7 +7325,8 @@
       "properties": {
         "stop_id": "R26",
         "station_name": "Rector St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6883,7 +7341,8 @@
       "properties": {
         "stop_id": "R27",
         "station_name": "Whitehall St-South Ferry",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6898,7 +7357,8 @@
       "properties": {
         "stop_id": "R28",
         "station_name": "Court St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6913,7 +7373,8 @@
       "properties": {
         "stop_id": "R29",
         "station_name": "Jay St-MetroTech",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6928,7 +7389,8 @@
       "properties": {
         "stop_id": "R30",
         "station_name": "DeKalb Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6943,7 +7405,8 @@
       "properties": {
         "stop_id": "R31",
         "station_name": "Atlantic Av-Barclays Ctr",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6958,7 +7421,8 @@
       "properties": {
         "stop_id": "R32",
         "station_name": "Union St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6973,7 +7437,8 @@
       "properties": {
         "stop_id": "R33",
         "station_name": "4 Av-9 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -6988,7 +7453,8 @@
       "properties": {
         "stop_id": "R34",
         "station_name": "Prospect Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7003,7 +7469,8 @@
       "properties": {
         "stop_id": "R35",
         "station_name": "25 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7018,7 +7485,8 @@
       "properties": {
         "stop_id": "R36",
         "station_name": "36 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7033,7 +7501,8 @@
       "properties": {
         "stop_id": "R39",
         "station_name": "45 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7048,7 +7517,8 @@
       "properties": {
         "stop_id": "R40",
         "station_name": "53 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7063,7 +7533,8 @@
       "properties": {
         "stop_id": "R41",
         "station_name": "59 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7078,7 +7549,8 @@
       "properties": {
         "stop_id": "R42",
         "station_name": "Bay Ridge Av",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7093,7 +7565,8 @@
       "properties": {
         "stop_id": "R43",
         "station_name": "77 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7108,7 +7581,8 @@
       "properties": {
         "stop_id": "R44",
         "station_name": "86 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7123,7 +7597,8 @@
       "properties": {
         "stop_id": "R45",
         "station_name": "Bay Ridge-95 St",
-        "color": "#1E88E5"
+        "color": "#FCCC0A",
+        "lines": "N,Q,R,W"
       }
     },
     {
@@ -7138,7 +7613,8 @@
       "properties": {
         "stop_id": "S01",
         "station_name": "Franklin Av",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7153,7 +7629,8 @@
       "properties": {
         "stop_id": "S03",
         "station_name": "Park Pl",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7168,7 +7645,8 @@
       "properties": {
         "stop_id": "S04",
         "station_name": "Botanic Garden",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7183,7 +7661,8 @@
       "properties": {
         "stop_id": "S09",
         "station_name": "Tottenville",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7198,7 +7677,8 @@
       "properties": {
         "stop_id": "S11",
         "station_name": "Arthur Kill",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7213,7 +7693,8 @@
       "properties": {
         "stop_id": "S13",
         "station_name": "Richmond Valley",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7228,7 +7709,8 @@
       "properties": {
         "stop_id": "S14",
         "station_name": "Pleasant Plains",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7243,7 +7725,8 @@
       "properties": {
         "stop_id": "S15",
         "station_name": "Prince's Bay",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7258,7 +7741,8 @@
       "properties": {
         "stop_id": "S16",
         "station_name": "Huguenot",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7273,7 +7757,8 @@
       "properties": {
         "stop_id": "S17",
         "station_name": "Annadale",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7288,7 +7773,8 @@
       "properties": {
         "stop_id": "S18",
         "station_name": "Eltingville",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7303,7 +7789,8 @@
       "properties": {
         "stop_id": "S19",
         "station_name": "Great Kills",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7318,7 +7805,8 @@
       "properties": {
         "stop_id": "S20",
         "station_name": "Bay Terrace",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7333,7 +7821,8 @@
       "properties": {
         "stop_id": "S21",
         "station_name": "Oakwood Heights",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7348,7 +7837,8 @@
       "properties": {
         "stop_id": "S22",
         "station_name": "New Dorp",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7363,7 +7853,8 @@
       "properties": {
         "stop_id": "S23",
         "station_name": "Grant City",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7378,7 +7869,8 @@
       "properties": {
         "stop_id": "S24",
         "station_name": "Jefferson Av",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7393,7 +7885,8 @@
       "properties": {
         "stop_id": "S25",
         "station_name": "Dongan Hills",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7408,7 +7901,8 @@
       "properties": {
         "stop_id": "S26",
         "station_name": "Old Town",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7423,7 +7917,8 @@
       "properties": {
         "stop_id": "S27",
         "station_name": "Grasmere",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7438,7 +7933,8 @@
       "properties": {
         "stop_id": "S28",
         "station_name": "Clifton",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7453,7 +7949,8 @@
       "properties": {
         "stop_id": "S29",
         "station_name": "Stapleton",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7468,7 +7965,8 @@
       "properties": {
         "stop_id": "S30",
         "station_name": "Tompkinsville",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     },
     {
@@ -7483,7 +7981,8 @@
       "properties": {
         "stop_id": "S31",
         "station_name": "St George",
-        "color": "#1E88E5"
+        "color": "#808183",
+        "lines": "S"
       }
     }
   ]

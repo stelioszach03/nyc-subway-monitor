@@ -1,112 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Train, RouteDelay, Alert } from '../types/subway';
 
-// Fallback data for development mode
-const getFallbackTrainData = (): Train[] => {
-  return [
-    {
-      trip_id: "01A",
-      route_id: "1",
-      timestamp: new Date().toISOString(),
-      latitude: 40.7580,
-      longitude: -73.9855,
-      current_status: "IN_TRANSIT_TO",
-      vehicle_id: "1001",
-      direction_id: 0
-    },
-    {
-      trip_id: "02A",
-      route_id: "2",
-      timestamp: new Date().toISOString(),
-      latitude: 40.7490,
-      longitude: -73.9680,
-      current_status: "STOPPED_AT",
-      vehicle_id: "2001",
-      direction_id: 1,
-      delay: 120
-    },
-    {
-      trip_id: "03A",
-      route_id: "A",
-      timestamp: new Date().toISOString(),
-      latitude: 40.7630,
-      longitude: -73.9780,
-      current_status: "IN_TRANSIT_TO",
-      vehicle_id: "3001",
-      direction_id: 0,
-      delay: 60
-    }
-  ];
-};
-
-const getFallbackDelayData = (): RouteDelay[] => {
-  const now = new Date();
-  const windowEnd = now.toISOString();
-  const windowStart = new Date(now.getTime() - 300000).toISOString(); // 5 minutes ago
-  
-  return [
-    {
-      route_id: "1",
-      avg_delay: 45.5,
-      max_delay: 120,
-      min_delay: 0,
-      train_count: 12,
-      window_start: windowStart,
-      window_end: windowEnd,
-      anomaly_score: 0.2
-    },
-    {
-      route_id: "2",
-      avg_delay: 95.2,
-      max_delay: 240,
-      min_delay: 10,
-      train_count: 8,
-      window_start: windowStart,
-      window_end: windowEnd,
-      anomaly_score: 0.4
-    },
-    {
-      route_id: "A",
-      avg_delay: 185.0,
-      max_delay: 360,
-      min_delay: 60,
-      train_count: 15,
-      window_start: windowStart,
-      window_end: windowEnd,
-      anomaly_score: 0.7
-    }
-  ];
-};
-
-const getFallbackAlertData = (): Alert[] => {
-  return [
-    {
-      id: "alert1",
-      route_id: "A",
-      timestamp: new Date().toISOString(),
-      message: "Significant delays detected on the A line due to signal problems",
-      severity: "HIGH",
-      anomaly_score: 0.85
-    },
-    {
-      id: "alert2",
-      route_id: "2",
-      timestamp: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
-      message: "Delays of up to 15 minutes on the 2 line due to train traffic",
-      severity: "MEDIUM",
-      anomaly_score: 0.65
-    },
-    {
-      id: "alert3",
-      route_id: "G",
-      timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-      message: "Minor delays on the G line",
-      severity: "LOW",
-      anomaly_score: 0.35
-    }
-  ];
-};
-
 interface SubwayDataContextType {
   trains: Train[];
   delays: RouteDelay[];
@@ -139,17 +33,13 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [socketReconnectTimer, setSocketReconnectTimer] = useState<number | null>(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   
   // Log configuration on init
   useEffect(() => {
     console.log('Subway Data Provider initialized with API URL:', apiUrl);
-    
-    // Initialize with fallback data immediately for development
-    setTrains(getFallbackTrainData());
-    setDelays(getFallbackDelayData());
-    setAlerts(getFallbackAlertData());
   }, [apiUrl]);
 
   // Fetch initial train data
@@ -158,7 +48,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Fetching train data from:', `${apiUrl}/trains`);
       const response = await fetch(`${apiUrl}/trains`, { 
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(8000) // 8 second timeout
       });
       
       if (!response.ok) {
@@ -173,11 +63,6 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred fetching train data';
       console.error('Error fetching train data:', errorMessage);
       setError(errorMessage);
-      
-      // Keep using fallback data
-      if (trains.length === 0) {
-        setTrains(getFallbackTrainData());
-      }
     } finally {
       setIsLoading(false);
     }
@@ -189,7 +74,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Fetching delay data from:', `${apiUrl}/metrics`);
       const response = await fetch(`${apiUrl}/metrics`, {
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(8000) // 8 second timeout
       });
       
       if (!response.ok) {
@@ -204,11 +89,6 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred fetching delay data';
       console.error('Error fetching delay data:', errorMessage);
       setError(errorMessage);
-      
-      // Keep using fallback data
-      if (delays.length === 0) {
-        setDelays(getFallbackDelayData());
-      }
     } finally {
       setIsLoading(false);
     }
@@ -220,7 +100,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Fetching alert data from:', `${apiUrl}/alerts`);
       const response = await fetch(`${apiUrl}/alerts`, {
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(8000) // 8 second timeout
       });
       
       if (!response.ok) {
@@ -235,25 +115,19 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred fetching alert data';
       console.error('Error fetching alert data:', errorMessage);
       setError(errorMessage);
-      
-      // Keep using fallback data
-      if (alerts.length === 0) {
-        setAlerts(getFallbackAlertData());
-      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Set up WebSocket connection
-  useEffect(() => {
-    // In development, we only try to connect once for performance
-    if (connectionAttempts > 0) {
-      console.log('Not attempting WebSocket connection in development mode');
-      return;
-    }
-
+  
+  // Function to establish WebSocket connection
+  const connectWebSocket = () => {
     try {
+      if (socket !== null && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+        console.log('WebSocket connection already exists');
+        return;
+      }
+      
       console.log('Attempting to establish WebSocket connection...');
       const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/ws/live`;
       console.log('WebSocket URL:', wsUrl);
@@ -263,6 +137,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
       newSocket.onopen = () => {
         console.log('WebSocket connected successfully');
         setSocket(newSocket);
+        setConnectionAttempts(0); // Reset connection attempts on successful connection
       };
 
       newSocket.onmessage = (event) => {
@@ -318,23 +193,52 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
       newSocket.onclose = (event) => {
         console.log(`WebSocket disconnected with code ${event.code}`, event.reason);
         setSocket(null);
-      };
-
-      return () => {
-        console.log('Cleaning up WebSocket connection');
-        if (newSocket && newSocket.readyState === WebSocket.OPEN) {
-          newSocket.close(1000, 'Component unmounted');
+        
+        // Try to reconnect with exponential backoff
+        const delay = Math.min(30000, Math.pow(2, connectionAttempts) * 1000); // Max 30 seconds
+        console.log(`Attempting to reconnect in ${delay/1000} seconds...`);
+        
+        if (socketReconnectTimer) {
+          window.clearTimeout(socketReconnectTimer);
         }
+        
+        const timerId = window.setTimeout(() => {
+          connectWebSocket();
+        }, delay);
+        
+        setSocketReconnectTimer(timerId);
       };
     } catch (err) {
       console.error('Error setting up WebSocket:', err);
       setConnectionAttempts(prev => prev + 1);
     }
+  };
+
+  // Set up WebSocket connection
+  useEffect(() => {
+    // Initial connection attempt
+    connectWebSocket();
+    
+    // Clean up on unmount
+    return () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close(1000, 'Component unmounted');
+      }
+      
+      if (socketReconnectTimer) {
+        window.clearTimeout(socketReconnectTimer);
+      }
+    };
   }, [apiUrl, connectionAttempts]);
 
   // Initial data fetch and polling setup
   useEffect(() => {
-    console.log('Setting up polling for data updates');
+    console.log('Setting up initial data fetch and polling');
+    
+    // Initial data fetch
+    fetchTrains();
+    fetchDelays();
+    fetchAlerts();
     
     // Setting up polling intervals
     const delayInterval = setInterval(fetchDelays, 60000); // Every minute

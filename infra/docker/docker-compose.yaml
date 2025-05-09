@@ -1,4 +1,5 @@
-# nyc-subway-monitor/infra/docker/docker-compose.yaml
+version: '3.8'
+
 services:
   # Data Ingestion Service
   ingest:
@@ -6,6 +7,8 @@ services:
       context: ../../services/ingest
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - MTA_API_KEY=${MTA_API_KEY:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
     depends_on:
       - kafka
@@ -25,6 +28,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     depends_on:
       - kafka
       - timescaledb
@@ -40,6 +44,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MODEL_PATH=/app/models/anomaly_model.onnx
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     depends_on:
       - redis
     volumes:
@@ -62,6 +67,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - ML_SERVICE_URL=http://ml:8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     depends_on:
       - timescaledb
       - redis
@@ -74,10 +80,12 @@ services:
     build:
       context: ../../web
       args:
-        - VITE_API_URL=http://localhost:8000
-        - VITE_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+        - VITE_MAPBOX_TOKEN=${VITE_MAPBOX_TOKEN}
     ports:
       - "3000:80"
+    depends_on:
+      - api
     networks:
       - subway-net
 
@@ -92,7 +100,7 @@ services:
       - subway-net
 
   kafka:
-    image: confluentinc/cp-kafka:7.4.0  # Άλλαξα από 4.0.0 σε 7.4.0 για συμβατότητα
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
       - zookeeper
     environment:
@@ -100,19 +108,21 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
       - subway-net
 
   timescaledb:
-    image: postgres:15-alpine  # Άλλαξα από timescaledb/timescaledb:latest-pg15
+    image: postgres:15-alpine  # Changed to standard PostgreSQL
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     networks:
@@ -142,26 +152,15 @@ services:
     image: grafana/grafana:11.0.0
     volumes:
       - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
       - "3001:3000"
     networks:
       - subway-net
-
-  # Airflow for ML training
-  airflow:
-    image: apache/airflow:2.8.0
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB}
-    volumes:
-      - ../../services/ml/dags:/opt/airflow/dags
-      - ml_models:/opt/airflow/ml_models
-    ports:
-      - "8080:8080"
     depends_on:
-      - timescaledb
-    networks:
-      - subway-net
+      - prometheus
 
 networks:
   subway-net:

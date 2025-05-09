@@ -1,7 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAlerts } from '../contexts/AlertContext';
 import { ROUTE_COLORS } from '../types/subway';
 import { Alert } from '../types/subway';
+
+// MTA official line colors
+const MTA_LINE_COLORS: Record<string, string> = {
+  '1': '#EE352E', '2': '#EE352E', '3': '#EE352E',
+  '4': '#00933C', '5': '#00933C', '6': '#00933C',
+  '7': '#B933AD',
+  'A': '#2850AD', 'C': '#2850AD', 'E': '#2850AD',
+  'B': '#FF6319', 'D': '#FF6319', 'F': '#FF6319', 'M': '#FF6319',
+  'G': '#6CBE45',
+  'J': '#996633', 'Z': '#996633',
+  'L': '#A7A9AC',
+  'N': '#FCCC0A', 'Q': '#FCCC0A', 'R': '#FCCC0A', 'W': '#FCCC0A',
+  'S': '#808183', 'SI': '#00A1DE'
+};
 
 const AlertCard = ({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string) => void }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -43,7 +57,7 @@ const AlertCard = ({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
           <div className="flex items-center space-x-2">
             <div 
               className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white"
-              style={{ backgroundColor: ROUTE_COLORS[alert.route_id] || '#666' }}
+              style={{ backgroundColor: MTA_LINE_COLORS[alert.route_id] || ROUTE_COLORS[alert.route_id] || '#666' }}
             >
               {alert.route_id}
             </div>
@@ -74,19 +88,38 @@ const AlertCard = ({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
             <div 
               className="cursor-pointer text-blue-600 hover:text-blue-800"
               onClick={() => setIsExpanded(!isExpanded)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-controls={`details-${alert.id}`}
             >
               {isExpanded ? 'Show less' : 'Details'}
             </div>
           </div>
           
           {isExpanded && (
-            <div className="mt-3 rounded-md bg-gray-50 p-3">
+            <div id={`details-${alert.id}`} className="mt-3 rounded-md bg-gray-50 p-3">
               <div className="grid grid-cols-2 gap-y-2 text-sm">
                 <div className="text-gray-600">Alert ID:</div>
                 <div className="font-mono text-gray-800">{alert.id}</div>
                 
                 <div className="text-gray-600">Anomaly Score:</div>
-                <div className="font-medium text-gray-800">{alert.anomaly_score.toFixed(2)}</div>
+                <div className="font-medium text-gray-800">
+                  <div className="flex items-center">
+                    <div className="w-24 h-2 rounded-full bg-gray-200">
+                      <div 
+                        className={`h-full rounded-full ${
+                          alert.anomaly_score > 0.7 ? 'bg-red-500' : 
+                          alert.anomaly_score > 0.4 ? 'bg-yellow-500' : 
+                          'bg-blue-500'
+                        }`} 
+                        style={{ width: `${alert.anomaly_score * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2">{alert.anomaly_score.toFixed(2)}</span>
+                  </div>
+                </div>
                 
                 <div className="text-gray-600">Detected at:</div>
                 <div className="text-gray-800">{new Date(alert.timestamp).toLocaleString()}</div>
@@ -98,6 +131,7 @@ const AlertCard = ({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
         <button
           onClick={() => onDismiss(alert.id)}
           className="ml-4 flex-shrink-0 rounded-md bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+          aria-label={`Dismiss alert for ${alert.route_id} line`}
         >
           Dismiss
         </button>
@@ -111,12 +145,37 @@ const Alerts = () => {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'newest' | 'severity'>('newest');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLines, setSelectedLines] = useState<string[]>([]);
+  
+  useEffect(() => {
+    // If there are alerts, extract unique route IDs for filtering
+    if (alerts.length > 0) {
+      const uniqueRoutes = [...new Set(alerts.map(alert => alert.route_id))];
+      setSelectedLines(uniqueRoutes);
+    }
+  }, [alerts]);
+
+  // Toggle a line selection
+  const toggleLineSelection = (line: string) => {
+    setSelectedLines(prev => {
+      if (prev.includes(line)) {
+        return prev.filter(l => l !== line);
+      } else {
+        return [...prev, line];
+      }
+    });
+  };
   
   // Filter alerts
   const filteredAlerts = alerts
     .filter(alert => {
       // Filter by severity
       if (filter !== 'all' && alert.severity.toLowerCase() !== filter.toLowerCase()) {
+        return false;
+      }
+      
+      // Filter by selected lines
+      if (selectedLines.length > 0 && !selectedLines.includes(alert.route_id)) {
         return false;
       }
       
@@ -140,6 +199,9 @@ const Alerts = () => {
                (severityOrder[a.severity as keyof typeof severityOrder] || 0);
       }
     });
+
+  // Get unique route IDs from all alerts
+  const uniqueRouteIds = [...new Set(alerts.map(alert => alert.route_id))];
 
   return (
     <div className="space-y-6">
@@ -225,6 +287,51 @@ const Alerts = () => {
         </div>
       </div>
       
+      {/* Line filter chips */}
+      {uniqueRouteIds.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {uniqueRouteIds.sort().map(routeId => (
+            <button
+              key={routeId}
+              className={`flex items-center space-x-1 rounded-full px-3 py-1 text-sm font-medium ${
+                selectedLines.includes(routeId)
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={{
+                backgroundColor: selectedLines.includes(routeId) 
+                  ? MTA_LINE_COLORS[routeId] || ROUTE_COLORS[routeId] || '#666'
+                  : undefined
+              }}
+              onClick={() => toggleLineSelection(routeId)}
+              aria-pressed={selectedLines.includes(routeId)}
+            >
+              <span>{routeId} Line</span>
+              {selectedLines.includes(routeId) && (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
+          ))}
+          {selectedLines.length < uniqueRouteIds.length ? (
+            <button
+              className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              onClick={() => setSelectedLines(uniqueRouteIds)}
+            >
+              Select All
+            </button>
+          ) : (
+            <button
+              className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              onClick={() => setSelectedLines([])}
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+      )}
+      
       {/* Alerts list */}
       {filteredAlerts.length === 0 ? (
         <div className="mt-8 rounded-lg bg-gray-50 p-8 text-center shadow-sm">
@@ -235,15 +342,16 @@ const Alerts = () => {
           </div>
           <h3 className="mt-3 text-lg font-medium text-gray-900">No alerts found</h3>
           <p className="mt-2 text-sm text-gray-500">
-            {searchQuery || filter !== 'all' 
+            {searchQuery || filter !== 'all' || selectedLines.length !== uniqueRouteIds.length
               ? 'Try adjusting your filters or search query' 
               : 'There are currently no active alerts in the system'}
           </p>
-          {(searchQuery || filter !== 'all') && (
+          {(searchQuery || filter !== 'all' || selectedLines.length !== uniqueRouteIds.length) && (
             <button
               onClick={() => {
                 setSearchQuery('');
                 setFilter('all');
+                setSelectedLines(uniqueRouteIds);
               }}
               className="mt-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-600 shadow-sm hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >

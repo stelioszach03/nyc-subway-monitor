@@ -30,6 +30,30 @@ const AREA_COLORS = {
   'Staten Island': '#F4511E'
 };
 
+// Map stop_id prefixes to subway lines
+const STOP_ID_LINE_MAPPING = {
+  '1': ['1'],
+  '2': ['2'],
+  '3': ['3'],
+  '4': ['4'],
+  '5': ['5'],
+  '6': ['6'],
+  '7': ['7'],
+  'A': ['A', 'C', 'E'],
+  'B': ['B', 'D', 'F', 'M'],
+  'D': ['B', 'D', 'F', 'M'],
+  'F': ['B', 'D', 'F', 'M'],
+  'G': ['G'],
+  'J': ['J', 'Z'],
+  'L': ['L'],
+  'M': ['M'],
+  'N': ['N', 'Q', 'R', 'W'],
+  'Q': ['N', 'Q', 'R', 'W'],
+  'R': ['N', 'Q', 'R', 'W'],
+  'S': ['S'],
+  'SI': ['SIR']
+};
+
 const stopsFile = path.join(__dirname, 'stops.txt');
 const outputFile = path.join(__dirname, 'public', 'subway-stations.geojson');
 
@@ -96,8 +120,53 @@ function getBorough(name) {
   return 'Manhattan'; // Default fallback
 }
 
+// Improved function to infer subway lines from stop_id
+function getSubwayLines(stopId) {
+  // First two characters often indicate the line
+  const prefix = stopId.slice(0, 1);
+  if (STOP_ID_LINE_MAPPING[prefix]) {
+    return STOP_ID_LINE_MAPPING[prefix];
+  }
+  
+  // Handle numeric IDs (older format)
+  if (/^\d+$/.test(stopId)) {
+    const firstDigit = stopId.charAt(0);
+    switch (firstDigit) {
+      case '1': return ['1'];
+      case '2': return ['2', '3'];
+      case '3': return ['3'];
+      case '4': return ['4', '5'];
+      case '5': return ['5'];
+      case '6': return ['6'];
+      case '7': return ['7'];
+      default: return [];
+    }
+  }
+  
+  // Special case handling
+  if (stopId.startsWith('A')) return ['A', 'C', 'E'];
+  if (stopId.startsWith('B') || stopId.startsWith('D')) return ['B', 'D', 'F', 'M'];
+  if (stopId.startsWith('E')) return ['E'];
+  if (stopId.startsWith('G')) return ['G'];
+  if (stopId.startsWith('J')) return ['J', 'Z'];
+  if (stopId.startsWith('L')) return ['L'];
+  if (stopId.startsWith('M')) return ['M'];
+  if (stopId.startsWith('N')) return ['N', 'Q', 'R', 'W'];
+  if (stopId.startsWith('Q')) return ['Q'];
+  if (stopId.startsWith('R')) return ['R'];
+  if (stopId.startsWith('S')) return ['S'];
+  
+  return [];
+}
+
 // Assign a color based on station ID and name patterns
-function assignStationColor(stopId, name) {
+function assignStationColor(stopId, name, lines) {
+  // If we have determined lines that serve this station
+  if (lines && lines.length > 0) {
+    // Use the color of the first line in our list
+    return LINE_COLORS[lines[0]] || '#808183';
+  }
+  
   // Try to extract route info from the stop_id
   const routeMatch = stopId.match(/^[A-Z0-9]+/);
   if (routeMatch && LINE_COLORS[routeMatch[0]]) {
@@ -182,7 +251,15 @@ for (let i = 1; i < lines.length; i++) {
     .replace(/ Station$/, '');
   
   const stopId = parts[stopIdIndex].replace(/"/g, '').trim();
-  const color = assignStationColor(stopId, stationName);
+  
+  // Get subway lines that serve this station
+  const subwayLines = getSubwayLines(stopId);
+  
+  // Format the lines as a comma-separated string
+  const linesStr = subwayLines.join(',');
+  
+  // Choose a color for the station
+  const color = assignStationColor(stopId, stationName, subwayLines);
   
   try {
     features.push({
@@ -194,7 +271,8 @@ for (let i = 1; i < lines.length; i++) {
       properties: {
         stop_id: stopId,
         station_name: stationName,
-        color: color
+        color: color,
+        lines: linesStr  // Add the lines that serve this station
       }
     });
   } catch (e) {

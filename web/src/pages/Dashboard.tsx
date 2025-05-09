@@ -5,18 +5,6 @@ import { useAlerts } from '../contexts/AlertContext';
 import { Link } from 'react-router-dom';
 import { ROUTE_COLORS } from '../types/subway';
 
-// Map of subway route IDs to their display names
-const ROUTE_NAMES: Record<string, string> = {
-  '1': '1 Train', '2': '2 Train', '3': '3 Train',
-  '4': '4 Train', '5': '5 Train', '6': '6 Train',
-  '7': '7 Train', 'A': 'A Train', 'C': 'C Train',
-  'E': 'E Train', 'B': 'B Train', 'D': 'D Train',
-  'F': 'F Train', 'M': 'M Train', 'G': 'G Train',
-  'J': 'J Train', 'Z': 'Z Train', 'L': 'L Train',
-  'N': 'N Train', 'Q': 'Q Train', 'R': 'R Train',
-  'W': 'W Train', 'S': 'S Train', 'SI': 'SI Train'
-};
-
 // Group subway routes by color family
 const ROUTE_GROUPS = {
   'Red Lines': ['1', '2', '3'],

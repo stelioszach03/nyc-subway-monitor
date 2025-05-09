@@ -38,7 +38,7 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
   const [mapStyle, setMapStyle] = useState<string>('light-v11');
   const [showControls, setShowControls] = useState(false);
   const [showStations, setShowStations] = useState(true);
-  const { trains, delays } = useSubwayData();
+  const { trains } = useSubwayData(); // Removed unused 'delays'
   const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
   const popup = useRef<mapboxgl.Popup | null>(null);
 
@@ -98,7 +98,7 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
           data: {
             type: 'FeatureCollection',
             features: []
-          }
+          } as GeoJSON.FeatureCollection<GeoJSON.Geometry>
         });
 
         // Fetch and process subway stations
@@ -333,7 +333,7 @@ const SubwayMap = ({ selectedRoute }: SubwayMapProps) => {
       source.setData({
         type: 'FeatureCollection',
         features
-      });
+      } as GeoJSON.FeatureCollection<GeoJSON.Geometry>);
       
       // If a train was selected, ensure popup is still shown even after data update
       if (selectedTrain) {

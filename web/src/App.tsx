@@ -8,7 +8,7 @@ import { AlertProvider } from './contexts/AlertContext';
 import { SubwayDataProvider } from './contexts/SubwayDataContext';
 
 // DEVELOPMENT MODE FLAG - Set to true to bypass API connection check
-const DEVELOPMENT_MODE = true;
+const DEVELOPMENT_MODE = false;
 
 const App = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
