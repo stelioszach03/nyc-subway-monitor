@@ -1,3 +1,4 @@
+# infra/docker/docker-compose.yaml
 version: '3.8'
 
 services:
@@ -7,7 +8,7 @@ services:
       context: ../../services/ingest
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - MTA_API_KEY=${MTA_API_KEY:-}
+      # ΣΗΜΕΙΩΣΗ: ΔΕΝ ΧΡΕΙΑΖΕΤΑΙ ΠΙΑ MTA API KEY!
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
     depends_on:

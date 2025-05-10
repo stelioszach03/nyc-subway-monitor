@@ -1,10 +1,12 @@
-# nyc-subway-monitor/services/api/app.py
+# services/api/app.py
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 
 import httpx
-import redis
+import asyncio
+import async_timeout
+import aioredis
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,26 +50,41 @@ Instrumentator().instrument(app).expose(app)
 DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 engine = create_engine(
     DATABASE_URL,
-    pool_size=20,           # Increase pool size
-    max_overflow=0,        # No overflow
-    pool_timeout=30.0,     # Wait max 30 seconds for connection  
-    pool_recycle=3600,     # Recycle connections after 1 hour
+    pool_size=20,           
+    max_overflow=0,        
+    pool_timeout=30.0,     
+    pool_recycle=3600,     
     connect_args={
-        "connect_timeout": 10  # 10 second connection timeout
+        "connect_timeout": 10  
     }
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Redis setup with timeout
-redis_client = redis.Redis(
-    host=REDIS_HOST, 
-    port=REDIS_PORT, 
-    decode_responses=True,
-    socket_timeout=5.0,     # 5 second timeout
-    socket_connect_timeout=5.0,
-    retry_on_timeout=True
-)
+# Redis setup - ASYNC VERSION
+redis_client = None
+pubsub_connections = {}
+
+@app.on_event("startup")
+async def startup_event():
+    global redis_client
+    # Create async Redis client
+    redis_client = await aioredis.from_url(
+        f"redis://{REDIS_HOST}:{REDIS_PORT}",
+        encoding="utf-8",
+        decode_responses=True,
+        max_connections=20
+    )
+    print(f"Connected to Redis at {REDIS_HOST}:{REDIS_PORT}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    global redis_client
+    if redis_client:
+        await redis_client.close()
+    # Close all pubsub connections
+    for pubsub in pubsub_connections.values():
+        await pubsub.close()
 
 # Create HTTP client with timeout for ML service calls
 http_client = httpx.AsyncClient(
@@ -132,15 +149,19 @@ async def get_trains(
     
     try:
         # Get train keys from Redis
-        train_keys = redis_client.keys(pattern)
+        train_keys = await redis_client.keys(pattern)
         
         for key in train_keys[:limit]:
-            train_data = redis_client.hgetall(key)
+            train_data = await redis_client.hgetall(key)
             if not train_data:
                 continue
                 
             # Parse Redis key to get route_id and trip_id
-            _, route, trip = key.split(":")
+            parts = key.split(":")
+            if len(parts) >= 3:
+                route, trip = parts[1], parts[2]
+            else:
+                continue
             
             # Skip if timestamp is older than 5 minutes
             timestamp = datetime.fromtimestamp(int(train_data.get("timestamp", 0)))
@@ -158,9 +179,6 @@ async def get_trains(
                 "vehicle_id": train_data.get("vehicle_id", "unknown"),
                 "direction_id": int(train_data.get("direction_id", 0))
             })
-    except redis.TimeoutError:
-        print("Redis timeout on /trains")
-        return []
     except Exception as e:
         print(f"Error fetching trains: {e}")
         return []
@@ -199,7 +217,7 @@ async def get_alerts(
 async def get_subway_metrics(
     db = Depends(get_db),
     route_id: Optional[str] = None,
-    window: str = Query("5m", pattern=r"^\d+[mh]$")  # Format: 5m, 1h, etc.
+    window: str = Query("5m", pattern=r"^\d+[mh]$")  
 ):
     """Get aggregated metrics for the specified time window."""
     # Parse time window
@@ -267,7 +285,7 @@ async def get_subway_metrics(
     
     return metrics
 
-# WebSocket connection for real-time updates
+# WebSocket connection for real-time updates - UPDATED FOR ASYNC REDIS
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
@@ -281,7 +299,10 @@ class ConnectionManager:
 
     async def send_update(self, message: str):
         for connection in self.active_connections:
-            await connection.send_text(message)
+            try:
+                await connection.send_text(message)
+            except:
+                self.active_connections.remove(connection)
 
 manager = ConnectionManager()
 
@@ -289,26 +310,49 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
-    # Subscribe to Redis pub/sub channel
+    # Create a dedicated pubsub connection for this WebSocket
     pubsub = redis_client.pubsub()
-    pubsub.subscribe("train-updates")
     
     try:
         # Send initial state
         trains = await get_trains(limit=100)
         await websocket.send_json({"type": "initial", "data": trains})
         
-        # Start listening for updates
-        for message in pubsub.listen():
-            if message["type"] == "message":
-                # Forward Redis message to WebSocket client
-                await websocket.send_text(message["data"].decode())
+        # Subscribe to updates
+        await pubsub.subscribe("train-updates")
+        
+        # Start listening for updates - ASYNC VERSION
+        while True:
+            try:
+                # Use timeout to allow graceful disconnection
+                async with async_timeout.timeout(10):
+                    message = await pubsub.get_message(ignore_subscribe_messages=True)
+                    
+                    if message and message["type"] == "message":
+                        # Forward Redis message to WebSocket client
+                        await websocket.send_text(message["data"])
+                        
+            except asyncio.TimeoutError:
+                # Send a keepalive ping
+                try:
+                    await websocket.send_json({"type": "ping"})
+                except:
+                    # WebSocket is closed
+                    break
+                    
+            except Exception as e:
+                print(f"Error in websocket message loop: {e}")
+                break
+                
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        pubsub.unsubscribe()
+        print("WebSocket disconnected normally")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
     finally:
-        pubsub.unsubscribe()
-
+        manager.disconnect(websocket)
+        await pubsub.unsubscribe("train-updates")
+        await pubsub.close()
+        
 # Health check endpoint
 @app.get("/health")
 async def health_check():
@@ -318,7 +362,3 @@ async def health_check():
 @app.on_event("shutdown")
 async def shutdown_event():
     await http_client.aclose()
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

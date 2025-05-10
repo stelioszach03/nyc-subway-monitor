@@ -1,3 +1,4 @@
+# services/ingest/main.py
 import os
 import time
 import json
@@ -15,8 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# MTA API settings
-MTA_API_KEY = os.environ.get("MTA_API_KEY", "")
+# MTA API settings - NO KEY REQUIRED!
 MTA_FEED_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
 MTA_FEEDS = [
     "1", "2", "11", "16", "21", "26", "31", "36", "51"  # Different subway line feeds
@@ -43,10 +43,13 @@ def create_kafka_producer():
         return None
 
 def fetch_mta_feed(feed_id):
-    """Fetch subway feed data from MTA API."""
-    headers = {"x-api-key": MTA_API_KEY}
+    """Fetch subway feed data from MTA API - NO KEY REQUIRED!"""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; NYC-Subway-Monitor/1.0)"
+    }
     try:
-        response = requests.get(f"{MTA_FEED_URL}-{feed_id}", headers=headers, timeout=10)
+        url = f"{MTA_FEED_URL}-{feed_id}"
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             return response.content
         else:
