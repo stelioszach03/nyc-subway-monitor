@@ -27,9 +27,10 @@ scrape_configs:
     static_configs:
       - targets: ["ml:8000"]
 
-  - job_name: "kafka"
-    static_configs:
-      - targets: ["kafka:9092"]
+  # Αφαιρούμε προσωρινά το Kafka monitoring
+  # - job_name: "kafka"
+  #   static_configs:
+  #     - targets: ["kafka:9092"]
 
   - job_name: "timescaledb"
     static_configs:

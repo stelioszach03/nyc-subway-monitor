@@ -32,7 +32,11 @@ def create_kafka_producer():
         return KafkaProducer(
             bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
             value_serializer=lambda x: json.dumps(x).encode('utf-8'),
-            retries=5
+            retries=5,
+            acks='all',
+            request_timeout_ms=30000,
+            max_block_ms=30000,
+            retry_backoff_ms=1000
         )
     except Exception as e:
         logger.error(f"Failed to create Kafka producer: {e}")

@@ -73,6 +73,9 @@ def create_kafka_stream(spark: SparkSession) -> Any:
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
         .option("subscribe", "subway-feeds")
         .option("startingOffsets", "latest")
+        .option("kafka.request.timeout.ms", "60000")
+        .option("kafka.session.timeout.ms", "30000")
+        .option("failOnDataLoss", "false")
         .load()
     )
 

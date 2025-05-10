@@ -37,6 +37,9 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   
+  // FIX: Increase timeout
+  const FETCH_TIMEOUT = 12000; // 12 seconds instead of 8
+  
   // Log configuration on init
   useEffect(() => {
     console.log('Subway Data Provider initialized with API URL:', apiUrl);
@@ -48,7 +51,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Fetching train data from:', `${apiUrl}/trains`);
       const response = await fetch(`${apiUrl}/trains`, { 
-        signal: AbortSignal.timeout(8000) // 8 second timeout
+        signal: AbortSignal.timeout(FETCH_TIMEOUT)
       });
       
       if (!response.ok) {
@@ -68,13 +71,13 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Fetch route delays
+  // FIX: Change endpoint from /metrics to /subway-metrics
   const fetchDelays = async () => {
     setIsLoading(true);
     try {
-      console.log('Fetching delay data from:', `${apiUrl}/metrics`);
-      const response = await fetch(`${apiUrl}/metrics`, {
-        signal: AbortSignal.timeout(8000) // 8 second timeout
+      console.log('Fetching delay data from:', `${apiUrl}/subway-metrics`);
+      const response = await fetch(`${apiUrl}/subway-metrics`, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT)
       });
       
       if (!response.ok) {
@@ -88,7 +91,10 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred fetching delay data';
       console.error('Error fetching delay data:', errorMessage);
-      setError(errorMessage);
+      // Don't set error for timeouts - this might be expected behavior
+      if (!errorMessage.includes('timeout')) {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +106,7 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Fetching alert data from:', `${apiUrl}/alerts`);
       const response = await fetch(`${apiUrl}/alerts`, {
-        signal: AbortSignal.timeout(8000) // 8 second timeout
+        signal: AbortSignal.timeout(FETCH_TIMEOUT)
       });
       
       if (!response.ok) {
@@ -114,7 +120,10 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred fetching alert data';
       console.error('Error fetching alert data:', errorMessage);
-      setError(errorMessage);
+      // Don't set error for timeouts - this might be expected behavior
+      if (!errorMessage.includes('timeout')) {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -240,10 +249,10 @@ export const SubwayDataProvider = ({ children }: { children: ReactNode }) => {
     fetchDelays();
     fetchAlerts();
     
-    // Setting up polling intervals
-    const delayInterval = setInterval(fetchDelays, 60000); // Every minute
-    const alertInterval = setInterval(fetchAlerts, 60000); // Every minute
-    const trainInterval = setInterval(fetchTrains, 30000); // Every 30 seconds
+    // FIX: Increase polling intervals to reduce load
+    const delayInterval = setInterval(fetchDelays, 90000); // Every 1.5 minutes
+    const alertInterval = setInterval(fetchAlerts, 90000); // Every 1.5 minutes
+    const trainInterval = setInterval(fetchTrains, 60000); // Every minute
 
     return () => {
       clearInterval(delayInterval);

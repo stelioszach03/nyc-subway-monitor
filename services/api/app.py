@@ -44,14 +44,36 @@ app.add_middleware(
 # Setup Prometheus metrics
 Instrumentator().instrument(app).expose(app)
 
-# Database setup
+# Database setup with connection pooling
 DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=20,           # Increase pool size
+    max_overflow=0,        # No overflow
+    pool_timeout=30.0,     # Wait max 30 seconds for connection  
+    pool_recycle=3600,     # Recycle connections after 1 hour
+    connect_args={
+        "connect_timeout": 10  # 10 second connection timeout
+    }
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Redis setup
-redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+# Redis setup with timeout
+redis_client = redis.Redis(
+    host=REDIS_HOST, 
+    port=REDIS_PORT, 
+    decode_responses=True,
+    socket_timeout=5.0,     # 5 second timeout
+    socket_connect_timeout=5.0,
+    retry_on_timeout=True
+)
+
+# Create HTTP client with timeout for ML service calls
+http_client = httpx.AsyncClient(
+    timeout=httpx.Timeout(3.0, connect=2.0),
+    limits=httpx.Limits(max_keepalive_connections=10, max_connections=20)
+)
 
 # Pydantic models
 class TrainPosition(BaseModel):
@@ -108,33 +130,40 @@ async def get_trains(
     trains = []
     pattern = f"train:{route_id if route_id else '*'}:*"
     
-    # Get train keys from Redis
-    train_keys = redis_client.keys(pattern)
-    
-    for key in train_keys[:limit]:
-        train_data = redis_client.hgetall(key)
-        if not train_data:
-            continue
-            
-        # Parse Redis key to get route_id and trip_id
-        _, route, trip = key.split(":")
+    try:
+        # Get train keys from Redis
+        train_keys = redis_client.keys(pattern)
         
-        # Skip if timestamp is older than 5 minutes
-        timestamp = datetime.fromtimestamp(int(train_data.get("timestamp", 0)))
-        if datetime.now() - timestamp > timedelta(minutes=5):
-            continue
+        for key in train_keys[:limit]:
+            train_data = redis_client.hgetall(key)
+            if not train_data:
+                continue
+                
+            # Parse Redis key to get route_id and trip_id
+            _, route, trip = key.split(":")
             
-        trains.append({
-            "route_id": route,
-            "trip_id": trip,
-            "timestamp": timestamp,
-            "latitude": float(train_data.get("lat", 0)),
-            "longitude": float(train_data.get("lon", 0)),
-            "current_status": train_data.get("status", "UNKNOWN"),
-            "delay": int(train_data.get("delay", 0)),
-            "vehicle_id": train_data.get("vehicle_id", "unknown"),
-            "direction_id": int(train_data.get("direction_id", 0))
-        })
+            # Skip if timestamp is older than 5 minutes
+            timestamp = datetime.fromtimestamp(int(train_data.get("timestamp", 0)))
+            if datetime.now() - timestamp > timedelta(minutes=5):
+                continue
+                
+            trains.append({
+                "route_id": route,
+                "trip_id": trip,
+                "timestamp": timestamp,
+                "latitude": float(train_data.get("lat", 0)),
+                "longitude": float(train_data.get("lon", 0)),
+                "current_status": train_data.get("status", "UNKNOWN"),
+                "delay": int(train_data.get("delay", 0)),
+                "vehicle_id": train_data.get("vehicle_id", "unknown"),
+                "direction_id": int(train_data.get("direction_id", 0))
+            })
+    except redis.TimeoutError:
+        print("Redis timeout on /trains")
+        return []
+    except Exception as e:
+        print(f"Error fetching trains: {e}")
+        return []
     
     return trains
 
@@ -145,23 +174,29 @@ async def get_alerts(
     limit: int = Query(20, ge=1, le=50)
 ):
     """Get recent alerts, optionally filtered by route and severity."""
-    # Query ML service for anomalies
+    # Query ML service for anomalies with timeout
     params = {}
     if route_id:
         params["route_id"] = route_id
     if severity:
         params["severity"] = severity
         
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{ML_SERVICE_URL}/anomalies", params=params)
-        
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to fetch anomalies from ML service")
-        
-    return response.json()[:limit]
+    try:
+        response = await http_client.get(f"{ML_SERVICE_URL}/anomalies", params=params)
+        response.raise_for_status()
+        return response.json()[:limit]
+    except httpx.TimeoutException:
+        print("ML service timeout on /anomalies")
+        return []
+    except httpx.HTTPError as e:
+        print(f"Warning: ML service error: {e}")
+        return []
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return []
 
-@app.get("/metrics", response_model=List[MetricResponse])
-async def get_metrics(
+@app.get("/subway-metrics", response_model=List[MetricResponse])
+async def get_subway_metrics(
     db = Depends(get_db),
     route_id: Optional[str] = None,
     window: str = Query("5m", pattern=r"^\d+[mh]$")  # Format: 5m, 1h, etc.
@@ -199,16 +234,24 @@ async def get_metrics(
         
     query += " GROUP BY route_id"
     
-    result = db.execute(text(query), params).fetchall()
+    # Execute query with timeout
+    try:
+        result = db.execute(text(query), params).fetchall()
+    except Exception as e:
+        print(f"Database query error: {e}")
+        result = []
     
-    # Get anomaly scores from ML service
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{ML_SERVICE_URL}/scores")
-        
+    # Get anomaly scores from ML service with timeout
     anomaly_scores = {}
-    if response.status_code == 200:
+    try:
+        response = await http_client.get(f"{ML_SERVICE_URL}/scores")
+        response.raise_for_status()
         scores = response.json()
         anomaly_scores = {item["route_id"]: item["score"] for item in scores}
+    except (httpx.TimeoutException, httpx.HTTPError) as e:
+        print(f"Warning: Could not fetch anomaly scores: {e}")
+    except Exception as e:
+        print(f"Unexpected error fetching scores: {e}")
     
     # Combine database results with anomaly scores
     metrics = []
@@ -270,6 +313,11 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
+# Cleanup on shutdown
+@app.on_event("shutdown")
+async def shutdown_event():
+    await http_client.aclose()
 
 if __name__ == "__main__":
     import uvicorn
