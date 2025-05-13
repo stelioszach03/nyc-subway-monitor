@@ -1,0 +1,53 @@
+# NYC MTA Subway Feeds Configuration
+# No API key required for these public feeds
+
+feeds:
+  # Real-time GTFS-RT feeds by line group
+  # Using the correct percent-encoded URLs
+  - name: "ACE Lines"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
+    lines: ["A", "C", "E"]
+    frequency: "30s"
+    
+  - name: "BDFM Lines"
+    type: "realtime"  
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
+    lines: ["B", "D", "F", "M"]
+    frequency: "30s"
+    
+  - name: "G Line"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g"
+    lines: ["G"]
+    frequency: "30s"
+    
+  - name: "JZ Lines"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz"
+    lines: ["J", "Z"]
+    frequency: "30s"
+    
+  - name: "L Line"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l"
+    lines: ["L"]
+    frequency: "30s"
+    
+  - name: "NQRW Lines"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw"
+    lines: ["N", "Q", "R", "W"]
+    frequency: "30s"
+    
+  - name: "Trip Updates (1-7)"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
+    lines: ["1", "2", "3", "4", "5", "6", "7"]
+    frequency: "30s"
+    
+  - name: "Staten Island Railway"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si"
+    lines: ["SI"]
+    frequency: "30s"
