@@ -26,7 +26,7 @@ RUN chmod +x entrypoint.sh
 
 # Ορισμός μεταβλητών περιβάλλοντος
 ENV MODEL_OUTPUT_PATH=/app/models/anomaly_model.onnx
-ENV TRAINING_SCHEDULE="0 */6 * * *"  # Κάθε 6 ώρες
+ENV TRAINING_SCHEDULE="0 */1 * * *"  # Κάθε 1 ώρα
 
 # Δημιουργία αρχείου cron task
 RUN echo "#!/bin/bash\ncd /app && python train.py && curl -X POST http://ml:8000/reload-model" > /app/train_cron.sh \

@@ -31,7 +31,7 @@ REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
 MODEL_PATH = os.environ.get("MODEL_PATH", "/app/models/anomaly_model.onnx")
 AUTO_CREATE_MODEL = os.environ.get("AUTO_CREATE_MODEL", "true").lower() == "true"
-MODEL_RELOAD_INTERVAL = int(os.environ.get("MODEL_RELOAD_INTERVAL", "60"))  # 60 seconds
+MODEL_RELOAD_INTERVAL = int(os.environ.get("MODEL_RELOAD_INTERVAL", "30"))  # 30 seconds
 
 # Initialize FastAPI
 app = FastAPI(

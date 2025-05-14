@@ -9,6 +9,7 @@ import yaml
 from datetime import datetime
 from google.transit import gtfs_realtime_pb2
 from kafka import KafkaProducer
+from kafka.errors import KafkaTimeoutError, NoBrokersAvailable 
 from sqlalchemy import create_engine, text
 
 # Configure logging
@@ -30,20 +31,45 @@ POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "subway_password")
 POSTGRES_DB = os.environ.get("POSTGRES_DB", "subway_monitor")
 
 def create_kafka_producer():
-    """Create and return a Kafka producer."""
-    try:
-        return KafkaProducer(
-            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-            value_serializer=lambda x: json.dumps(x).encode('utf-8'),
-            retries=5,
-            acks='all',
-            request_timeout_ms=30000,
-            max_block_ms=30000,
-            retry_backoff_ms=1000
-        )
-    except Exception as e:
-        logger.error(f"Failed to create Kafka producer: {e}")
-        return None
+    """Create and return a Kafka producer with retry."""
+    max_retries = 10
+    retry_backoff = 5  # seconds
+    
+    for retry in range(max_retries):
+        try:
+            logger.info(f"Attempting to create Kafka producer (attempt {retry+1}/{max_retries})...")
+            producer = KafkaProducer(
+                bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+                value_serializer=lambda x: json.dumps(x).encode('utf-8'),
+                retries=5,
+                acks='all',
+                request_timeout_ms=30000,
+                max_block_ms=60000,
+                retry_backoff_ms=1000
+            )
+            # Test connection
+            producer.list_topics(timeout_ms=10000)
+            logger.info("Successfully connected to Kafka")
+            return producer
+        except (KafkaTimeoutError, NoBrokersAvailable) as e:
+            logger.warning(f"Kafka connection failed (attempt {retry+1}): {e}")
+            if retry < max_retries - 1:
+                logger.info(f"Retrying in {retry_backoff} seconds...")
+                time.sleep(retry_backoff)
+                retry_backoff = min(30, retry_backoff * 2)  # Exponential backoff up to 30 seconds
+            else:
+                logger.error(f"Failed to create Kafka producer after {max_retries} attempts")
+                logger.warning("Will continue without Kafka and store data directly to database")
+                return None
+        except Exception as e:
+            logger.error(f"Unexpected error creating Kafka producer: {e}")
+            if retry < max_retries - 1:
+                logger.info(f"Retrying in {retry_backoff} seconds...")
+                time.sleep(retry_backoff)
+                retry_backoff = min(30, retry_backoff * 2)
+            else:
+                logger.error(f"Failed to create Kafka producer after {max_retries} attempts")
+                return None
 
 def create_db_engine():
     """Create database engine for historical data storage."""
@@ -300,13 +326,46 @@ def store_historical_data(vehicles, db_engine):
         import traceback
         logger.error(traceback.format_exc())
 
+# Βελτιωμένη συνάρτηση δημιουργίας θέματος Kafka
+def ensure_kafka_topic_exists():
+    """Ensure the Kafka topic exists."""
+    import subprocess
+    
+    try:
+        cmd = [
+            "kafka-topics", 
+            "--create", 
+            "--if-not-exists",
+            "--bootstrap-server", KAFKA_BOOTSTRAP_SERVERS,
+            "--replication-factor", "1",
+            "--partitions", "1",
+            "--topic", KAFKA_TOPIC
+        ]
+        
+        # Προσπάθεια εκτέλεσης της εντολής
+        logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            logger.info(f"Kafka topic {KAFKA_TOPIC} is ready")
+            return True
+        else:
+            logger.warning(f"Failed to create Kafka topic: {result.stderr}")
+            return False
+    except Exception as e:
+        logger.error(f"Error ensuring Kafka topic: {e}")
+        return False
+
 def ingest_realtime_feeds():
     """Fetch, parse, and publish subway data to Kafka."""
+    # Ensure Kafka topic exists
+    ensure_kafka_topic_exists()
+    
     producer = create_kafka_producer()
     db_engine = create_db_engine()
     
-    if not producer:
-        logger.error("Cannot proceed without Kafka producer")
+    if not db_engine:
+        logger.error("Cannot proceed without database connection")
         return
     
     feeds = load_feeds_config()
@@ -338,12 +397,13 @@ def ingest_realtime_feeds():
         if vehicles:
             logger.info(f"Parsed {len(vehicles)} vehicles/trips from feed {feed['name']}")
             
-            # Publish to Kafka
-            for vehicle in vehicles:
-                try:
-                    producer.send(KAFKA_TOPIC, value=vehicle)
-                except Exception as e:
-                    logger.error(f"Error sending to Kafka: {e}")
+            # Publish to Kafka if available
+            if producer:
+                for vehicle in vehicles:
+                    try:
+                        producer.send(KAFKA_TOPIC, value=vehicle)
+                    except Exception as e:
+                        logger.error(f"Error sending to Kafka: {e}")
             
             # Collect for historical storage
             all_vehicles.extend(vehicles)
@@ -357,8 +417,9 @@ def ingest_realtime_feeds():
         logger.warning("No vehicles/trips parsed from any feed")
     
     # Make sure all messages are sent
-    producer.flush()
-    producer.close()
+    if producer:
+        producer.flush()
+        producer.close()
     logger.info(f"Feed ingestion completed - processed {len(all_vehicles)} total vehicles/trips")
 
 def run_scheduled_task():
@@ -405,6 +466,9 @@ feeds:
             return
     
     logger.info(f"Loaded {len(feeds)} feed configurations")
+    
+    # Ensure Kafka topic exists
+    ensure_kafka_topic_exists()
     
     # For testing, run once immediately
     logger.info("Running initial ingestion...")
