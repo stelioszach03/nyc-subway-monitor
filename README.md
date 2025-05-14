@@ -1,314 +1,211 @@
 # NYC Subway Monitor
 
-A real-time monitoring system for the New York City Subway, providing live train positions, delay information, and anomaly detection.
+A real-time monitoring system for the New York City subway system with machine learning-based anomaly detection for identifying unusual delays and service disruptions.
+
+![NYC Subway Monitor Dashboard](https://i.imgur.com/zCLfIV8.png)
+
+## Overview
+
+The NYC Subway Monitor is a comprehensive system that:
+
+- **Captures real-time data** from MTA's GTFS-RT feeds
+- **Processes and analyzes** subway train positions and delays
+- **Detects anomalies** using machine learning
+- **Visualizes** trains on an interactive map
+- **Alerts** on detected service disruptions
+- **Provides metrics** on system performance
+
+The system continuously trains its anomaly detection model to improve accuracy over time. It's designed to run as a set of interconnected microservices using Docker containers for easy deployment.
 
 ## Architecture
 
-- **Data Ingestion**: Pulls GTFS-RT Subway feeds every 30 seconds
-- **Streaming Pipeline**: Processes data with Apache Kafka and Spark Structured Streaming
-- **Storage**: Uses PostgreSQL with TimescaleDB for time-series data and Redis for real-time cache
-- **Machine Learning**: Anomaly detection with Isolation Forest, exported to ONNX
-- **API**: FastAPI for REST endpoints and WebSocket streaming
-- **Frontend**: React 19 with Mapbox GL for visualization
+![Architecture Diagram](https://i.imgur.com/kJLfIV8.png)
 
-## Directory Structure
-nyc-subway-monitor/
-├── infra/                 # Infrastructure configuration
-│   ├── docker/            # Docker Compose for local dev
-│   ├── helm/              # Helm charts for Kubernetes
-│   └── k8s/               # Kubernetes manifests
-├── services/              # Backend services
-│   ├── ingest/            # GTFS feed ingestion service
-│   ├── stream/            # Spark streaming pipeline
-│   ├── ml/                # Machine learning service
-│   └── api/               # FastAPI gateway
-├── web/                   # React frontend
-├── docs/                  # Documentation
-└── docker/                # Docker-related files
+The system consists of several components:
 
-## Getting Started
+- **Web Frontend**: React-based UI for visualization (port 3000)
+- **API Service**: FastAPI backend providing data to the frontend (port 8000)
+- **ML Service**: Provides anomaly detection using isolation forest (port 8001)
+- **Ingest Service**: Collects data from MTA GTFS-RT feeds and publishes to Kafka
+- **Stream Processing**: Processes and analyzes data using Spark
+- **Trainer Service**: Periodically trains the anomaly detection model
+- **Supporting Infrastructure**:
+  - Kafka: Message broker for data streaming
+  - TimescaleDB: Time-series database for historical data
+  - Redis: In-memory store for real-time data and pub/sub
+
+## Features
+
+- **Live Map**: Real-time positions of all active subway trains
+- **Delay Monitoring**: Track and visualize delays across all subway lines
+- **Anomaly Detection**: ML-powered identification of unusual delays
+- **Alert System**: Real-time notifications for potential issues
+- **Performance Metrics**: Dashboard showing system-wide statistics
+- **Continuous Learning**: Model improves over time with new data
+
+## Quick Start
 
 ### Prerequisites
 
 - Docker and Docker Compose
-- Node.js 22.4.0 LTS
-- Python 3.11.12
-- A Mapbox API token (free tier)
+- 4GB+ RAM available
+- 10GB+ disk space
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/nyc-subway-monitor.git
+   cd nyc-subway-monitor/infra/docker
+   ```
+
+2. Start the system:
+   ```bash
+   ./start.sh
+   ```
+
+3. Access the application:
+   - Web UI: http://localhost:3000
+   - API: http://localhost:8000
+   - ML Service: http://localhost:8001
+
+The system will automatically fetch subway data, process it, train the anomaly detection model, and present results on the dashboard.
+
+### System Health
+
+Check the system's health:
+```bash
+./check-health.sh
+```
+
+## Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the `infra/docker` directory based on the provided `.env.sample`:
-Database
-POSTGRES_USER=subway
-POSTGRES_PASSWORD=subway_password
-POSTGRES_DB=subway_monitor
-Frontend
-MAPBOX_TOKEN=your_mapbox_token_here
-Services
-LOG_LEVEL=INFO
-ML
-MODEL_PATH=/app/models/anomaly_model.onnx
+Key configurations are managed through environment variables in `.env`:
 
-### Local Development
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`: Database credentials
+- `MAPBOX_TOKEN`: Token for map visualization
+- `VITE_API_URL`: API endpoint for frontend
+- `LOG_LEVEL`: Logging verbosity (INFO, DEBUG, WARNING, ERROR)
 
-1. Build and start the services:
+### Feed Configuration
+
+MTA GTFS-RT feed settings are in `infra/docker/feeds.yaml`:
+
+```yaml
+feeds:
+  - name: "ACE Lines"
+    type: "realtime"
+    url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
+    lines: ["A", "C", "E"]
+    frequency: "30s"
+  # Additional feeds...
+```
+
+### Docker Resources
+
+Adjust resource limits in `docker-compose.yaml` based on your machine's capabilities.
+
+## Development
+
+### Project Structure
+
+```
+nyc-subway-monitor/
+├── infra/
+│   ├── docker/          # Docker setup & scripts
+│   ├── helm/            # Kubernetes helm charts
+│   └── k8s/             # Kubernetes manifests
+├── services/
+│   ├── api/             # FastAPI backend
+│   ├── ingest/          # Data ingestion service
+│   ├── ml/              # Machine learning service
+│   ├── stream/          # Stream processing
+│   └── trainer/         # Model training service
+└── web/                 # React frontend
+```
+
+### Building Components
+
+Individual services can be built with:
 
 ```bash
-cd nyc-subway-monitor/infra/docker
-docker-compose up -d
+cd services/[service-name]
+docker build -t subway-[service-name] .
+```
 
-Access the frontend at http://localhost:3000
-Access the API documentation at http://localhost:8000/docs
-Access Grafana dashboards at http://localhost:3001 (admin/admin)
-Access Airflow at http://localhost:8080 (airflow/airflow)
+### Testing
 
-Development Workflow
+Each service has its own test suite:
 
-Start the services using Docker Compose
-Develop the frontend:
+```bash
+cd services/[service-name]
+python -m pytest
+```
 
-bashcd nyc-subway-monitor/web
-pnpm install
-pnpm dev
+## Machine Learning
 
-Make changes to Python services and rebuild:
+The system uses an Isolation Forest algorithm to detect anomalies in subway delays:
 
-bashcd nyc-subway-monitor/infra/docker
-docker-compose build <service_name>
-docker-compose up -d <service_name>
-Deployment
-Kubernetes Deployment
+1. **Feature Engineering**:
+   - Average delay per route
+   - Maximum delay
+   - Delay standard deviation
+   - Number of trains per route
+   - Time-based features (hour, day of week)
 
-Update the Helm values in infra/helm/values.yaml
-Deploy using Helm:
+2. **Training**:
+   - Occurs automatically every 2 hours
+   - Uses historical data from TimescaleDB
+   - Model and parameters saved to shared volume
 
-bashcd nyc-subway-monitor/infra/helm
-helm upgrade --install subway-monitor . -f values.yaml
-CI/CD Pipeline
-The project includes GitHub Actions workflows for:
+3. **Inference**:
+   - Real-time scoring of current subway conditions
+   - Scores range from 0-1 (higher = more anomalous)
+   - Visualized in the metrics dashboard
 
-Linting and testing
-Building Docker images
-Pushing to GitHub Container Registry
-Deploying to Kubernetes via Argo CD
+## Troubleshooting
 
-API Documentation
+### Common Issues
 
-/trains - Get current train positions
-/alerts - Get anomaly alerts
-/metrics - Get performance metrics
-/ws/live - WebSocket for real-time updates
+1. **Services fail to start**:
+   ```bash
+   docker compose logs [service-name]
+   docker compose restart [service-name]
+   ```
 
-Architecture Details
-Feeds and Data Sources
-MTA GTFS-RT feeds (no API key required):
+2. **No data appearing**:
+   - Check MTA feed status: `docker compose logs ingest`
+   - Verify Kafka connections: `docker compose logs kafka`
 
-123456: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs
-ACE: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace
-BDFM: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm
-G: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g
-JZ: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz
-NQRW: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw
-L: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l
-7: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-7
-SIR: https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si
+3. **Model not training**:
+   - Check trainer logs: `docker compose logs trainer`
+   - Manually create initial model: `./create_onnx_model.sh`
 
-Machine Learning
+4. **High resource usage**:
+   - Adjust resources in docker-compose.yaml
+   - Run `docker system prune` to clear unused resources
 
-Nightly retraining of the anomaly detection model
-Uses 7 days of historical data for training
-Anomaly scores published to API and WebSocket
+### Complete Reset
 
-License
-MIT License
+To completely reset the system:
 
-## Data Ingestion Service
+```bash
+docker compose down -v  # Removes all data
+./start.sh
+```
 
-Finally, let's create the data ingestion service:
+## Contributing
 
-```python
-# nyc-subway-monitor/services/ingest/main.py
-import os
-import time
-import json
-import logging
-import requests
-import schedule
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
-import asyncio
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-from google.protobuf.message import DecodeError
-from google.transit import gtfs_realtime_pb2
-from kafka import KafkaProducer
+## License
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('subway-ingest')
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-# Configuration from environment variables
-KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
-KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC", "subway-feeds")
-FETCH_INTERVAL = int(os.environ.get("FETCH_INTERVAL", "30"))  # seconds
+## Acknowledgments
 
-# MTA GTFS-RT feed URLs
-FEED_URLS = {
-    '123456': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
-    'ACE': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace',
-    'BDFM': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm',
-    'G': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g',
-    'JZ': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz',
-    'NQRW': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw',
-    'L': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l',
-    '7': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-7',
-    'SIR': 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si'
-}
-
-def init_kafka_producer() -> KafkaProducer:
-    """Initialize and return a Kafka producer."""
-    return KafkaProducer(
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
-    )
-
-def fetch_feed(feed_id: str, url: str) -> List[Dict[str, Any]]:
-    """Fetch and parse a GTFS-RT feed."""
-    try:
-        logger.info(f"Fetching feed {feed_id} from {url}")
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        
-        feed = gtfs_realtime_pb2.FeedMessage()
-        feed.ParseFromString(response.content)
-        
-        trains = []
-        timestamp = datetime.fromtimestamp(feed.header.timestamp)
-        
-        for entity in feed.entity:
-            if entity.HasField('trip_update'):
-                trip_update = entity.trip_update
-                route_id = trip_update.trip.route_id
-                trip_id = trip_update.trip.trip_id
-                
-                # Process stop time updates for delay information
-                for stop_update in trip_update.stop_time_update:
-                    delay = None
-                    if stop_update.HasField('arrival') and stop_update.arrival.HasField('delay'):
-                        delay = stop_update.arrival.delay
-                    elif stop_update.HasField('departure') and stop_update.departure.HasField('delay'):
-                        delay = stop_update.departure.delay
-                    
-                    trains.append({
-                        'feed_id': feed_id,
-                        'trip_id': trip_id,
-                        'route_id': route_id,
-                        'stop_id': stop_update.stop_id,
-                        'stop_sequence': stop_update.stop_sequence,
-                        'delay': delay,
-                        'timestamp': timestamp.isoformat()
-                    })
-            
-            if entity.HasField('vehicle'):
-                vehicle = entity.vehicle
-                route_id = vehicle.trip.route_id
-                trip_id = vehicle.trip.trip_id
-                
-                # Process vehicle position
-                if vehicle.HasField('position'):
-                    trains.append({
-                        'feed_id': feed_id,
-                        'trip_id': trip_id,
-                        'route_id': route_id,
-                        'latitude': vehicle.position.latitude,
-                        'longitude': vehicle.position.longitude,
-                        'current_status': gtfs_realtime_pb2.VehiclePosition.VehicleStopStatus.Name(vehicle.current_status),
-                        'current_stop_sequence': vehicle.current_stop_sequence,
-                        'vehicle_id': vehicle.vehicle.id if vehicle.HasField('vehicle') else None,
-                        'timestamp': timestamp.isoformat(),
-                        'direction_id': vehicle.trip.direction_id if vehicle.trip.HasField('direction_id') else None
-                    })
-        
-        logger.info(f"Processed {len(trains)} train updates from feed {feed_id}")
-        return trains
-    
-    except DecodeError as e:
-        logger.error(f"Failed to decode protobuf for feed {feed_id}: {e}")
-        return []
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to fetch feed {feed_id}: {e}")
-        return []
-    except Exception as e:
-        logger.error(f"Error processing feed {feed_id}: {e}")
-        return []
-
-def fetch_all_feeds() -> None:
-    """Fetch all GTFS-RT feeds and send to Kafka."""
-    producer = init_kafka_producer()
-    
-    def process_feed(feed_id: str, url: str) -> None:
-        trains = fetch_feed(feed_id, url)
-        for train in trains:
-            producer.send(KAFKA_TOPIC, value=train)
-    
-    # Fetch feeds in parallel
-    with ThreadPoolExecutor(max_workers=len(FEED_URLS)) as executor:
-        for feed_id, url in FEED_URLS.items():
-            executor.submit(process_feed, feed_id, url)
-    
-    # Ensure all messages are sent
-    producer.flush()
-    logger.info(f"Completed fetching all feeds at {datetime.now().isoformat()}")
-
-def start_scheduled_fetching() -> None:
-    """Start scheduled fetching of feeds."""
-    logger.info(f"Starting scheduled feed fetching every {FETCH_INTERVAL} seconds")
-    
-    # Run immediately on startup
-    fetch_all_feeds()
-    
-    # Schedule regular runs
-    schedule.every(FETCH_INTERVAL).seconds.do(fetch_all_feeds)
-    
-    # Keep the script running
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-if __name__ == "__main__":
-    logger.info("NYC Subway Monitor - Feed Ingestion Service starting up")
-    start_scheduled_fetching()
-Requirements for ingest service:
-# nyc-subway-monitor/services/ingest/requirements.txt
-kafka-python==2.0.2
-requests==2.31.0
-protobuf==4.25.1
-schedule==1.2.1
-gtfs-realtime-bindings==1.0.0
-And its Dockerfile:
-dockerfile# nyc-subway-monitor/services/ingest/Dockerfile
-FROM python:3.11.12-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-CMD ["python", "main.py"]
-This completes the core components of the NYC Subway Monitor system. The application now includes:
-
-Data ingestion from MTA GTFS feeds
-Spark streaming pipeline for processing
-ML service for anomaly detection
-FastAPI backend with REST and WebSocket endpoints
-React 19 frontend with Mapbox visualization
-Docker Compose for local development
-Kubernetes/Helm configuration for production
-Airflow DAG for nightly ML model training
-
-The system follows the specified architecture and requirements, using all the specified technologies and versions. The code is type-annotated, follows modern best practices, and is structured for maintainability and scalability.
+- MTA for providing GTFS-RT feeds
+- MapBox for mapping capabilities
+- All open-source libraries used in this project

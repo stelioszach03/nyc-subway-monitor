@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Υποδομή
+  # Infrastructure
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     healthcheck:
@@ -18,6 +18,13 @@ services:
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -25,7 +32,7 @@ services:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -38,21 +45,36 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_LOG_RETENTION_HOURS=168
-      - KAFKA_HEAP_OPTS=-Xmx512m -Xms256m
+      - KAFKA_HEAP_OPTS=-Xmx1g -Xms512m
+      - KAFKA_JVM_PERFORMANCE_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35
     volumes:
       - kafka_data:/var/lib/kafka/data
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+          cpus: '1.0'
+        reservations:
+          memory: 512M
 
-  # Βάσεις Δεδομένων
+  # Databases
   timescaledb:
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-subway}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-subway_password}
       - POSTGRES_DB=${POSTGRES_DB:-subway_monitor}
-    command: postgres -c max_connections=200 -c shared_buffers=256MB
+    command: >
+      postgres -c max_connections=200 
+              -c shared_buffers=256MB
+              -c work_mem=16MB
+              -c maintenance_work_mem=64MB
+              -c effective_cache_size=512MB
+              -c checkpoint_timeout=15min
+              -c max_wal_size=2GB
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
@@ -63,27 +85,51 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
   redis:
     image: redis:7-alpine
     volumes:
       - redis_data:/data
+    # Include Redis configuration for better performance
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 5s
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
 
-  # Model Trainer Service - περιοδική εκπαίδευση
+  # Model Trainer Service - periodic training
   trainer:
     build:
       context: ../../services/trainer
+      dockerfile: Dockerfile
     environment:
       - POSTGRES_HOST=timescaledb
       - POSTGRES_PORT=5432
@@ -92,7 +138,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-subway_monitor}
       - MODEL_OUTPUT_PATH=/app/models/anomaly_model.onnx
       - ML_SERVICE_URL=http://ml:8000
-      - TRAINING_SCHEDULE="0 */6 * * *"  # Εκπαίδευση κάθε 6 ώρες
+      - TRAINING_SCHEDULE="0 */2 * * *"  # Training every 2 hours for more frequent updates
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
       - ml_models:/app/models
     restart: unless-stopped
@@ -101,11 +149,19 @@ services:
         condition: service_healthy
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
   # ML Service
   ml:
     build:
       context: ../../services/ml
+      dockerfile: Dockerfile
     ports:
       - "8001:8000"
     environment:
@@ -114,7 +170,9 @@ services:
       - MODEL_PATH=/app/models/anomaly_model.onnx
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - AUTO_CREATE_MODEL=true
-      - MODEL_RELOAD_INTERVAL=60  # Έλεγχος για νέο μοντέλο κάθε 60 δευτερόλεπτα
+      - MODEL_RELOAD_INTERVAL=30  # Check for new model every 30 seconds
+      - WORKERS=2
+      - PYTHONUNBUFFERED=1
     depends_on:
       redis:
         condition: service_healthy
@@ -129,11 +187,19 @@ services:
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
   # API Gateway
   api:
     build:
       context: ../../services/api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -147,6 +213,7 @@ services:
       - ML_SERVICE_URL=http://ml:8000
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - WORKERS=4
+      - PYTHONUNBUFFERED=1
     depends_on:
       ml:
         condition: service_healthy
@@ -163,11 +230,19 @@ services:
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
   # Web Frontend
   web:
     build:
       context: ../../web
+      dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
         - VITE_MAPBOX_TOKEN=${MAPBOX_TOKEN}
@@ -176,14 +251,28 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
 
   # Ingest Service
   ingest:
     build:
       context: ../../services/ingest
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - POSTGRES_HOST=timescaledb
@@ -192,6 +281,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-subway_password}
       - POSTGRES_DB=${POSTGRES_DB:-subway_monitor}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./feeds.yaml:/app/feeds.yaml:ro
     restart: unless-stopped
@@ -202,11 +292,19 @@ services:
         condition: service_healthy
     networks:
       - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.8'
+        reservations:
+          memory: 256M
 
   # Stream Service
   stream:
     build:
       context: ../../services/stream
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - POSTGRES_HOST=timescaledb
@@ -217,6 +315,10 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PYTHONUNBUFFERED=1
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_EXECUTOR_MEMORY=1g
     restart: unless-stopped
     depends_on:
       kafka:
@@ -227,36 +329,13 @@ services:
         condition: service_healthy
     networks:
       - subway-net
-
-  # Monitoring - προαιρετικά
-  prometheus:
-    image: prom/prometheus:v2.48.0
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    ports:
-      - "9090:9090"
-    profiles: ["monitoring"]
-    networks:
-      - subway-net
-
-  grafana:
-    image: grafana/grafana:10.2.2
-    ports:
-      - "3001:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana_data:/var/lib/grafana
-    profiles: ["monitoring"]
-    networks:
-      - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+          cpus: '1.5'
+        reservations:
+          memory: 512M
 
 networks:
   subway-net:
@@ -268,5 +347,3 @@ volumes:
   timescaledb_data:
   redis_data:
   ml_models:
-  prometheus_data:
-  grafana_data:
