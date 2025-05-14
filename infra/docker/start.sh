@@ -31,7 +31,16 @@ wait_for_service() {
     local retry_interval=${3:-5}
     local attempt=1
     
-    echo "⏳ Waiting for $service to be ready..."
+    # Ειδικές ρυθμίσεις για κάθε υπηρεσία
+    if [ "$service" = "kafka" ]; then
+        max_attempts=60
+        retry_interval=10
+    elif [ "$service" = "zookeeper" ]; then
+        max_attempts=40
+        retry_interval=5
+    fi
+    
+    echo "⏳ Waiting for $service to be ready (max $max_attempts attempts)..."
     while [ $attempt -le $max_attempts ]; do
         if docker compose ps "$service" | grep -q "healthy"; then
             echo "✅ $service is ready!"
@@ -43,9 +52,21 @@ wait_for_service() {
             if [ "$service" = "kafka" ] && [ $attempt -ge 15 ]; then
                 # Ειδικός χειρισμός για το Kafka - δημιουργία θέματος για βοήθεια
                 echo "🔄 Trying to create Kafka topic to help with startup..."
-                docker compose exec kafka kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic subway-feeds
-                docker compose restart kafka
-                sleep 20
+                docker compose exec -T kafka bash -c "kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic subway-feeds"
+                
+                # Έλεγχος αν το topic δημιουργήθηκε επιτυχώς
+                if docker compose exec -T kafka bash -c "kafka-topics --list --bootstrap-server kafka:9092" | grep -q "subway-feeds"; then
+                    echo "✅ Topic 'subway-feeds' created successfully"
+                else
+                    echo "⚠️ Could not create topic 'subway-feeds' yet. Will try again..."
+                fi
+                
+                # Επανεκκίνηση μόνο αν έχουμε κάνει αρκετές προσπάθειες
+                if [ $attempt -ge 25 ]; then
+                    echo "🔄 Restarting Kafka after multiple failed attempts..."
+                    docker compose restart kafka
+                    sleep 30
+                fi
             fi
         fi
         
@@ -72,14 +93,34 @@ export COMPOSE_IGNORE_OBSOLETE=1
 # Start infrastructure services one by one with careful ordering
 echo "🔄 Starting Zookeeper service..."
 docker compose up -d zookeeper
-if ! wait_for_service "zookeeper" 20 3; then exit 1; fi
+if ! wait_for_service "zookeeper" 20 3; then 
+    echo "❌ Zookeeper failed to start properly. Trying to restart..."
+    docker compose restart zookeeper
+    sleep 15
+    if ! wait_for_service "zookeeper" 20 3; then
+        echo "❌ Zookeeper still failing. Exiting..."
+        exit 1
+    fi
+fi
 
 echo "🔄 Starting Kafka service..."
 docker compose up -d kafka
 # Αύξηση του χρόνου αναμονής για το Kafka και προσαρμογή του retry interval
-if ! wait_for_service "kafka" 40 10; then 
+if ! wait_for_service "kafka" 60 10; then 
     echo "⚠️ Kafka is taking longer than expected. Creating topic and continuing..."
-    docker compose exec -T kafka kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic subway-feeds
+    
+    # Προσπάθεια δημιουργίας topic με διαφορετικές παραμέτρους
+    docker compose exec -T kafka bash -c "kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic subway-feeds"
+    docker compose exec -T kafka bash -c "kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic subway-feeds"
+    
+    echo "🔄 Restarting Kafka after topic creation attempt..."
+    docker compose restart kafka
+    sleep 30
+    
+    # Μία τελευταία προσπάθεια αναμονής
+    if ! wait_for_service "kafka" 30 10; then
+        echo "⚠️ Kafka is still not fully healthy, but we'll try to continue..."
+    fi
 fi
 
 echo "🔄 Starting Redis and TimescaleDB services..."

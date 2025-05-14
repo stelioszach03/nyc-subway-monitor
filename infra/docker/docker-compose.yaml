@@ -1,4 +1,4 @@
-# Αφαίρεση του πεδίου version που είναι παρωχημένο και προκαλεί προειδοποιήσεις
+# services/docker-compose.yaml - Διορθωμένη έκδοση
 services:
   # Infrastructure
   zookeeper:
@@ -31,12 +31,12 @@ services:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      # Βελτιωμένος έλεγχος υγείας για το Kafka
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list", "--topic", "subway-feeds", "--under-replicated-partitions"]
-      interval: 20s
+      # Απλοποιημένος έλεγχος υγείας για το Kafka
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list"]
+      interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -56,7 +56,8 @@ services:
       - KAFKA_MIN_INSYNC_REPLICAS=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
-      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=100
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=60000
     volumes:
       - kafka_data:/var/lib/kafka/data
     restart: unless-stopped
