@@ -292,6 +292,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-subway_password}
       - POSTGRES_DB=${POSTGRES_DB:-subway_monitor}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - STOPS_FILE=/app/stops.txt
       - PYTHONUNBUFFERED=1
     volumes:
       - ./feeds.yaml:/app/feeds.yaml:ro
