@@ -7,10 +7,10 @@ import schedule
 import requests
 import yaml
 from datetime import datetime
-from google.transit import gtfs_realtime_pb2
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError, NoBrokersAvailable 
 from sqlalchemy import create_engine, text
+from nyct_gtfs import NYCTFeed
 
 # Configure logging
 logging.basicConfig(
@@ -148,145 +148,37 @@ def fetch_gtfs_realtime_feed(feed_url, feed_name):
 
 def parse_gtfs_feed(feed_data, expected_lines=None):
     """Parse GTFS-RT binary data into Python objects."""
-    feed = gtfs_realtime_pb2.FeedMessage()
-    
+    # --- NEW: use nyct-gtfs ---------------------------------
     try:
-        # Validate that we have binary data
-        if not isinstance(feed_data, bytes):
-            logger.error("Feed data is not binary - cannot parse")
-            return []
-        
-        # Check for common error patterns in the response
-        if feed_data.startswith(b'<?xml'):
-            logger.error("Received XML response instead of protobuf - likely wrong URL or error response")
-            logger.error(f"Feed content sample: {feed_data[:200]}")
-            return []
-        
-        feed.ParseFromString(feed_data)
-        logger.debug(f"Successfully parsed feed with {len(feed.entity)} entities")
-        
-        # Count entity types for debugging
-        vehicle_count = 0
-        trip_update_count = 0
-        alert_count = 0
-        
-        vehicles = []
-        for entity in feed.entity:
-            # Parse VehiclePosition entities (might not be present in subway feeds)
-            if entity.HasField('vehicle'):
-                vehicle = entity.vehicle
-                vehicle_count += 1
-                
-                # Extract vehicle position data
-                if vehicle.HasField('position') and vehicle.HasField('trip'):
-                    # Filter by expected lines if provided
-                    if expected_lines and vehicle.trip.route_id not in expected_lines:
-                        continue
-                    
-                    # Basic validation
-                    if not vehicle.trip.route_id:
-                        continue
-                        
-                    # Parse timestamp
-                    ts = datetime.fromtimestamp(vehicle.timestamp)
-                    
-                    # Create vehicle data object
-                    vehicle_data = {
-                        "type": "vehicle_position",
-                        "trip_id": vehicle.trip.trip_id,
-                        "route_id": vehicle.trip.route_id,
-                        "timestamp": ts.isoformat(),
-                        "latitude": vehicle.position.latitude,
-                        "longitude": vehicle.position.longitude,
-                        "current_status": str(vehicle.current_status),
-                        "current_stop_sequence": vehicle.current_stop_sequence if vehicle.HasField('current_stop_sequence') else None,
-                        "delay": vehicle.delay if vehicle.HasField('delay') else None,
-                        "vehicle_id": vehicle.vehicle.id if vehicle.HasField('vehicle') else "unknown",
-                        "direction_id": vehicle.trip.direction_id if vehicle.trip.HasField('direction_id') else 0
-                    }
-                    
-                    vehicles.append(vehicle_data)
-            
-            # Parse TripUpdate entities (main entity type for MTA subway feeds)
-            if entity.HasField('trip_update'):
-                trip_update = entity.trip_update
-                trip_update_count += 1
-                
-                # Basic validation
-                if not trip_update.trip.route_id:
-                    continue
-                
-                # Filter by expected lines if provided
-                if expected_lines and trip_update.trip.route_id not in expected_lines:
-                    continue
-                
-                # Get timestamp
-                update_ts = datetime.now()
-                if trip_update.HasField('timestamp'):
-                    update_ts = datetime.fromtimestamp(trip_update.timestamp)
-                
-                # Process stop time updates
-                for stop_update in trip_update.stop_time_update:
-                    # Get delay information
-                    delay = None
-                    arrival_time = None
-                    departure_time = None
-                    
-                    if stop_update.HasField('arrival'):
-                        arrival_time = stop_update.arrival.time
-                        if stop_update.arrival.HasField('delay'):
-                            delay = stop_update.arrival.delay
-                    
-                    if stop_update.HasField('departure'):
-                        departure_time = stop_update.departure.time
-                        if stop_update.departure.HasField('delay') and delay is None:
-                            delay = stop_update.departure.delay
-                    
-                    # Αν δεν υπάρχει delay, θεωρούμε 0
-                    if delay is None:
-                        delay = 0
-                    
-                    # Create a vehicle-like object for compatibility with existing code
-                    train_data = {
-                        "type": "trip_update",
-                        "trip_id": trip_update.trip.trip_id,
-                        "route_id": trip_update.trip.route_id,
-                        "timestamp": update_ts.isoformat(),
-                        "stop_id": stop_update.stop_id,
-                        "stop_sequence": stop_update.stop_sequence,
-                        "delay": delay,
-                        "arrival_time": arrival_time,
-                        "departure_time": departure_time,
-                        "current_status": "SCHEDULED",  # Default status
-                        "vehicle_id": trip_update.vehicle.id if trip_update.HasField('vehicle') else "unknown",
-                        "direction_id": trip_update.trip.direction_id if trip_update.trip.HasField('direction_id') else 0
-                    }
-                    
-                    # For compatibility with existing code that expects lat/lon
-                    if stop_update.stop_id in STOPS:
-                        train_data["latitude"], train_data["longitude"] = STOPS[stop_update.stop_id]
-                    else:
-                        # fallback για άγνωστο stop_id
-                        train_data["latitude"] = 40.7128
-                        train_data["longitude"] = -74.006
-                    
-                    vehicles.append(train_data)
-            
-            # Count alerts for debugging
-            if entity.HasField('alert'):
-                alert_count += 1
-        
-        logger.debug(f"Entity types in feed: vehicles={vehicle_count}, trip_updates={trip_update_count}, alerts={alert_count}")
-        logger.info(f"Extracted {len(vehicles)} updates from feed")
-        return vehicles
-    except Exception as e:
-        logger.error(f"Error parsing GTFS feed: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        # Log some debug info about the feed data
-        if isinstance(feed_data, bytes):
-            logger.error(f"Feed data preview: {feed_data[:100]}")
+        f = NYCTFeed(feed_bytes=feed_data)
+    except Exception as err:
+        logger.error(f'NYCTFeed parse error: {err}')
         return []
+
+    vehicles = []
+    for trip in f.trips:           # κάθε revenue trip
+        if expected_lines and trip['route_id'] not in expected_lines:
+            continue
+
+        # πρώτο stop (για να βρούμε συντεταγμένες)
+        stop_id = trip['stops'][0]['stop_id'] if trip['stops'] else None
+        lat, lon = STOPS.get(stop_id, (40.7128, -74.0060))
+
+        vehicles.append({
+            "type": "trip_update",
+            "trip_id": trip['trip_id'],
+            "route_id": trip['route_id'],
+            "timestamp": datetime.utcfromtimestamp(trip['timestamp']).isoformat(),
+            "stop_id": stop_id,
+            "stop_sequence": trip['stops'][0]['stop_sequence'] if trip['stops'] else None,
+            "delay": trip.get('delay', 0) or 0,
+            "vehicle_id": trip.get('vehicle_id', 'unknown'),
+            "direction_id": trip.get('direction_id', 0),
+            "latitude": lat,
+            "longitude": lon,
+        })
+    logger.info(f"Extracted {len(vehicles)} trips with nyct-gtfs")
+    return vehicles
 
 def store_historical_data(vehicles, db_engine):
     """Store raw vehicle data for historical analysis and model training."""
@@ -330,7 +222,7 @@ def store_historical_data(vehicles, db_engine):
                     'timestamp': vehicle['timestamp'],
                     'latitude': vehicle['latitude'],
                     'longitude': vehicle['longitude'],
-                    'current_status': vehicle['current_status'],
+                    'current_status': vehicle.get('current_status', 'SCHEDULED'),
                     'delay': vehicle.get('delay', 0),
                     'vehicle_id': vehicle['vehicle_id'],
                     'stop_id': vehicle.get('stop_id', None)
