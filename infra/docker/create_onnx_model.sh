@@ -1,11 +1,16 @@
+#!/bin/bash
+
 # Εγκατάσταση Python και απαιτούμενων πακέτων
 echo "📦 Εγκατάσταση απαιτούμενων πακέτων..."
-docker run --rm -v $(pwd)/models:/app/models python:3.11-slim bash -c "pip install scikit-learn numpy pandas skl2onnx && mkdir -p /app/models && python -c \"
+docker run --rm -v $(pwd)/models:/app/models python:3.11-slim bash -c '
+    pip install -q "onnx<1.18" scikit-learn numpy pandas skl2onnx && mkdir -p /app/models
+    python - << "EOF"
 import numpy as np
 import pickle
 import os
 import json
 from datetime import datetime
+from pathlib import Path
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -13,11 +18,12 @@ from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 
 # Ορισμός διαδρομών εξόδου
-MODEL_PATH = '/app/models/anomaly_model.onnx'
-MODEL_DIR = os.path.dirname(MODEL_PATH)
+MODEL_PATH = Path("/app/models/anomaly_model.onnx")
+MODEL_DIR = MODEL_PATH.parent
 os.makedirs(MODEL_DIR, exist_ok=True)
+PKL_PATH = MODEL_PATH.with_suffix(".pkl")
 
-print('Δημιουργία μοντέλου ανίχνευσης ανωμαλιών...')
+print("Δημιουργία μοντέλου ανίχνευσης ανωμαλιών...")
 
 # Εκπαίδευση μοντέλου Isolation Forest
 # Δημιουργία συνθετικών δεδομένων που μοιάζουν με πρότυπα καθυστέρησης μετρό
@@ -58,7 +64,7 @@ X_anomalies = np.array([
 # Συνδυασμός κανονικών και ανώμαλων δεδομένων
 X = np.vstack([X_normal, X_anomalies])
 
-print(f'Εκπαίδευση με {X.shape[0]} δείγματα, {X.shape[1]} χαρακτηριστικά')
+print(f"Εκπαίδευση με {X.shape[0]} δείγματα, {X.shape[1]} χαρακτηριστικά")
 
 # Δημιουργία και εκπαίδευση του pipeline μοντέλου
 scaler = StandardScaler()
@@ -66,55 +72,61 @@ iso_forest = IsolationForest(
     contamination=0.05,  # 5% των δεδομένων αναμένεται να είναι ανωμαλίες
     random_state=42,
     n_estimators=200,
-    max_samples='auto',
+    max_samples="auto",
     n_jobs=-1
 )
 
 pipeline = Pipeline([
-    ('scaler', scaler),
-    ('isolation_forest', iso_forest)
+    ("scaler", scaler),
+    ("isolation_forest", iso_forest)
 ])
 
 pipeline.fit(X)
 
 # Αποθήκευση του μοντέλου ως ONNX
 feature_columns = [
-    'avg_delay', 'max_delay', 'min_delay', 'delay_std', 
-    'train_count', 'delay_per_train', 'delay_variability',
-    'hour', 'day_of_week', 'is_weekend', 'active_vehicles'
+    "avg_delay", "max_delay", "min_delay", "delay_std", 
+    "train_count", "delay_per_train", "delay_variability",
+    "hour", "day_of_week", "is_weekend", "active_vehicles"
 ]
 
-initial_types = [('input', FloatTensorType([None, len(feature_columns)]))]
+initial_types = [("input", FloatTensorType([None, len(feature_columns)]))]
+
+# Ενεργοποίηση του score_samples για να έχουμε και τα raw anomaly scores
+iso_forest_instance = pipeline.named_steps["isolation_forest"]
 onx = convert_sklearn(
     pipeline, 
     initial_types=initial_types,
-    target_opset=15,
-    name='SubwayAnomalyDetection'
+    target_opset={"": 15, "ai.onnx.ml": 3},
+    options={id(iso_forest_instance): {"score_samples": True}},
+    name="SubwayAnomalyDetection"
 )
 
-with open(MODEL_PATH, 'wb') as f:
+with open(MODEL_PATH, "wb") as f:
     f.write(onx.SerializeToString())
 
 # Αποθήκευση και σε μορφή pickle για συμβατότητα
-with open(MODEL_PATH.replace('.onnx', '.pkl'), 'wb') as f:
+with open(PKL_PATH, "wb") as f:
     pickle.dump(pipeline, f)
 
 # Αποθήκευση scaler ξεχωριστά 
-with open(os.path.join(MODEL_DIR, 'scaler.pkl'), 'wb') as f:
+with open(MODEL_DIR / "scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
 
 # Αποθήκευση πληροφοριών χαρακτηριστικών
 feature_info = {
-    'feature_columns': feature_columns,
-    'trained_at': datetime.now().isoformat(),
-    'model_version': 'initial'
+    "feature_columns": feature_columns,
+    "trained_at": datetime.now().isoformat(),
+    "model_version": "initial"
 }
 
-with open(os.path.join(MODEL_DIR, 'feature_info.json'), 'w') as f:
+with open(MODEL_DIR / "feature_info.json", "w") as f:
     json.dump(feature_info, f, indent=2)
 
-print(f'✅ Δημιουργήθηκε μοντέλο ONNX στο {MODEL_PATH}')
-print(f'✅ Δημιουργήθηκε μοντέλο Pickle στο {MODEL_PATH.replace(\".onnx\", \".pkl\")}')
-print(f'✅ Αποθηκεύτηκε scaler στο {os.path.join(MODEL_DIR, \"scaler.pkl\")}')
-print(f'✅ Αποθηκεύτηκαν πληροφορίες χαρακτηριστικών στο {os.path.join(MODEL_DIR, \"feature_info.json\")}')
-\" && echo '✅ Πακέτα εγκαταστάθηκαν επιτυχώς'"
+print(f"✅ Δημιουργήθηκε μοντέλο ONNX στο {MODEL_PATH}")
+print(f"✅ Δημιουργήθηκε μοντέλο Pickle στο {PKL_PATH}")
+print(f"✅ Αποθηκεύτηκε scaler στο {MODEL_DIR}/scaler.pkl")
+print(f"✅ Αποθηκεύτηκαν πληροφορίες χαρακτηριστικών στο {MODEL_DIR}/feature_info.json")
+EOF
+    echo "✅ Πακέτα εγκαταστάθηκαν επιτυχώς"
+'
