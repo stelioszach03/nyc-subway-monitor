@@ -3,7 +3,7 @@
 # Εγκατάσταση Python και απαιτούμενων πακέτων
 echo "📦 Εγκατάσταση απαιτούμενων πακέτων..."
 docker run --rm -v $(pwd)/models:/app/models python:3.11-slim bash -c '
-    pip install -q "onnx<1.18" scikit-learn numpy pandas skl2onnx && mkdir -p /app/models
+    pip install -q "onnx>=1.13.1,<1.18" scikit-learn numpy pandas "skl2onnx>=1.13,<1.18" && mkdir -p /app/models
     python - << "EOF"
 import numpy as np
 import pickle

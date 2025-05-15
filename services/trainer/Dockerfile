@@ -11,10 +11,9 @@ RUN apt-get update && apt-get install -y \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
-# Εγκατάσταση Python πακέτων
+# Εγκατάσταση Python πακέτων - πρώτα το requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install skl2onnx requests
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Δημιουργία φακέλου για μοντέλα
 RUN mkdir -p /app/models
