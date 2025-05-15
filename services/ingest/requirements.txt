@@ -1,9 +1,9 @@
 kafka-python==2.0.2
 requests==2.31.0
-protobuf==4.25.1
+protobuf==4.25.3
 schedule==1.2.1
 gtfs-realtime-bindings==1.0.0
 pyyaml==6.0.1
 sqlalchemy==2.0.27
 psycopg2-binary==2.9.9
-nyct-gtfs==0.0.6
+nyct-gtfs==2.0.0

@@ -155,6 +155,8 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
         return []
 
     vehicles = []
+
+    # 1) trip_updates  (όπως ήδη κάνεις)
     for trip in f.trips:           # κάθε revenue trip
         if expected_lines and trip['route_id'] not in expected_lines:
             continue
@@ -176,7 +178,30 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
             "latitude": lat,
             "longitude": lon,
         })
-    logger.info(f"Extracted {len(vehicles)} trips with nyct-gtfs")
+
+    # 2) vehicle_positions  – αρκετά feeds έχουν ΜΟΝΟ αυτά
+    for v in f.vehicles:
+        if expected_lines and v['route_id'] not in expected_lines:
+            continue
+
+        lat = v.get('latitude', 40.7128)
+        lon = v.get('longitude', -74.0060)
+
+        vehicles.append({
+            "type": "vehicle_position",
+            "trip_id": v.get('trip_id'),
+            "route_id": v['route_id'],
+            "timestamp": datetime.utcfromtimestamp(v['timestamp']).isoformat(),
+            "latitude": lat,
+            "longitude": lon,
+            "delay": v.get('delay', 0),
+            "vehicle_id": v.get('vehicle_id', 'unknown'),
+            "direction_id": v.get('direction_id', 0),
+        })
+
+    logger.info(
+        f"Extracted {len(f.trips)} trip_updates + {len(f.vehicles)} vehicle_positions "
+        f"→ {len(vehicles)} records total")
     return vehicles
 
 def store_historical_data(vehicles, db_engine):

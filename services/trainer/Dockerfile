@@ -11,15 +11,13 @@ RUN apt-get update && apt-get install -y \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
-# Εγκατάσταση Python πακέτων - πρώτα το requirements
+# Εγκατάσταση Python πακέτων - ΠΡΩΤΑ τα συγκεκριμένα ONNX πακέτα, μετά τα υπόλοιπα
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Αν δεν χρησιμοποιείς το requirements.txt, μπορείς να προσθέσεις τα παρακάτω
 RUN pip install --no-cache-dir \
-    "onnx>=1.13.1,<1.18" \
-    "skl2onnx>=1.13,<1.18" \
-    "pyarrow>=14.0.1"
+        onnx==1.14.0 \
+        skl2onnx==1.14.1 \
+        onnxruntime==1.16.0 \
+        -r requirements.txt
 
 # Δημιουργία φακέλου για μοντέλα
 RUN mkdir -p /app/models
@@ -29,9 +27,8 @@ COPY train.py .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Ορισμός μεταβλητών περιβάλλοντος
-ENV MODEL_OUTPUT_PATH=/app/models/anomaly_model.onnx
-ENV TRAINING_SCHEDULE="0 */1 * * *"  # Κάθε 1 ώρα
+# Ορισμός μεταβλητών περιβάλλοντος - διόρθωση σχολίου
+ENV TRAINING_SCHEDULE="0 */1 * * *"
 
 # Δημιουργία αρχείου cron task
 RUN echo "#!/bin/bash\ncd /app && python train.py && curl -X POST http://ml:8000/reload-model" > /app/train_cron.sh \
