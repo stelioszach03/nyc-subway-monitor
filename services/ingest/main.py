@@ -30,6 +30,20 @@ POSTGRES_USER = os.environ.get("POSTGRES_USER", "subway")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "subway_password")
 POSTGRES_DB = os.environ.get("POSTGRES_DB", "subway_monitor")
 
+# ---- NEW: static stops lookup ----------------------------------
+STOPS_FILE = os.environ.get("STOPS_FILE", "/app/stops.txt")
+STOPS = {}
+if os.path.exists(STOPS_FILE):
+    import csv
+    with open(STOPS_FILE, newline="", encoding="utf-8") as fh:
+        rdr = csv.DictReader(fh)
+        for row in rdr:
+            STOPS[row["stop_id"]] = (float(row["stop_lat"]), float(row["stop_lon"]))
+    logger.info(f"Loaded {len(STOPS):,} GTFS stops from {STOPS_FILE}")
+else:
+    logger.warning(f"GTFS stops file not found at {STOPS_FILE}; TripUpdates will get dummy coords")
+# ----------------------------------------------------------------
+
 def create_kafka_producer():
     """Create and return a Kafka producer with retry."""
     max_retries = 10
@@ -228,9 +242,9 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
                         if stop_update.departure.HasField('delay') and delay is None:
                             delay = stop_update.departure.delay
                     
-                    # Skip if no delay information
+                    # Αν δεν υπάρχει delay, θεωρούμε 0
                     if delay is None:
-                        continue
+                        delay = 0
                     
                     # Create a vehicle-like object for compatibility with existing code
                     train_data = {
@@ -249,9 +263,12 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
                     }
                     
                     # For compatibility with existing code that expects lat/lon
-                    # Using dummy coordinates for NYC (will be updated later based on stop_id)
-                    train_data["latitude"] = 40.7128  # NYC latitude
-                    train_data["longitude"] = -74.006 # NYC longitude
+                    if stop_update.stop_id in STOPS:
+                        train_data["latitude"], train_data["longitude"] = STOPS[stop_update.stop_id]
+                    else:
+                        # fallback για άγνωστο stop_id
+                        train_data["latitude"] = 40.7128
+                        train_data["longitude"] = -74.006
                     
                     vehicles.append(train_data)
             
