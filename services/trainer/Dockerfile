@@ -15,6 +15,12 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Αν δεν χρησιμοποιείς το requirements.txt, μπορείς να προσθέσεις τα παρακάτω
+RUN pip install --no-cache-dir \
+    "onnx>=1.13.1,<1.18" \
+    "skl2onnx>=1.13,<1.18" \
+    "pyarrow>=14.0.1"
+
 # Δημιουργία φακέλου για μοντέλα
 RUN mkdir -p /app/models
 

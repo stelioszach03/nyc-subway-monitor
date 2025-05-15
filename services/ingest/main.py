@@ -7,10 +7,10 @@ import schedule
 import requests
 import yaml
 from datetime import datetime
+from nyct_gtfs import NYCTFeed
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError, NoBrokersAvailable 
 from sqlalchemy import create_engine, text
-from nyct_gtfs import NYCTFeed
 
 # Configure logging
 logging.basicConfig(
@@ -148,7 +148,6 @@ def fetch_gtfs_realtime_feed(feed_url, feed_name):
 
 def parse_gtfs_feed(feed_data, expected_lines=None):
     """Parse GTFS-RT binary data into Python objects."""
-    # --- NEW: use nyct-gtfs ---------------------------------
     try:
         f = NYCTFeed(feed_bytes=feed_data)
     except Exception as err:
