@@ -8,6 +8,13 @@ from datetime import datetime, timedelta
 import httpx
 import asyncio
 import json
+# Προσθήκη του DateTimeEncoder για τη σειριοποίηση των datetime
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
 # Use the correct import for different Python versions
 if sys.version_info >= (3, 11, 3):
     from asyncio import timeout as async_timeout
@@ -316,7 +323,7 @@ async def get_trains(
                     train = {
                         "route_id": route,
                         "trip_id": trip,
-                        "timestamp": timestamp,
+                        "timestamp": timestamp,  # Τώρα είναι datetime αντικείμενο
                         "latitude": float(train_data.get("lat", 0)),
                         "longitude": float(train_data.get("lon", 0)),
                         "current_status": train_data.get("status", "UNKNOWN"),
@@ -532,7 +539,8 @@ async def websocket_endpoint(websocket: WebSocket):
         # Send initial state
         try:
             trains = await get_trains(limit=100)
-            await websocket.send_json({"type": "initial", "data": trains})
+            # Χρησιμοποιούμε τον DateTimeEncoder για σειριοποίηση των datetime αντικειμένων
+            await websocket.send_text(json.dumps({"type": "initial", "data": trains}, cls=DateTimeEncoder))
         except Exception as e:
             logger.warning(f"Error sending initial train data: {e}")
             # Continue even if initial data fails
@@ -564,7 +572,8 @@ async def websocket_endpoint(websocket: WebSocket):
             except asyncio.TimeoutError:
                 # Send a keepalive ping
                 try:
-                    await websocket.send_json({"type": "ping"})
+                    # Χρησιμοποιούμε τον DateTimeEncoder για το ping
+                    await websocket.send_text(json.dumps({"type": "ping"}, cls=DateTimeEncoder))
                 except WebSocketDisconnect:
                     logger.info(f"Client {client_id} disconnected during ping")
                     break

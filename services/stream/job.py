@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     from_json, col, window, expr, to_timestamp, 
-    avg, max as spark_max, min as spark_min, count
+    avg, max as spark_max, min as spark_min, count,
+    coalesce, lit  # Προσθήκη των coalesce και lit για τον χειρισμό NULL
 )
 from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, 
@@ -155,9 +156,10 @@ def process_stream(spark: SparkSession) -> None:
             col("route_id")
         )
         .agg(
-            avg(col("delay")).alias("avg_delay"),
-            spark_max(col("delay")).alias("max_delay"),
-            spark_min(col("delay")).alias("min_delay"),
+            # Χρησιμοποιούμε coalesce για να αποφύγουμε τα NULL values
+            coalesce(avg(col("delay")), lit(0.0)).alias("avg_delay"),
+            coalesce(spark_max(col("delay")), lit(0)).alias("max_delay"), 
+            coalesce(spark_min(col("delay")), lit(0)).alias("min_delay"),
             count("*").alias("train_count")
         )
         .select(
