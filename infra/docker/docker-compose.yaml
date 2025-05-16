@@ -178,7 +178,7 @@ services:
       - PYTHONUNBUFFERED=1
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
-      - ./models:/app/models  # ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Bind mount αντί για Docker volume
+      - ./models:/app/models
     restart: unless-stopped
     depends_on:
       timescaledb:
@@ -213,7 +213,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./models:/app/models  # ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Bind mount αντί για Docker volume
+      - ./models:/app/models
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s

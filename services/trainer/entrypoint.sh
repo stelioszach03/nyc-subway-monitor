@@ -9,9 +9,9 @@ sleep 30
 
 # Δημιουργία του crontab αρχείου δυναμικά από το env var
 echo "Ρύθμιση cron με schedule: $TRAINING_SCHEDULE"
-printf "%s python /app/train.py && curl -s -X POST http://ml:8000/reload-model\n" "$TRAINING_SCHEDULE" > /etc/crontabs/root
+echo "$TRAINING_SCHEDULE python /app/train.py && curl -s -X POST http://ml:8000/reload-model" > /etc/crontabs/root
 chmod 644 /etc/crontabs/root
-crontab -l
+cat /etc/crontabs/root
 
 # Αρχική εκπαίδευση με την έναρξη
 echo "Εκτέλεση αρχικής εκπαίδευσης..."

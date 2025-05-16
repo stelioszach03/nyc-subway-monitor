@@ -17,10 +17,7 @@ COPY train.py .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Αφαιρούμε τη γραμμή με το ENV TRAINING_SCHEDULE που προκαλεί το πρόβλημα
-# Θα χρησιμοποιήσουμε την τιμή από το docker-compose
-
-# Δεν απαιτείται πλέον η δημιουργία του crontab αρχείου εδώ
-# Θα δημιουργηθεί δυναμικά στο entrypoint.sh
+# Δημιουργία του crontabs directory και του root file
+RUN mkdir -p /etc/crontabs && touch /etc/crontabs/root && chmod 600 /etc/crontabs/root
 
 ENTRYPOINT ["/app/entrypoint.sh"]

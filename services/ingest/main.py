@@ -87,9 +87,11 @@ def create_kafka_producer():
                 value_serializer=lambda x: json.dumps(x).encode('utf-8'),
                 retries=5,
                 acks='all',
-                request_timeout_ms=30000,
-                max_block_ms=60000,
-                retry_backoff_ms=1000
+                request_timeout_ms=60000,     # Αύξηση από 30000 σε 60000
+                max_block_ms=120000,          # Αύξηση από 60000 σε 120000
+                retry_backoff_ms=1000,
+                socket_timeout_ms=30000,      # Προσθήκη
+                connections_max_idle_ms=600000 # Προσθήκη
             )
             # Test connection using metrics() instead of list_topics()
             producer.metrics()
