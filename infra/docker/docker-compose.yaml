@@ -178,7 +178,7 @@ services:
       - PYTHONUNBUFFERED=1
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
-      - ml_models:/app/models
+      - ./models:/app/models  # ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Bind mount αντί για Docker volume
     restart: unless-stopped
     depends_on:
       timescaledb:
@@ -213,7 +213,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ml_models:/app/models
+      - ./models:/app/models  # ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Bind mount αντί για Docker volume
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
@@ -387,5 +387,4 @@ volumes:
   kafka_data:
   timescaledb_data:
   redis_data:
-  ml_models:
   nginx_cache_data:
