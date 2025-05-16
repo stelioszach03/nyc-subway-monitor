@@ -16,26 +16,26 @@ test_endpoint() {
     local name=$2
     
     echo -n "Testing $name ($endpoint): "
-    response=$(curl -s -I "http://localhost:8080/$endpoint" | head -1)
+    response=$(curl -s -I "http://localhost:808080/$endpoint" | head -1)
     status=$(echo "$response" | awk '{print $2}')
     
     if [[ "$status" == "200" ]]; then
         echo "✅ OK - $response"
         
         # Get cache status
-        cache_status=$(curl -s -I "http://localhost:8080/$endpoint" | grep -i "X-Cache-Status" | awk '{print $2}')
+        cache_status=$(curl -s -I "http://localhost:808080/$endpoint" | grep -i "X-Cache-Status" | awk '{print $2}')
         echo "  Cache status: $cache_status"
         
         # Verify content type
-        content_type=$(curl -s -I "http://localhost:8080/$endpoint" | grep -i "Content-Type" | awk '{print $2}')
+        content_type=$(curl -s -I "http://localhost:808080/$endpoint" | grep -i "Content-Type" | awk '{print $2}')
         echo "  Content-Type: $content_type"
         
         # Get content length
-        content_length=$(curl -s -I "http://localhost:8080/$endpoint" | grep -i "Content-Length" | awk '{print $2}')
+        content_length=$(curl -s -I "http://localhost:808080/$endpoint" | grep -i "Content-Length" | awk '{print $2}')
         echo "  Content-Length: $content_length bytes"
         
         # Get first few bytes to verify it's binary
-        first_bytes=$(curl -s "http://localhost:8080/$endpoint" | head -c 20 | xxd -p | tr -d '\n')
+        first_bytes=$(curl -s "http://localhost:808080/$endpoint" | head -c 20 | xxd -p | tr -d '\n')
         echo "  First bytes: $first_bytes"
     else
         echo "❌ Failed - $response"
@@ -59,7 +59,7 @@ echo "🔄 Running 10 requests to test caching performance:"
 
 for i in {1..10}; do
     echo -n "Request $i: "
-    time curl -s -o /dev/null "http://localhost:8080/gtfs-ace"
+    time curl -s -o /dev/null "http://localhost:808080/gtfs-ace"
     echo ""
 done
 

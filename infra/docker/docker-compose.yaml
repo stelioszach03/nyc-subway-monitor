@@ -139,8 +139,11 @@ services:
   # Cache proxy for MTA feeds
   cache:
     image: nginx:stable-alpine
+    ports:
+      - "8080:80"                # ← Εκθέτουμε το port 80 στο 8080
     volumes:
-      - ./nginx-cache/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-cache/nginx.conf:/etc/nginx/nginx.conf:ro  # ← Χρησιμοποιούμε το κύριο config
+      - ./nginx-cache/default.conf:/etc/nginx/conf.d/default.conf:ro  # ← Και το server block
       - nginx_cache_data:/var/cache/nginx
     restart: unless-stopped
     healthcheck:
