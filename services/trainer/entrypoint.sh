@@ -3,16 +3,6 @@
 # Καλύτερος χειρισμός σφαλμάτων
 set -e
 
-# Καθαρισμός προηγούμενου crontab
-crontab -r || true
-
-# Δυναμική δημιουργία crontab με το προκαθορισμένο χρονοδιάγραμμα και προσθήκη username (root)
-echo "$TRAINING_SCHEDULE root /app/train_cron.sh >> /var/log/training.log 2>&1" > /etc/cron.d/model-training
-echo "*/30 * * * * root /app/train_cron.sh >> /var/log/training.log 2>&1" >> /etc/cron.d/model-training
-echo "" >> /etc/cron.d/model-training  # Add empty line at the end of crontab
-chmod 0644 /etc/cron.d/model-training
-crontab /etc/cron.d/model-training
-
 # Περιμένουμε λίγο για να εξασφαλίσουμε ότι τα άλλα services έχουν ξεκινήσει
 echo "Waiting for other services to initialize..."
 sleep 30
@@ -21,8 +11,10 @@ sleep 30
 echo "Εκτέλεση αρχικής εκπαίδευσης..."
 for attempt in {1..3}; do
     echo "Training attempt $attempt..."
-    if /app/train_cron.sh; then
+    if python /app/train.py; then
         echo "Initial training completed successfully!"
+        # Ειδοποίηση ML service για επαναφόρτωση του μοντέλου
+        curl -s -X POST http://ml:8000/reload-model
         break
     else
         echo "Training attempt $attempt failed"
@@ -36,5 +28,5 @@ for attempt in {1..3}; do
 done
 
 # Έναρξη του cron service σε foreground mode
-echo "Έναρξη υπηρεσίας cron με προγραμματισμό: $TRAINING_SCHEDULE και επιπλέον εκπαιδεύσεις κάθε 30 λεπτά"
+echo "Έναρξη υπηρεσίας cron με προγραμματισμό: $TRAINING_SCHEDULE"
 cron -f

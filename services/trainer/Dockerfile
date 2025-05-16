@@ -17,10 +17,13 @@ COPY train.py .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Use double quotes for ENV value with spaces to make Docker build work
-ENV TRAINING_SCHEDULE="0 */1 * * *"
+# Χωρίς quotes στην τιμή
+ENV TRAINING_SCHEDULE=0 */1 * * *
 
-RUN echo '#!/bin/sh\ncd /app && python train.py && curl -s -X POST http://ml:8000/reload-model' \
-        > /app/train_cron.sh && chmod +x /app/train_cron.sh
+# Απλοποιημένο script απευθείας στο /etc/crontabs/root
+RUN echo "${TRAINING_SCHEDULE} python /app/train.py && curl -s -X POST http://ml:8000/reload-model" > /etc/crontabs/root \
+    && echo "" >> /etc/crontabs/root \
+    && chmod 644 /etc/crontabs/root \
+    && crontab -l
 
 ENTRYPOINT ["/app/entrypoint.sh"]
