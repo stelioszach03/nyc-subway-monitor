@@ -7,9 +7,10 @@ import schedule
 import requests
 import yaml
 from datetime import datetime
-from nyct_gtfs import NYCTFeed
+from google.transit import gtfs_realtime_pb2  # Αντικατάσταση του NYCTFeed
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError, NoBrokersAvailable 
+from kafka.admin import KafkaAdminClient, NewTopic
 from sqlalchemy import create_engine, text
 
 # Configure logging
@@ -90,8 +91,8 @@ def create_kafka_producer():
                 max_block_ms=60000,
                 retry_backoff_ms=1000
             )
-            # Test connection
-            producer.list_topics(timeout_ms=10000)
+            # Test connection using metrics() instead of list_topics()
+            producer.metrics()
             logger.info("Successfully connected to Kafka")
             return producer
         except (KafkaTimeoutError, NoBrokersAvailable) as e:
@@ -181,63 +182,70 @@ def fetch_gtfs_realtime_feed(feed_url, feed_name):
         return None
 
 def parse_gtfs_feed(feed_data, expected_lines=None):
-    """Parse GTFS-RT binary data into Python objects."""
+    """Parse GTFS-RT binary data into Python objects via protobuf."""
     try:
-        f = NYCTFeed(feed_bytes=feed_data)
+        feed = gtfs_realtime_pb2.FeedMessage()
+        feed.ParseFromString(feed_data)
     except Exception as err:
-        logger.error(f'NYCTFeed parse error: {err}')
+        logger.error(f"GTFS-RT parse error: {err}")
         return []
 
     vehicles = []
 
-    # Trip updates
-    for trip in f.trips:
-        if expected_lines and trip['route_id'] not in expected_lines:
-            continue
+    for entity in feed.entity:
+        # Trip updates
+        if entity.HasField('trip_update'):
+            tu = entity.trip_update
+            route_id = tu.trip.route_id
+            if expected_lines and route_id not in expected_lines:
+                continue
+            ts = tu.timestamp
+            for stu in tu.stop_time_update:
+                stop_id = stu.stop_id
+                lat, lon = STOPS.get(stop_id, (40.7128, -74.0060))
+                # pick departure.delay over arrival.delay if present
+                delay = (
+                    stu.departure.delay if stu.departure and stu.departure.delay is not None 
+                    else stu.arrival.delay if stu.arrival and stu.arrival.delay is not None 
+                    else 0
+                )
+                vehicles.append({
+                    "type": "trip_update",
+                    "trip_id": tu.trip.trip_id,
+                    "route_id": route_id,
+                    "timestamp": datetime.utcfromtimestamp(ts).isoformat(),
+                    "stop_id": stop_id,
+                    "stop_sequence": stu.stop_sequence,
+                    "delay": delay,
+                    "vehicle_id": (tu.vehicle.id if tu.vehicle and tu.vehicle.id else "unknown"),
+                    "direction_id": (tu.trip.direction_id if hasattr(tu.trip, 'direction_id') else 0),
+                    "latitude": lat,
+                    "longitude": lon,
+                    "current_status": (stu.current_status or "SCHEDULED")
+                })
 
-        # First stop (for coordinates)
-        stop_id = trip['stops'][0]['stop_id'] if trip['stops'] else None
-        lat, lon = STOPS.get(stop_id, (40.7128, -74.0060))
+        # Vehicle positions
+        if entity.HasField('vehicle'):
+            vp = entity.vehicle
+            route_id = vp.trip.route_id if vp.trip and vp.trip.route_id else None
+            if expected_lines and route_id not in expected_lines:
+                continue
+            lat = vp.position.latitude if vp.position and hasattr(vp.position, 'latitude') else 40.7128
+            lon = vp.position.longitude if vp.position and hasattr(vp.position, 'longitude') else -74.0060
+            vehicles.append({
+                "type": "vehicle_position",
+                "trip_id": (vp.trip.trip_id if vp.trip and vp.trip.trip_id else None),
+                "route_id": route_id,
+                "timestamp": datetime.utcfromtimestamp(vp.timestamp).isoformat(),
+                "latitude": lat,
+                "longitude": lon,
+                "current_status": (vp.current_status or "IN_TRANSIT_TO"),
+                "delay": (vp.delay or 0),
+                "vehicle_id": (vp.vehicle.id if vp.vehicle and vp.vehicle.id else "unknown"),
+                "direction_id": (vp.trip.direction_id if vp.trip and hasattr(vp.trip, 'direction_id') else 0),
+            })
 
-        vehicles.append({
-            "type": "trip_update",
-            "trip_id": trip['trip_id'],
-            "route_id": trip['route_id'],
-            "timestamp": datetime.utcfromtimestamp(trip['timestamp']).isoformat(),
-            "stop_id": stop_id,
-            "stop_sequence": trip['stops'][0]['stop_sequence'] if trip['stops'] else None,
-            "delay": trip.get('delay', 0) or 0,
-            "vehicle_id": trip.get('vehicle_id', 'unknown'),
-            "direction_id": trip.get('direction_id', 0),
-            "latitude": lat,
-            "longitude": lon,
-            "current_status": trip.get('current_status', 'SCHEDULED')
-        })
-
-    # Vehicle positions
-    for v in f.vehicles:
-        if expected_lines and v['route_id'] not in expected_lines:
-            continue
-
-        lat = v.get('latitude', 40.7128)
-        lon = v.get('longitude', -74.0060)
-
-        vehicles.append({
-            "type": "vehicle_position",
-            "trip_id": v.get('trip_id'),
-            "route_id": v['route_id'],
-            "timestamp": datetime.utcfromtimestamp(v['timestamp']).isoformat(),
-            "latitude": lat,
-            "longitude": lon,
-            "current_status": v.get('current_status', 'IN_TRANSIT_TO'),
-            "delay": v.get('delay', 0),
-            "vehicle_id": v.get('vehicle_id', 'unknown'),
-            "direction_id": v.get('direction_id', 0),
-        })
-
-    logger.info(
-        f"Extracted {len(f.trips)} trip_updates + {len(f.vehicles)} vehicle_positions "
-        f"→ {len(vehicles)} records total")
+    logger.info(f"Extracted {len(vehicles)} records from GTFS feed")
     return vehicles
 
 def store_historical_data(vehicles, db_engine):
@@ -296,29 +304,37 @@ def store_historical_data(vehicles, db_engine):
         logger.error(traceback.format_exc())
 
 def ensure_kafka_topic_exists():
-    """Ensure the Kafka topic exists."""
-    import subprocess
-    
+    """Ensure the Kafka topic exists using admin client."""
     try:
-        cmd = [
-            "kafka-topics", 
-            "--create", 
-            "--if-not-exists",
-            "--bootstrap-server", KAFKA_BOOTSTRAP_SERVERS,
-            "--replication-factor", "1",
-            "--partitions", "1",
-            "--topic", KAFKA_TOPIC
-        ]
+        logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists using admin client...")
         
-        logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists...")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # Create an admin client
+        admin_client = KafkaAdminClient(
+            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+            request_timeout_ms=30000,
+            client_id="subway-ingest-admin"
+        )
         
-        if result.returncode == 0:
-            logger.info(f"Kafka topic {KAFKA_TOPIC} is ready")
-            return True
+        # Get existing topics
+        existing_topics = admin_client.list_topics()
+        
+        # Create topic if it doesn't exist
+        if KAFKA_TOPIC not in existing_topics:
+            logger.info(f"Topic {KAFKA_TOPIC} does not exist, creating it...")
+            
+            new_topic = NewTopic(
+                name=KAFKA_TOPIC,
+                num_partitions=1,
+                replication_factor=1
+            )
+            
+            admin_client.create_topics([new_topic])
+            logger.info(f"Successfully created Kafka topic {KAFKA_TOPIC}")
         else:
-            logger.warning(f"Failed to create Kafka topic: {result.stderr}")
-            return False
+            logger.info(f"Topic {KAFKA_TOPIC} already exists")
+            
+        admin_client.close()
+        return True
     except Exception as e:
         logger.error(f"Error ensuring Kafka topic: {e}")
         return False
