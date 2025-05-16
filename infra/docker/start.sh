@@ -128,6 +128,10 @@ docker compose up -d redis timescaledb
 if ! wait_for_service "redis" 20 3; then exit 1; fi
 if ! wait_for_service "timescaledb" 20 3; then exit 1; fi
 
+echo "🔄 Starting Cache service..."
+docker compose up -d cache
+if ! wait_for_service "cache" 20 3; then exit 1; fi
+
 # Create initial model if needed
 if [ ! -f "models/anomaly_model.onnx" ]; then
     echo "🧠 Creating initial ML model..."

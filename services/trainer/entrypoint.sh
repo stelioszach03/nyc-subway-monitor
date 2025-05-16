@@ -6,9 +6,10 @@ set -e
 # Καθαρισμός προηγούμενου crontab
 crontab -r || true
 
-# Δυναμική δημιουργία crontab με το προκαθορισμένο χρονοδιάγραμμα
-echo "$TRAINING_SCHEDULE /app/train_cron.sh >> /var/log/training.log 2>&1" > /etc/cron.d/model-training
-echo "*/30 * * * * /app/train_cron.sh >> /var/log/training.log 2>&1" >> /etc/cron.d/model-training
+# Δυναμική δημιουργία crontab με το προκαθορισμένο χρονοδιάγραμμα και προσθήκη username (root)
+echo "$TRAINING_SCHEDULE root /app/train_cron.sh >> /var/log/training.log 2>&1" > /etc/cron.d/model-training
+echo "*/30 * * * * root /app/train_cron.sh >> /var/log/training.log 2>&1" >> /etc/cron.d/model-training
+echo "" >> /etc/cron.d/model-training  # Add empty line at the end of crontab
 chmod 0644 /etc/cron.d/model-training
 crontab /etc/cron.d/model-training
 

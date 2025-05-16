@@ -1,4 +1,4 @@
-# services/docker-compose.yaml - Διορθωμένη έκδοση
+# services/docker-compose.yaml
 services:
   # Infrastructure
   zookeeper:
@@ -135,6 +135,29 @@ services:
           cpus: '0.5'
         reservations:
           memory: 128M
+
+  # Cache proxy for MTA feeds
+  cache:
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx-cache/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_cache_data:/var/cache/nginx
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - subway-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 64M
 
   # Model Trainer Service - periodic training
   trainer:
@@ -294,6 +317,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - STOPS_FILE=/app/stops.txt
       - PYTHONUNBUFFERED=1
+      - CACHE_HOST=cache
+      - CACHE_PORT=80
     volumes:
       - ./feeds.yaml:/app/feeds.yaml:ro
     restart: unless-stopped
@@ -301,6 +326,8 @@ services:
       kafka:
         condition: service_healthy
       timescaledb:
+        condition: service_healthy
+      cache:
         condition: service_healthy
     networks:
       - subway-net
@@ -359,3 +386,4 @@ volumes:
   timescaledb_data:
   redis_data:
   ml_models:
+  nginx_cache_data:

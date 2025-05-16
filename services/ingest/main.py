@@ -30,7 +30,12 @@ POSTGRES_USER = os.environ.get("POSTGRES_USER", "subway")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "subway_password")
 POSTGRES_DB = os.environ.get("POSTGRES_DB", "subway_monitor")
 
-# ---- NEW: static stops lookup ----------------------------------
+# Cache proxy configuration
+CACHE_HOST = os.environ.get("CACHE_HOST", "cache")
+CACHE_PORT = os.environ.get("CACHE_PORT", "80")
+CACHE_URL_BASE = f"http://{CACHE_HOST}:{CACHE_PORT}"
+
+# ---- GTFS Stops lookup ----------------------------------
 STOPS_FILE = os.environ.get("STOPS_FILE", "/app/stops.txt")
 STOPS = {}
 if os.path.exists(STOPS_FILE):
@@ -43,6 +48,30 @@ if os.path.exists(STOPS_FILE):
 else:
     logger.warning(f"GTFS stops file not found at {STOPS_FILE}; TripUpdates will get dummy coords")
 # ----------------------------------------------------------------
+
+# Feed URL mappings - original to cache
+FEED_URL_MAP = {
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace": f"{CACHE_URL_BASE}/gtfs-ace",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm": f"{CACHE_URL_BASE}/gtfs-bdfm",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g": f"{CACHE_URL_BASE}/gtfs-g",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz": f"{CACHE_URL_BASE}/gtfs-jz",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l": f"{CACHE_URL_BASE}/gtfs-l",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw": f"{CACHE_URL_BASE}/gtfs-nqrw",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs": f"{CACHE_URL_BASE}/gtfs-123456",
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si": f"{CACHE_URL_BASE}/gtfs-si",
+}
+
+# Feed polling frequency (in seconds)
+FEED_POLL_FREQUENCY = {
+    "ACE Lines": 5,
+    "BDFM Lines": 5,
+    "G Line": 5,
+    "JZ Lines": 5,
+    "L Line": 15,
+    "NQRW Lines": 5,
+    "Trip Updates (1-7)": 5,
+    "Staten Island Railway": 30,
+}
 
 def create_kafka_producer():
     """Create and return a Kafka producer with retry."""
@@ -105,18 +134,23 @@ def load_feeds_config():
         return []
 
 def fetch_gtfs_realtime_feed(feed_url, feed_name):
-    """Fetch subway feed data from MTA API with improved error handling."""
+    """Fetch subway feed data from MTA API through the cache proxy."""
+    # Map to cached URL if available
+    cached_url = FEED_URL_MAP.get(feed_url, feed_url)
+    
     headers = {
         "User-Agent": "NYC-Subway-Monitor/1.0",
         "Accept": "application/x-protobuf"  # CRITICAL: This ensures we get binary protobuf data
     }
+    
     try:
-        logger.info(f"Fetching {feed_name} from {feed_url}")
-        response = requests.get(feed_url, headers=headers, timeout=30)
+        logger.info(f"Fetching {feed_name} from {cached_url}")
+        response = requests.get(cached_url, headers=headers, timeout=10)  # Reduced timeout since using local cache
         
         # Check response headers for debugging
         logger.debug(f"Response status: {response.status_code}")
         logger.debug(f"Content-Type: {response.headers.get('Content-Type', 'Not set')}")
+        logger.debug(f"Cache-Status: {response.headers.get('X-Cache-Status', 'Not set')}")
         
         if response.status_code == 200:
             content_type = response.headers.get('content-type', '').lower()
@@ -156,12 +190,12 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
 
     vehicles = []
 
-    # 1) trip_updates  (όπως ήδη κάνεις)
-    for trip in f.trips:           # κάθε revenue trip
+    # Trip updates
+    for trip in f.trips:
         if expected_lines and trip['route_id'] not in expected_lines:
             continue
 
-        # πρώτο stop (για να βρούμε συντεταγμένες)
+        # First stop (for coordinates)
         stop_id = trip['stops'][0]['stop_id'] if trip['stops'] else None
         lat, lon = STOPS.get(stop_id, (40.7128, -74.0060))
 
@@ -177,9 +211,10 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
             "direction_id": trip.get('direction_id', 0),
             "latitude": lat,
             "longitude": lon,
+            "current_status": trip.get('current_status', 'SCHEDULED')
         })
 
-    # 2) vehicle_positions  – αρκετά feeds έχουν ΜΟΝΟ αυτά
+    # Vehicle positions
     for v in f.vehicles:
         if expected_lines and v['route_id'] not in expected_lines:
             continue
@@ -194,6 +229,7 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
             "timestamp": datetime.utcfromtimestamp(v['timestamp']).isoformat(),
             "latitude": lat,
             "longitude": lon,
+            "current_status": v.get('current_status', 'IN_TRANSIT_TO'),
             "delay": v.get('delay', 0),
             "vehicle_id": v.get('vehicle_id', 'unknown'),
             "direction_id": v.get('direction_id', 0),
@@ -259,7 +295,6 @@ def store_historical_data(vehicles, db_engine):
         import traceback
         logger.error(traceback.format_exc())
 
-# Βελτιωμένη συνάρτηση δημιουργίας θέματος Kafka
 def ensure_kafka_topic_exists():
     """Ensure the Kafka topic exists."""
     import subprocess
@@ -275,7 +310,6 @@ def ensure_kafka_topic_exists():
             "--topic", KAFKA_TOPIC
         ]
         
-        # Προσπάθεια εκτέλεσης της εντολής
         logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists...")
         result = subprocess.run(cmd, capture_output=True, text=True)
         
@@ -289,86 +323,136 @@ def ensure_kafka_topic_exists():
         logger.error(f"Error ensuring Kafka topic: {e}")
         return False
 
-def ingest_realtime_feeds():
-    """Fetch, parse, and publish subway data to Kafka."""
+def process_feed(feed_name, feed_config, kafka_producer, db_engine):
+    """Process a single feed based on its configuration."""
+    try:
+        # Extract feed details
+        feed_url = feed_config['url']
+        expected_lines = feed_config.get('lines', [])
+        
+        logger.info(f"Processing feed: {feed_name}")
+        
+        # Fetch feed through cache
+        feed_data = fetch_gtfs_realtime_feed(feed_url, feed_name)
+        if not feed_data:
+            logger.warning(f"Skipping feed {feed_name} - no data received")
+            return
+            
+        # Parse feed
+        vehicles = parse_gtfs_feed(feed_data, expected_lines)
+        
+        if vehicles:
+            logger.info(f"Parsed {len(vehicles)} vehicles/trips from feed {feed_name}")
+            
+            # Publish to Kafka if available
+            if kafka_producer:
+                for vehicle in vehicles:
+                    try:
+                        kafka_producer.send(KAFKA_TOPIC, value=vehicle)
+                    except Exception as e:
+                        logger.error(f"Error sending to Kafka: {e}")
+            
+            # Store for historical analysis
+            if db_engine:
+                store_historical_data(vehicles, db_engine)
+        else:
+            logger.warning(f"No vehicles/trips found in feed {feed_name}")
+    except Exception as e:
+        logger.error(f"Error processing feed {feed_name}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+
+def setup_feed_processing():
+    """Set up scheduled feed processing based on feed configurations."""
     # Ensure Kafka topic exists
     ensure_kafka_topic_exists()
     
-    producer = create_kafka_producer()
+    # Create shared resources
+    kafka_producer = create_kafka_producer()
     db_engine = create_db_engine()
     
     if not db_engine:
         logger.error("Cannot proceed without database connection")
-        return
+        return False
     
+    # Load feed configurations
     feeds = load_feeds_config()
     if not feeds:
         logger.error("No feeds configured in feeds.yaml")
-        return
-        
-    realtime_feeds = [f for f in feeds if f.get('type') == 'realtime']
+        return False
     
+    # Filter realtime feeds
+    realtime_feeds = [f for f in feeds if f.get('type') == 'realtime']
     if not realtime_feeds:
         logger.warning("No realtime feeds configured")
-        return
+        return False
     
-    all_vehicles = []
-    
+    # Run initial processing for all feeds
+    logger.info("Running initial processing for all feeds")
     for feed in realtime_feeds:
-        logger.info(f"Processing feed: {feed['name']}")
-        
-        # Fetch feed
-        feed_data = fetch_gtfs_realtime_feed(feed['url'], feed['name'])
-        if not feed_data:
-            logger.warning(f"Skipping feed {feed['name']} - no data received")
-            continue
-            
-        # Parse feed
-        expected_lines = feed.get('lines', [])
-        vehicles = parse_gtfs_feed(feed_data, expected_lines)
-        
-        if vehicles:
-            logger.info(f"Parsed {len(vehicles)} vehicles/trips from feed {feed['name']}")
-            
-            # Publish to Kafka if available
-            if producer:
-                for vehicle in vehicles:
-                    try:
-                        producer.send(KAFKA_TOPIC, value=vehicle)
-                    except Exception as e:
-                        logger.error(f"Error sending to Kafka: {e}")
-            
-            # Collect for historical storage
-            all_vehicles.extend(vehicles)
-        else:
-            logger.warning(f"No vehicles/trips found in feed {feed['name']}")
+        process_feed(feed['name'], feed, kafka_producer, db_engine)
     
-    # Store historical data
-    if db_engine and all_vehicles:
-        store_historical_data(all_vehicles, db_engine)
-    elif not all_vehicles:
-        logger.warning("No vehicles/trips parsed from any feed")
+    # Close initial Kafka producer
+    if kafka_producer:
+        kafka_producer.flush()
+        kafka_producer.close()
     
-    # Make sure all messages are sent
-    if producer:
-        producer.flush()
-        producer.close()
-    logger.info(f"Feed ingestion completed - processed {len(all_vehicles)} total vehicles/trips")
-
-def run_scheduled_task():
-    """Run the ingestion process on schedule."""
-    logger.info("Running scheduled feed ingestion")
-    try:
-        ingest_realtime_feeds()
-    except Exception as e:
-        logger.error(f"Error in scheduled task: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
+    # Schedule feeds based on their polling frequency
+    for feed in realtime_feeds:
+        feed_name = feed['name']
+        # Determine polling frequency - use feed-specific setting or default from our mapping
+        frequency = int(feed.get('frequency', '30s').rstrip('s'))
+        frequency = FEED_POLL_FREQUENCY.get(feed_name, frequency)
+        
+        logger.info(f"Scheduling feed {feed_name} to run every {frequency} seconds")
+        
+        # Create a closure to capture feed config
+        def create_feed_processor(feed_name, feed_config):
+            def process_specific_feed():
+                # Create new producer and engine for each run to ensure fresh connections
+                producer = create_kafka_producer()
+                engine = create_db_engine()
+                
+                logger.debug(f"Running scheduled processing for feed: {feed_name}")
+                process_feed(feed_name, feed_config, producer, engine)
+                
+                # Clean up resources
+                if producer:
+                    producer.flush()
+                    producer.close()
+            
+            return process_specific_feed
+        
+        # Schedule the feed
+        schedule.every(frequency).seconds.do(create_feed_processor(feed_name, feed))
+    
+    return True
 
 def main():
     """Main entry point."""
     logger.info("NYC Subway Monitor - Enhanced Ingest Service Starting")
     logger.info(f"Log level: {os.environ.get('LOG_LEVEL', 'INFO')}")
+    
+    # Wait for cache service to be ready
+    max_retries = 10
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            health_url = f"{CACHE_URL_BASE}/health"
+            logger.info(f"Checking if cache service is ready: {health_url}")
+            response = requests.get(health_url, timeout=5)
+            if response.status_code == 200:
+                logger.info("Cache service is ready")
+                break
+            else:
+                logger.warning(f"Cache service returned status {response.status_code}")
+        except Exception as e:
+            logger.warning(f"Cache service not ready yet: {e}")
+        
+        retry_count += 1
+        sleep_time = min(30, 2 ** retry_count)
+        logger.info(f"Retrying in {sleep_time} seconds (attempt {retry_count}/{max_retries})")
+        time.sleep(sleep_time)
     
     # Validate configuration
     feeds = load_feeds_config()
@@ -384,13 +468,13 @@ feeds:
     type: "realtime"
     url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
     lines: ["A", "C", "E"]
-    frequency: "30s"
+    frequency: "5s"
     
   - name: "BDFM Lines"
     type: "realtime"  
     url: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
     lines: ["B", "D", "F", "M"]
-    frequency: "30s"
+    frequency: "5s"
 """)
             logger.info("Created default feeds.yaml file with sample MTA feeds")
             feeds = load_feeds_config()
@@ -400,21 +484,23 @@ feeds:
     
     logger.info(f"Loaded {len(feeds)} feed configurations")
     
-    # Ensure Kafka topic exists
-    ensure_kafka_topic_exists()
-    
-    # For testing, run once immediately
-    logger.info("Running initial ingestion...")
-    run_scheduled_task()
-    
-    # Schedule to run every 30 seconds
-    schedule.every(30).seconds.do(run_scheduled_task)
+    # Set up feed processing
+    if not setup_feed_processing():
+        logger.error("Failed to set up feed processing")
+        return
     
     # Keep the process running
     logger.info("Starting scheduler loop...")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("Ingest service stopped by user")
+    except Exception as e:
+        logger.error(f"Error in scheduler loop: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
 
 if __name__ == "__main__":
     main()
