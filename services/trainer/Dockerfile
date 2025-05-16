@@ -17,13 +17,10 @@ COPY train.py .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Χωρίς quotes στην τιμή
-ENV TRAINING_SCHEDULE=0 */1 * * *
+# Αφαιρούμε τη γραμμή με το ENV TRAINING_SCHEDULE που προκαλεί το πρόβλημα
+# Θα χρησιμοποιήσουμε την τιμή από το docker-compose
 
-# Απλοποιημένο script απευθείας στο /etc/crontabs/root
-RUN echo "${TRAINING_SCHEDULE} python /app/train.py && curl -s -X POST http://ml:8000/reload-model" > /etc/crontabs/root \
-    && echo "" >> /etc/crontabs/root \
-    && chmod 644 /etc/crontabs/root \
-    && crontab -l
+# Δεν απαιτείται πλέον η δημιουργία του crontab αρχείου εδώ
+# Θα δημιουργηθεί δυναμικά στο entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
