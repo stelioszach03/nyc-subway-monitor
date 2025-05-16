@@ -220,8 +220,8 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
                     "vehicle_id": (tu.vehicle.id if tu.vehicle and tu.vehicle.id else "unknown"),
                     "direction_id": (tu.trip.direction_id if hasattr(tu.trip, 'direction_id') else 0),
                     "latitude": lat,
-                    "longitude": lon,
-                    "current_status": (stu.current_status or "SCHEDULED")
+                    "longitude": lon
+                    # Αφαιρέθηκε το current_status που δεν υπάρχει στο StopTimeUpdate
                 })
 
         # Vehicle positions
@@ -240,7 +240,7 @@ def parse_gtfs_feed(feed_data, expected_lines=None):
                 "latitude": lat,
                 "longitude": lon,
                 "current_status": (vp.current_status or "IN_TRANSIT_TO"),
-                "delay": (vp.delay or 0),
+                # Αφαιρέθηκε το delay που δεν υπάρχει στο VehiclePosition
                 "vehicle_id": (vp.vehicle.id if vp.vehicle and vp.vehicle.id else "unknown"),
                 "direction_id": (vp.trip.direction_id if vp.trip and hasattr(vp.trip, 'direction_id') else 0),
             })
