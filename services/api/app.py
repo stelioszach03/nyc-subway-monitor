@@ -311,13 +311,14 @@ async def get_trains(
                     continue
                 
                 # Skip if timestamp is older than 5 minutes
+                # Skip if timestamp is older than 15 minutes (αύξηση από 5 σε 15 λεπτά)
                 try:
                     timestamp = datetime.fromtimestamp(int(train_data.get("timestamp", 0)))
-                    if datetime.now() - timestamp > timedelta(minutes=5):
+                    if datetime.now() - timestamp > timedelta(minutes=15):
                         continue
                 except (ValueError, TypeError):
-                    # Invalid timestamp
-                    continue
+                    # Fallback to current timestamp if parsing fails
+                    timestamp = datetime.now()
                     
                 try:
                     train = {

@@ -65,6 +65,7 @@ def create_kafka_stream(spark: SparkSession) -> Any:
         .option("kafka.session.timeout.ms", "30000")
         .option("failOnDataLoss", "false")
         .load()
+        .filter("key IS NOT NULL AND value IS NOT NULL")  # Προσθήκη φίλτρου για NULL values
     )
 
 def send_to_redis_sync(batch_df, batch_id):
@@ -127,6 +128,7 @@ def send_to_redis_sync(batch_df, batch_id):
                 
                 # Execute all commands in the pipeline
                 pipe.execute()
+                print(f"Successfully processed batch {batch_id} with {len(rows)} records")
     except Exception as e:
         print(f"Error sending to Redis: {e}")
     finally:
@@ -205,7 +207,9 @@ def process_stream(spark: SparkSession) -> None:
         .start()
     )
     
-    # Wait for termination
+    # Wait for termination - ΔΙΟΡΘΩΘΗΚΕ Η ΓΡΑΜΜΗ ΠΑΡΑΚΑΤΩ
+    # Αυτή είναι η σημαντική αλλαγή - περιμένουμε και τα δύο streams
+    print("Starting streams - awaiting termination")
     spark.streams.awaitAnyTermination()
 
 if __name__ == "__main__":

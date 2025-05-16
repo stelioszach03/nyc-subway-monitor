@@ -307,39 +307,51 @@ def store_historical_data(vehicles, db_engine):
 
 def ensure_kafka_topic_exists():
     """Ensure the Kafka topic exists using admin client."""
-    try:
-        logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists using admin client...")
-        
-        # Create an admin client
-        admin_client = KafkaAdminClient(
-            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-            request_timeout_ms=30000,
-            client_id="subway-ingest-admin"
-        )
-        
-        # Get existing topics
-        existing_topics = admin_client.list_topics()
-        
-        # Create topic if it doesn't exist
-        if KAFKA_TOPIC not in existing_topics:
-            logger.info(f"Topic {KAFKA_TOPIC} does not exist, creating it...")
+    max_retries = 10
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            logger.info(f"Ensuring Kafka topic {KAFKA_TOPIC} exists using admin client (attempt {retry_count+1}/{max_retries})...")
             
-            new_topic = NewTopic(
-                name=KAFKA_TOPIC,
-                num_partitions=1,
-                replication_factor=1
+            # Create an admin client
+            admin_client = KafkaAdminClient(
+                bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+                request_timeout_ms=30000,
+                client_id="subway-ingest-admin"
             )
             
-            admin_client.create_topics([new_topic])
-            logger.info(f"Successfully created Kafka topic {KAFKA_TOPIC}")
-        else:
-            logger.info(f"Topic {KAFKA_TOPIC} already exists")
+            # Get existing topics
+            existing_topics = admin_client.list_topics()
             
-        admin_client.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error ensuring Kafka topic: {e}")
-        return False
+            # Create topic if it doesn't exist
+            if KAFKA_TOPIC not in existing_topics:
+                logger.info(f"Topic {KAFKA_TOPIC} does not exist, creating it...")
+                
+                new_topic = NewTopic(
+                    name=KAFKA_TOPIC,
+                    num_partitions=1,
+                    replication_factor=1
+                )
+                
+                admin_client.create_topics([new_topic])
+                logger.info(f"Successfully created Kafka topic {KAFKA_TOPIC}")
+            else:
+                logger.info(f"Topic {KAFKA_TOPIC} already exists")
+                
+            admin_client.close()
+            return True
+        except Exception as e:
+            logger.warning(f"Error ensuring Kafka topic (attempt {retry_count+1}): {e}")
+            retry_count += 1
+            
+            if retry_count < max_retries:
+                wait_time = min(30, 2 ** retry_count)  # Exponential backoff
+                logger.info(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                logger.error(f"Failed to ensure Kafka topic after {max_retries} attempts")
+                return False
 
 def process_feed(feed_name, feed_config, kafka_producer, db_engine):
     """Process a single feed based on its configuration."""
