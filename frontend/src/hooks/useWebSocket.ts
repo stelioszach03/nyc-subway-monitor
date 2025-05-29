@@ -20,7 +20,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     const ws = getWebSocket()
 
     // Set up event listeners
-    ws.on('connected', () => {
+    const handleConnected = () => {
       setIsConnected(true)
       setConnectionError(null)
       
@@ -28,32 +28,42 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       if (optionsRef.current.filters) {
         ws.subscribe(optionsRef.current.filters)
       }
-    })
+    }
 
-    ws.on('disconnected', () => {
+    const handleDisconnected = () => {
       setIsConnected(false)
-    })
+    }
 
-    ws.on('error', (error) => {
+    const handleError = (error: Error) => {
       setConnectionError(error)
-    })
+    }
 
-    ws.on('anomaly', (anomaly) => {
+    const handleAnomaly = (anomaly: any) => {
       setLastMessage({ type: 'anomaly', data: anomaly })
       optionsRef.current.onAnomalyReceived?.(anomaly)
-    })
+    }
 
-    ws.on('stats', (stats) => {
+    const handleStats = (stats: any) => {
       setLastMessage({ type: 'stats', data: stats })
       optionsRef.current.onStatsReceived?.(stats)
-    })
+    }
+
+    ws.on('connected', handleConnected)
+    ws.on('disconnected', handleDisconnected)
+    ws.on('error', handleError)
+    ws.on('anomaly', handleAnomaly)
+    ws.on('stats', handleStats)
 
     // Connect
     ws.connect()
 
     // Cleanup
     return () => {
-      ws.removeAllListeners()
+      ws.removeListener('connected', handleConnected)
+      ws.removeListener('disconnected', handleDisconnected)
+      ws.removeListener('error', handleError)
+      ws.removeListener('anomaly', handleAnomaly)
+      ws.removeListener('stats', handleStats)
       // Don't disconnect as other components might be using it
     }
   }, [])

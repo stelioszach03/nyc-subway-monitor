@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { StationMarker } from './StationMarker'
@@ -23,22 +22,29 @@ export function SubwayMap({ anomalies, onStationClick, selectedStation }: Subway
   useEffect(() => {
     if (!mapContainer.current || map.current) return
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-73.98, 40.75], // NYC center
-      zoom: 11,
-      pitch: 30,
-    })
+    // Only initialize on client side
+    if (typeof window === 'undefined') return
 
-    map.current.on('load', () => {
-      setMapLoaded(true)
-    })
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: [-73.98, 40.75], // NYC center
+        zoom: 11,
+        pitch: 30,
+      })
 
-    // Cleanup
-    return () => {
-      map.current?.remove()
-      map.current = null
+      map.current.on('load', () => {
+        setMapLoaded(true)
+      })
+
+      // Cleanup
+      return () => {
+        map.current?.remove()
+        map.current = null
+      }
+    } catch (error) {
+      console.error('Failed to initialize map:', error)
     }
   }, [])
 

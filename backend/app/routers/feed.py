@@ -26,24 +26,23 @@ logger = structlog.get_logger()
 settings = get_settings()
 
 try:
-    import httpx
-    from google.transit import gtfs_realtime_pb2
+    from nyctrains import NYCTFeed
 except ImportError:
-    logger.error("Required packages not available")
-    raise
+    NYCTFeed = None
+    logger.warning("nyctrains not available, will use direct protobuf parsing")
 
 router = APIRouter()
 
-# Feed URLs for NYC subway lines
-FEED_URLS = {
-    "1": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs",
-    "A": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace",
-    "B": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
-    "G": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g",
-    "J": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz",
-    "L": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l",
-    "N": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw",
-    "SI": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si",
+# Feed codes for NYC subway lines
+FEED_CODES = {
+    "1": ["1", "2", "3", "4", "5", "6", "7", "S"],
+    "A": ["A", "C", "E"],
+    "B": ["B", "D", "F", "M"],
+    "G": ["G"],
+    "J": ["J", "Z"],
+    "L": ["L"],
+    "N": ["N", "Q", "R", "W"],
+    "SI": ["SI"],
 }
 
 # Global lock for station creation to prevent deadlocks
@@ -65,14 +64,17 @@ def serialize_datetime(obj: Any) -> Any:
 
 
 def load_stations_from_file() -> Dict[str, Dict]:
-    """Load station data from stations.txt file (GTFS static data)."""
+    """Load station data from stops.txt file (GTFS static data) with multiple fallback paths."""
     stations = {}
     
-    # Try different possible locations
+    # Try multiple possible paths
     possible_paths = [
+        Path("/home/stelios/nyc-subway-monitor/backend/data/stations.txt"),
         Path("data/stations.txt"),
         Path("backend/data/stations.txt"),
-        Path("/app/data/stations.txt"),  # Docker path
+        Path("../backend/data/stations.txt"),
+        Path("data/stops.txt"),
+        Path("backend/data/stops.txt"),
     ]
     
     file_to_load = None
@@ -82,33 +84,35 @@ def load_stations_from_file() -> Dict[str, Dict]:
             break
     
     if not file_to_load:
-        logger.warning("Station file not found in any expected location")
-        logger.warning(f"Tried: {[str(p) for p in possible_paths]}")
-        logger.warning("Current working directory: " + str(Path.cwd()))
+        logger.warning("Station files not found in any of the expected locations")
+        logger.warning(f"Tried paths: {[str(p) for p in possible_paths]}")
         return stations
     
     try:
         with open(file_to_load, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                stop_id = row['stop_id']
+                stop_id = row.get('stop_id', row.get('Station ID', ''))
                 
-                # Extract parent station if exists
-                parent_station = row.get('parent_station', '')
+                # Handle different possible column names
+                name = row.get('stop_name', row.get('Stop Name', row.get('Station Name', '')))
+                lat = float(row.get('stop_lat', row.get('GTFS Latitude', row.get('Latitude', '40.7484'))))
+                lon = float(row.get('stop_lon', row.get('GTFS Longitude', row.get('Longitude', '-73.9857'))))
                 
-                # Store all stops, including child stops (like 101N, 101S)
-                stations[stop_id] = {
-                    "name": row['stop_name'],
-                    "lat": float(row['stop_lat']),
-                    "lon": float(row['stop_lon']),
-                    "lines": [],  # Will be populated from feed data
-                    "parent_station": parent_station,
-                    "location_type": row.get('location_type', '0'),
-                }
+                if stop_id:
+                    stations[stop_id] = {
+                        "name": name,
+                        "lat": lat,
+                        "lon": lon,
+                        "lines": [],
+                        "parent_station": row.get('parent_station', ''),
+                        "location_type": row.get('location_type', '0'),
+                    }
         
-        logger.info(f"Loaded {len(stations)} stations from {file_to_load}")
+        logger.info(f"Loaded {len(stations)} stations from {file_to_load.name}")
     except Exception as e:
         logger.error(f"Failed to load stations file: {e}")
+        logger.error(f"File path: {file_to_load}")
     
     return stations
 
@@ -123,6 +127,7 @@ class FeedIngester:
         # Load all stations from file
         self.station_cache = load_stations_from_file()
         self.unknown_stations = set()  # Track stations not in file
+        self.station_creation_tasks = {}  # Track ongoing station creation
     
     async def fetch_feed(self, feed_code: str) -> Dict:
         """Fetch and parse single feed with exponential backoff."""
@@ -131,7 +136,23 @@ class FeedIngester:
         
         while retries < settings.max_retries:
             try:
-                url = FEED_URLS.get(feed_code)
+                # Direct protobuf parsing since nyctrains isn't available
+                import httpx
+                from google.transit import gtfs_realtime_pb2
+                
+                # Map feed codes to URLs
+                url_map = {
+                    "1": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs",
+                    "A": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace",
+                    "B": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
+                    "G": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g",
+                    "J": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz",
+                    "L": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l",
+                    "N": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw",
+                    "SI": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si",
+                }
+                
+                url = url_map.get(feed_code)
                 if not url:
                     raise ValueError(f"Unknown feed code: {feed_code}")
                 
@@ -367,7 +388,7 @@ async def start_feed_ingestion():
         try:
             # Process feeds sequentially to avoid deadlocks
             async with feed_processing_lock:
-                for feed_code in FEED_URLS.keys():
+                for feed_code in FEED_CODES.keys():
                     # Check if enough time has passed since last fetch
                     last = ingester.last_fetch.get(feed_code, datetime.min)
                     if (datetime.utcnow() - last).total_seconds() >= settings.feed_update_interval:
@@ -402,7 +423,7 @@ async def get_feed_status(db: AsyncSession = Depends(get_db)) -> Dict:
     recent_updates = await crud.get_recent_feed_updates(db, limit=20)
     
     return {
-        "active_feeds": list(FEED_URLS.keys()),
+        "active_feeds": list(FEED_CODES.keys()),
         "update_interval": settings.feed_update_interval,
         "recent_updates": [
             FeedUpdateResponse.from_orm(update) for update in recent_updates
@@ -429,7 +450,7 @@ async def refresh_feed(
     db: AsyncSession = Depends(get_db)
 ) -> FeedUpdateResponse:
     """Manually trigger feed refresh."""
-    if feed_code not in FEED_URLS:
+    if feed_code not in FEED_CODES:
         raise HTTPException(status_code=404, detail=f"Unknown feed: {feed_code}")
     
     data = await ingester.fetch_feed(feed_code)

@@ -1,3 +1,4 @@
+# --- backend/app/ml/features.py ---
 """
 Feature extraction for subway time-series data.
 Computes headway, dwell time, schedule adherence, and rolling statistics.
@@ -114,25 +115,59 @@ class FeatureExtractor:
         ]
     
     def compute_rolling_features(self, positions_df: pd.DataFrame) -> pd.DataFrame:
-        """Compute rolling statistical features."""
+        """Compute rolling statistical features with proper window handling."""
+        
+        # Make a copy to avoid modifying original
+        df = positions_df.copy()
+        
+        # Ensure we have timestamp as index for time-based operations
+        if 'timestamp' in df.columns and not isinstance(df.index, pd.DatetimeIndex):
+            df = df.set_index('timestamp').sort_index()
         
         # Group by station and direction
-        grouped = positions_df.groupby(["current_station", "direction"])
+        grouped = df.groupby(["current_station", "direction"])
         
-        # Rolling statistics
+        # Calculate rolling statistics
         for col in ["headway_seconds", "dwell_time_seconds", "delay_seconds"]:
-            if col in positions_df.columns:
-                # Z-score within rolling window
-                positions_df[f"{col}_zscore"] = grouped[col].transform(
-                    lambda x: (x - x.rolling("1H").mean()) / x.rolling("1H").std()
-                )
-                
-                # Percentile rank
-                positions_df[f"{col}_percentile"] = grouped[col].transform(
-                    lambda x: x.rolling("1H").rank(pct=True)
-                )
+            if col in df.columns:
+                try:
+                    # For time-based rolling, we need DatetimeIndex
+                    if isinstance(df.index, pd.DatetimeIndex):
+                        # Use 1 hour window
+                        df[f"{col}_zscore"] = grouped[col].transform(
+                            lambda x: (x - x.rolling('1H', min_periods=1).mean()) / 
+                                     (x.rolling('1H', min_periods=1).std() + 1e-7)
+                        )
+                        
+                        df[f"{col}_percentile"] = grouped[col].transform(
+                            lambda x: x.rolling('1H', min_periods=1).rank(pct=True)
+                        )
+                    else:
+                        # Fallback to integer window (12 periods = ~1 hour for 5-min intervals)
+                        window_size = min(12, len(df))
+                        
+                        df[f"{col}_zscore"] = grouped[col].transform(
+                            lambda x: (x - x.rolling(window_size, min_periods=1).mean()) / 
+                                     (x.rolling(window_size, min_periods=1).std() + 1e-7)
+                        )
+                        
+                        df[f"{col}_percentile"] = grouped[col].transform(
+                            lambda x: x.rolling(window_size, min_periods=1).rank(pct=True)
+                        )
+                        
+                except Exception as e:
+                    # If rolling fails, just use global stats
+                    print(f"Warning: Rolling calculation failed for {col}: {e}")
+                    mean_val = df[col].mean()
+                    std_val = df[col].std() + 1e-7
+                    df[f"{col}_zscore"] = (df[col] - mean_val) / std_val
+                    df[f"{col}_percentile"] = df[col].rank(pct=True)
         
-        return positions_df
+        # Reset index if we set it
+        if isinstance(df.index, pd.DatetimeIndex) and 'timestamp' not in df.columns:
+            df = df.reset_index()
+        
+        return df
     
     def create_station_features(self, station_id: str, num_stations: int = 472) -> np.ndarray:
         """Create one-hot encoded station features."""

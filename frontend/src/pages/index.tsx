@@ -1,5 +1,4 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { Layout } from '@/components/layout/Layout'
@@ -24,6 +23,12 @@ export default function Home() {
     new Date(Date.now() - 24 * 60 * 60 * 1000),
     new Date()
   ])
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure client-side only rendering for dynamic content
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Fetch anomalies
   const { anomalies, stats, isLoading } = useAnomalies({
@@ -40,6 +45,20 @@ export default function Home() {
       console.log('New anomaly:', anomaly)
     },
   })
+
+  // Prevent hydration errors
+  if (!mounted) {
+    return (
+      <Layout>
+        <div className="flex flex-col h-screen bg-gray-950">
+          <div className="px-6 py-4 bg-gray-900 border-b border-gray-800">
+            <div className="animate-pulse h-20 bg-gray-800 rounded" />
+          </div>
+          <div className="flex-1 bg-gray-900 animate-pulse" />
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <>
