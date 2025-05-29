@@ -1,3 +1,4 @@
+# --- backend/requirements.txt ---
 # Core dependencies with exact pins for reproducibility
 fastapi==0.115.12
 uvicorn[standard]==0.32.1
@@ -10,11 +11,10 @@ sqlalchemy==2.0.36
 alembic==1.14.0
 
 # ML/Data Science
-nyct-gtfs==2.0.0
+nyctrains>=1.5.0  # This is the correct package name
 gtfs-realtime-bindings==1.0.0
 scikit-learn==1.6.0
 torch==2.3.0
-pytorch-lightning==2.3.0
 numpy==1.26.4
 pandas==2.2.3
 scipy==1.14.1
@@ -30,6 +30,10 @@ redis==5.2.1
 # Monitoring/Logging
 structlog==24.4.0
 prometheus-client==0.21.1
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
 
 # Dev/Test
 pytest==8.3.4

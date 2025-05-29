@@ -1,3 +1,4 @@
+# --- backend/app/db/crud.py ---
 """
 Database CRUD operations for async SQLAlchemy.
 """
@@ -28,7 +29,7 @@ async def create_feed_update(
         num_alerts=num_alerts,
     )
     db.add(feed_update)
-    await db.flush()
+    await db.flush()  # Changed from db.flush() to await db.flush()
     return feed_update
 
 

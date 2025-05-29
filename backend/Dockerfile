@@ -1,6 +1,5 @@
-
 # Multi-stage build for optimized Python image
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
