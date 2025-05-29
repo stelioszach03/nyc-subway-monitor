@@ -1,3 +1,4 @@
+
 """
 FastAPI application entry point for NYC Subway Monitor.
 Configures middleware, routers, and lifecycle events.
@@ -29,25 +30,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
     logger.info("Starting NYC Subway Monitor", version=settings.app_version)
     
-    # Initialize database
-    await init_db()
-    
-    # Load ML models
-    trainer = ModelTrainer()
-    await trainer.load_or_train_models()
-    
-    # Start background tasks
-    app.state.feed_task = asyncio.create_task(feed.start_feed_ingestion())
+    try:
+        # Initialize database
+        await init_db()
+        
+        # Load ML models
+        trainer = ModelTrainer()
+        await trainer.load_or_train_models()
+        app.state.trainer = trainer
+        
+        # Start background tasks
+        app.state.feed_task = asyncio.create_task(feed.start_feed_ingestion())
+        
+    except Exception as e:
+        logger.error("Failed to start application", error=str(e))
+        # Continue anyway for development
+        if not settings.debug:
+            raise
     
     yield
     
     # Shutdown
     logger.info("Shutting down NYC Subway Monitor")
-    app.state.feed_task.cancel()
-    try:
-        await app.state.feed_task
-    except asyncio.CancelledError:
-        pass
+    if hasattr(app.state, 'feed_task'):
+        app.state.feed_task.cancel()
+        try:
+            await app.state.feed_task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(
@@ -85,6 +95,12 @@ app.include_router(websocket.router, prefix=f"{settings.api_v1_prefix}/ws", tags
 # Prometheus metrics
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
+
+# Root redirect
+@app.get("/")
+async def root():
+    """Redirect to API documentation."""
+    return {"message": "NYC Subway Monitor API", "docs": f"{settings.api_v1_prefix}/docs"}
 
 if __name__ == "__main__":
     import uvicorn

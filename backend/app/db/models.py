@@ -19,6 +19,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    PrimaryKeyConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
@@ -48,15 +49,17 @@ class FeedUpdate(Base):
     
     __tablename__ = "feed_updates"
     
-    id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    id = Column(Integer, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
     feed_id = Column(String(20), nullable=False)  # "ace", "bdfm", etc.
     raw_data = Column(JSONB)  # Decoded protobuf as JSON
     num_trips = Column(Integer)
     num_alerts = Column(Integer)
     processing_time_ms = Column(Float)
     
+    # Composite primary key for TimescaleDB
     __table_args__ = (
+        PrimaryKeyConstraint('id', 'timestamp'),
         Index("idx_feed_timestamp", "feed_id", "timestamp"),
     )
 
@@ -66,8 +69,8 @@ class TrainPosition(Base):
     
     __tablename__ = "train_positions"
     
-    id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    id = Column(Integer, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
     trip_id = Column(String(100), nullable=False)
     route_id = Column(String(10), nullable=False)  # "6", "L", etc.
     line = Column(String(20), nullable=False)  # Line grouping
@@ -84,6 +87,7 @@ class TrainPosition(Base):
     schedule_adherence = Column(Float)  # Z-score of delay
     
     __table_args__ = (
+        PrimaryKeyConstraint('id', 'timestamp'),
         Index("idx_train_line_time", "line", "timestamp"),
         Index("idx_train_station", "current_station", "timestamp"),
     )
@@ -94,8 +98,8 @@ class Anomaly(Base):
     
     __tablename__ = "anomalies"
     
-    id = Column(Integer, primary_key=True)
-    detected_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), index=True)
+    id = Column(Integer, autoincrement=True)
+    detected_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
     station_id = Column(String(10), ForeignKey("stations.id"))
     line = Column(String(20))
     anomaly_type = Column(String(50))  # "headway", "dwell", "delay", "combined"
@@ -105,7 +109,7 @@ class Anomaly(Base):
     
     # Context
     features = Column(JSONB)  # Input features that triggered anomaly
-    meta_data = Column(JSONB)  # Additional context (renamed from metadata)
+    meta_data = Column(JSONB)  # Additional context
     resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime(timezone=True))
     
@@ -113,6 +117,7 @@ class Anomaly(Base):
     station = relationship("Station", back_populates="anomalies")
     
     __table_args__ = (
+        PrimaryKeyConstraint('id', 'detected_at'),
         Index("idx_anomaly_active", "resolved", "detected_at"),
         Index("idx_anomaly_station_time", "station_id", "detected_at"),
     )

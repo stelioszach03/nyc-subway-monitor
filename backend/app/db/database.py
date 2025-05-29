@@ -49,49 +49,85 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db() -> None:
     """Initialize database with TimescaleDB extensions and hypertables."""
-    async with engine.begin() as conn:
-        # Create TimescaleDB extension
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
+    try:
+        async with engine.begin() as conn:
+            # Create TimescaleDB extension
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
+            
+            # Drop all tables if they exist (for clean portfolio demo)
+            if settings.debug:
+                logger.info("Dropping existing tables for clean demo setup")
+                await conn.run_sync(Base.metadata.drop_all)
+            
+            # Create tables
+            await conn.run_sync(Base.metadata.create_all)
+            
+        # Create hypertables in separate transactions
+        await create_hypertables()
         
-        # Drop all tables if they exist (for clean portfolio demo)
-        if settings.debug:
-            logger.info("Dropping existing tables for clean demo setup")
-            await conn.run_sync(Base.metadata.drop_all)
-        
-        # Create tables
-        await conn.run_sync(Base.metadata.create_all)
-        
-        # Convert time-series tables to hypertables
-        hypertables = [
-            ("feed_updates", "timestamp"),
-            ("anomalies", "detected_at"),
-            ("train_positions", "timestamp"),
-        ]
-        
-        for table_name, time_column in hypertables:
-            try:
-                await conn.execute(
-                    text(f"""
-                        SELECT create_hypertable(
-                            '{table_name}',
-                            '{time_column}',
-                            if_not_exists => TRUE,
-                            chunk_time_interval => INTERVAL '1 day'
-                        )
-                    """)
-                )
-                logger.info(f"Created hypertable for {table_name}")
-            except Exception as e:
-                logger.warning(f"Hypertable {table_name} may already exist", error=str(e))
-        
-        # Create indexes for common queries
-        indexes = [
-            "CREATE INDEX IF NOT EXISTS idx_anomalies_station_time ON anomalies(station_id, detected_at DESC)",
-            "CREATE INDEX IF NOT EXISTS idx_train_positions_line_time ON train_positions(line, timestamp DESC)",
-            "CREATE INDEX IF NOT EXISTS idx_feed_updates_line ON feed_updates(feed_id, timestamp DESC)",
-        ]
-        
-        for index_sql in indexes:
-            await conn.execute(text(index_sql))
+        # Create additional indexes
+        await create_indexes()
         
         logger.info("Database initialized successfully")
+        
+    except Exception as e:
+        logger.error("Failed to initialize database", error=str(e))
+        raise
+
+
+async def create_hypertables() -> None:
+    """Create TimescaleDB hypertables."""
+    hypertables = [
+        ("feed_updates", "timestamp"),
+        ("anomalies", "detected_at"),
+        ("train_positions", "timestamp"),
+    ]
+    
+    for table_name, time_column in hypertables:
+        try:
+            async with engine.begin() as conn:
+                # Check if table is already a hypertable
+                result = await conn.execute(
+                    text("""
+                        SELECT COUNT(*)
+                        FROM timescaledb_information.hypertables
+                        WHERE hypertable_name = :table_name
+                    """),
+                    {"table_name": table_name}
+                )
+                count = result.scalar()
+                
+                if count == 0:
+                    # Create hypertable
+                    await conn.execute(
+                        text(f"""
+                            SELECT create_hypertable(
+                                '{table_name}',
+                                '{time_column}',
+                                chunk_time_interval => INTERVAL '1 day',
+                                create_default_indexes => FALSE
+                            )
+                        """)
+                    )
+                    logger.info(f"Created hypertable for {table_name}")
+                else:
+                    logger.info(f"Hypertable {table_name} already exists")
+                    
+        except Exception as e:
+            logger.warning(f"Could not create hypertable {table_name}", error=str(e))
+
+
+async def create_indexes() -> None:
+    """Create additional indexes for common queries."""
+    indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_anomalies_station_time ON anomalies(station_id, detected_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_train_positions_line_time ON train_positions(line, timestamp DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_feed_updates_feed_time ON feed_updates(feed_id, timestamp DESC)",
+    ]
+    
+    for index_sql in indexes:
+        try:
+            async with engine.begin() as conn:
+                await conn.execute(text(index_sql))
+        except Exception as e:
+            logger.warning(f"Could not create index", sql=index_sql, error=str(e))
