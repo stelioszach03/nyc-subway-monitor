@@ -1,0 +1,41 @@
+# Core dependencies with exact pins for reproducibility
+fastapi==0.115.12
+uvicorn[standard]==0.32.1
+pydantic==2.10.5
+pydantic-settings==2.7.0
+
+# Database
+asyncpg==0.29.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+
+# ML/Data Science
+nyctrains==1.5.0
+nyct-gtfs==2.0.0
+scikit-learn==1.6.0
+torch==2.3.0
+pytorch-lightning==2.3.0
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.14.1
+
+# Time series
+pytz==2024.2
+
+# API/Async
+httpx==0.28.1
+websockets==14.1
+redis==5.2.1
+
+# Monitoring/Logging
+structlog==24.4.0
+prometheus-client==0.21.1
+
+# Dev/Test
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+mypy==1.13.0
+black==24.10.0
+ruff==0.8.4
+pre-commit==4.0.1

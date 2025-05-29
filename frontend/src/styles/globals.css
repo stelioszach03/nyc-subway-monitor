@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.700') theme('colors.gray.900');
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-900;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-700 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-600;
+  }
+
+  /* Mapbox overrides */
+  .mapboxgl-popup-content {
+    @apply bg-gray-900 text-gray-100 rounded-lg shadow-xl border border-gray-800;
+  }
+
+  .mapboxgl-popup-close-button {
+    @apply text-gray-400 hover:text-gray-100;
+  }
+
+  /* D3 overrides */
+  .axis text {
+    @apply fill-gray-400;
+  }
+
+  .axis line,
+  .axis path {
+    @apply stroke-gray-700;
+  }
+
+  /* Station marker animations */
+  .station-marker {
+    @apply transition-transform duration-200;
+  }
+
+  .station-marker:hover {
+    @apply scale-110;
+  }
+}
+
+@layer utilities {
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-gray-900/50 backdrop-blur-sm border border-gray-800;
+  }
+}
