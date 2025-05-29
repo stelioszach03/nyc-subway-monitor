@@ -1,10 +1,10 @@
-# --- backend/app/schemas/anomaly.py ---
+
 """
 Pydantic schemas for anomaly detection results.
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,7 +19,7 @@ class AnomalyBase(BaseModel):
     model_name: str
     model_version: str
     features: Dict[str, float] = Field(default_factory=dict)
-    meta_data: Dict[str, any] = Field(default_factory=dict)  # Renamed from metadata
+    meta_data: Dict[str, Any] = Field(default_factory=dict)  # Fixed: any -> Any
 
 
 class AnomalyCreate(AnomalyBase):
@@ -56,7 +56,7 @@ class AnomalyStats(BaseModel):
     by_type: Dict[str, int]
     by_line: Dict[str, int]
     severity_distribution: Dict[str, int]  # low/medium/high counts
-    trend_24h: List[Dict[str, any]]  # Hourly counts
+    trend_24h: List[Dict[str, Any]]  # Fixed: any -> Any
 
 
 class WebSocketMessage(BaseModel):
@@ -64,4 +64,4 @@ class WebSocketMessage(BaseModel):
     
     type: str = Field(..., description="Message type: anomaly|heartbeat|stats")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    data: Optional[Dict[str, any]] = None
+    data: Optional[Dict[str, Any]] = None  # Fixed: any -> Any

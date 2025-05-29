@@ -1,11 +1,11 @@
-# --- backend/app/ml/predict.py ---
+
 """
 Real-time anomaly detection using trained models.
 Combines predictions from multiple models for ensemble detection.
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import structlog
@@ -20,10 +20,10 @@ class AnomalyDetector:
     """Ensemble anomaly detector combining multiple models."""
     
     def __init__(self):
-        self.models: Dict[str, any] = {}
+        self.models: Dict[str, Any] = {}
         self.last_run_time: Optional[datetime] = None
         
-    def register_model(self, name: str, model: any):
+    def register_model(self, name: str, model: Any):
         """Register a model for ensemble detection."""
         self.models[name] = model
         logger.info(f"Registered model: {name}")
@@ -32,7 +32,7 @@ class AnomalyDetector:
         """Check if a model type is loaded."""
         return model_type in self.models
     
-    async def detect_anomalies(self, positions: List[any]) -> List[Dict]:
+    async def detect_anomalies(self, positions: List[Any]) -> List[Dict]:
         """Run anomaly detection on train positions."""
         
         if not positions:

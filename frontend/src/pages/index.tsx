@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
@@ -5,6 +6,7 @@ import { Layout } from '@/components/layout/Layout'
 import { AnomalyTimeline } from '@/components/timeline/AnomalyTimeline'
 import { useAnomalies } from '@/hooks/useAnomalies'
 import { useWebSocket } from '@/hooks/useWebSocket'
+import type { Anomaly, LineInfo } from '@/types'
 
 // Dynamic import for Mapbox to avoid SSR issues
 const SubwayMap = dynamic(
@@ -33,7 +35,7 @@ export default function Home() {
 
   // WebSocket for real-time updates
   const { isConnected } = useWebSocket({
-    onAnomalyReceived: (anomaly) => {
+    onAnomalyReceived: (anomaly: Anomaly) => {
       // Handle real-time anomaly
       console.log('New anomaly:', anomaly)
     },
@@ -134,16 +136,16 @@ interface LineSelectorProps {
 }
 
 function LineSelector({ selectedLine, onChange, anomalyCounts = {} }: LineSelectorProps) {
-  const lines = [
-    { id: '123456', label: '1/2/3/4/5/6', color: 'bg-subway-4' },
-    { id: '7', label: '7', color: 'bg-subway-7' },
-    { id: 'ace', label: 'A/C/E', color: 'bg-subway-A' },
-    { id: 'bdfm', label: 'B/D/F/M', color: 'bg-subway-B' },
-    { id: 'g', label: 'G', color: 'bg-subway-G' },
-    { id: 'jz', label: 'J/Z', color: 'bg-subway-J' },
-    { id: 'l', label: 'L', color: 'bg-subway-L' },
-    { id: 'nqrw', label: 'N/Q/R/W', color: 'bg-subway-N' },
-    { id: 's', label: 'S', color: 'bg-subway-S' },
+  const lines: LineInfo[] = [
+    { id: '123456', label: '1/2/3/4/5/6', color: 'bg-red-500' },
+    { id: '7', label: '7', color: 'bg-purple-500' },
+    { id: 'ace', label: 'A/C/E', color: 'bg-blue-500' },
+    { id: 'bdfm', label: 'B/D/F/M', color: 'bg-orange-500' },
+    { id: 'g', label: 'G', color: 'bg-green-500' },
+    { id: 'jz', label: 'J/Z', color: 'bg-amber-700' },
+    { id: 'l', label: 'L', color: 'bg-gray-400' },
+    { id: 'nqrw', label: 'N/Q/R/W', color: 'bg-yellow-500' },
+    { id: 's', label: 'S', color: 'bg-gray-500' },
   ]
 
   return (
@@ -156,30 +158,30 @@ function LineSelector({ selectedLine, onChange, anomalyCounts = {} }: LineSelect
             selectedLine === null
               ? 'bg-blue-600 text-white'
               : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-      }`}
-    >
-      All Lines
-    </button>
-    {lines.map(line => (
-      <button
-        key={line.id}
-        onClick={() => onChange(line.id)}
-        className={`px-3 py-1 rounded text-sm transition-all flex items-center gap-1 ${
-          selectedLine === line.id
-            ? 'bg-gray-800 text-white ring-2 ring-blue-500'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-        }`}
-      >
-        <span className={`w-3 h-3 rounded-full ${line.color}`} />
-        {line.label}
-        {anomalyCounts[line.id] && (
-          <span className="ml-1 text-xs text-gray-400">
-            ({anomalyCounts[line.id]})
-          </span>
-        )}
-      </button>
-    ))}
-  </div>
-</div>
-)
+          }`}
+        >
+          All Lines
+        </button>
+        {lines.map(line => (
+          <button
+            key={line.id}
+            onClick={() => onChange(line.id)}
+            className={`px-3 py-1 rounded text-sm transition-all flex items-center gap-1 ${
+              selectedLine === line.id
+                ? 'bg-gray-800 text-white ring-2 ring-blue-500'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            <span className={`w-3 h-3 rounded-full ${line.color}`} />
+            {line.label}
+            {anomalyCounts[line.id] && (
+              <span className="ml-1 text-xs text-gray-400">
+                ({anomalyCounts[line.id]})
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }

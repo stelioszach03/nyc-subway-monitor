@@ -1,4 +1,4 @@
-# --- backend/app/ml/models/lstm_autoencoder.py ---
+
 """
 LSTM Autoencoder for sequence anomaly detection.
 Captures temporal dependencies in subway traffic patterns.

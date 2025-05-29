@@ -1,4 +1,4 @@
-# --- backend/app/db/models.py ---
+
 """
 SQLAlchemy models for NYC Subway Monitor.
 Designed for TimescaleDB with proper time-series optimization.

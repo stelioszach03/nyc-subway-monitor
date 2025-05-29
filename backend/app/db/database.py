@@ -1,3 +1,4 @@
+
 """
 Database connection and session management using SQLAlchemy with asyncpg.
 Includes TimescaleDB hypertable setup for time-series data.
@@ -51,6 +52,11 @@ async def init_db() -> None:
     async with engine.begin() as conn:
         # Create TimescaleDB extension
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
+        
+        # Drop all tables if they exist (for clean portfolio demo)
+        if settings.debug:
+            logger.info("Dropping existing tables for clean demo setup")
+            await conn.run_sync(Base.metadata.drop_all)
         
         # Create tables
         await conn.run_sync(Base.metadata.create_all)

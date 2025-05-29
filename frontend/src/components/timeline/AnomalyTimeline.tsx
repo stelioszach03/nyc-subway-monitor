@@ -1,10 +1,12 @@
+
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 import { format } from 'date-fns'
 import { TimelineControls } from './TimelineControls'
+import type { Anomaly } from '@/types'
 
 interface AnomalyTimelineProps {
-  anomalies: any[]
+  anomalies: Anomaly[]
   timeRange: [Date, Date]
   onTimeRangeChange: (range: [Date, Date]) => void
   isLoading?: boolean

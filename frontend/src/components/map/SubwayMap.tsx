@@ -1,22 +1,11 @@
+
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { StationMarker } from './StationMarker'
+import type { Anomaly } from '@/types'
 
 // Set Mapbox token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
-
-interface Anomaly {
-  id?: number
-  station_id?: string
-  line?: string
-  anomaly_type: string
-  severity: number
-  detected_at: string
-  model_name: string
-  model_version: string
-  features?: Record<string, number>
-  metadata?: Record<string, any>
-}
 
 interface SubwayMapProps {
   anomalies: Anomaly[]
@@ -44,23 +33,6 @@ export function SubwayMap({ anomalies, onStationClick, selectedStation }: Subway
 
     map.current.on('load', () => {
       setMapLoaded(true)
-      
-      // Add subway lines layer (if you have the data)
-      // map.current?.addSource('subway-lines', {
-      //   type: 'geojson',
-      //   data: '/data/subway-lines.geojson',
-      // })
-
-      // map.current?.addLayer({
-      //   id: 'subway-lines',
-      //   type: 'line',
-      //   source: 'subway-lines',
-      //   paint: {
-      //     'line-color': '#4a5568',
-      //     'line-width': 2,
-      //     'line-opacity': 0.6,
-      //   },
-      // })
     })
 
     // Cleanup

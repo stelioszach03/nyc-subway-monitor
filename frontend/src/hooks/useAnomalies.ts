@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import type { AnomalyListResponse, AnomalyStats } from '@/types'
 
 interface UseAnomaliesOptions {
   line?: string | null
@@ -21,10 +22,10 @@ export function useAnomalies(options: UseAnomaliesOptions = {}) {
   } = options
 
   // Fetch anomalies
-  const anomaliesQuery = useQuery({
+  const anomaliesQuery = useQuery<AnomalyListResponse>({
     queryKey: ['anomalies', { line, station, startDate, endDate, page, pageSize }],
     queryFn: async () => {
-      return apiClient.get('/api/v1/anomalies', {
+      return apiClient.get<AnomalyListResponse>('/api/v1/anomalies', {
         line: line || undefined,
         station_id: station || undefined,
         start_date: startDate?.toISOString(),
@@ -37,10 +38,10 @@ export function useAnomalies(options: UseAnomaliesOptions = {}) {
   })
 
   // Fetch stats
-  const statsQuery = useQuery({
+  const statsQuery = useQuery<AnomalyStats>({
     queryKey: ['anomaly-stats'],
     queryFn: async () => {
-      return apiClient.get('/api/v1/anomalies/stats', {
+      return apiClient.get<AnomalyStats>('/api/v1/anomalies/stats', {
         hours: 24,
       })
     },

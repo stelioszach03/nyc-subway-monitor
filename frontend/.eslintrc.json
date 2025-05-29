@@ -1,3 +1,4 @@
+
 {
   "extends": [
     "next/core-web-vitals",
@@ -12,7 +13,6 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react/react-in-jsx-scope": "off",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    "prefer-spread": "warn"
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
