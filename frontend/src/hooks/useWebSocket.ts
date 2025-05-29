@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { getWebSocket } from '@/lib/websocket'
 
 interface UseWebSocketOptions {
@@ -11,6 +11,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [isConnected, setIsConnected] = useState(false)
   const [lastMessage, setLastMessage] = useState<any>(null)
   const [connectionError, setConnectionError] = useState<Error | null>(null)
+  
+  // Use ref to avoid re-render dependency issues
+  const optionsRef = useRef(options)
+  optionsRef.current = options
 
   useEffect(() => {
     const ws = getWebSocket()
@@ -21,8 +25,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       setConnectionError(null)
       
       // Apply filters if provided
-      if (options.filters) {
-        ws.subscribe(options.filters)
+      if (optionsRef.current.filters) {
+        ws.subscribe(optionsRef.current.filters)
       }
     })
 
@@ -36,12 +40,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
     ws.on('anomaly', (anomaly) => {
       setLastMessage({ type: 'anomaly', data: anomaly })
-      options.onAnomalyReceived?.(anomaly)
+      optionsRef.current.onAnomalyReceived?.(anomaly)
     })
 
     ws.on('stats', (stats) => {
       setLastMessage({ type: 'stats', data: stats })
-      options.onStatsReceived?.(stats)
+      optionsRef.current.onStatsReceived?.(stats)
     })
 
     // Connect

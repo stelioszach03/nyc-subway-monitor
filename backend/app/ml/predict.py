@@ -1,3 +1,4 @@
+# --- backend/app/ml/predict.py ---
 """
 Real-time anomaly detection using trained models.
 Combines predictions from multiple models for ensemble detection.
@@ -112,8 +113,8 @@ class AnomalyDetector:
                 anomaly.get("station_id"),
                 anomaly.get("line"),
                 # Round to 5-minute window
-                pd.Timestamp(anomaly["metadata"].get("timestamp", datetime.utcnow())).floor("5min")
-                if "timestamp" in anomaly.get("metadata", {})
+                pd.Timestamp(anomaly["meta_data"].get("timestamp", datetime.utcnow())).floor("5min")
+                if "timestamp" in anomaly.get("meta_data", {})
                 else None
             )
             grouped[key].append(anomaly)
@@ -138,7 +139,7 @@ class AnomalyDetector:
                     "model_name": "ensemble",
                     "model_version": f"ensemble_{len(models)}",
                     "features": group[0]["features"],  # Use first model's features
-                    "metadata": {
+                    "meta_data": {
                         "models": models,
                         "individual_severities": dict(zip(models, severity_scores)),
                         "detection_count": len(group),

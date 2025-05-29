@@ -29,11 +29,12 @@ export function StationMarker({ severity, count, isSelected }: StationMarkerProp
         "
       ></div>
       <div 
-        class="relative rounded-full border-2 ${isSelected ? 'border-white' : 'border-gray-800'}"
+        class="relative rounded-full border-2 ${isSelected ? 'border-white' : 'border-gray-800'} shadow-lg"
         style="
           width: ${size}px;
           height: ${size}px;
           background-color: ${color};
+          box-shadow: 0 0 10px ${color};
         "
       >
         <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">

@@ -1,3 +1,4 @@
+# --- backend/app/db/models.py ---
 """
 SQLAlchemy models for NYC Subway Monitor.
 Designed for TimescaleDB with proper time-series optimization.
@@ -104,7 +105,7 @@ class Anomaly(Base):
     
     # Context
     features = Column(JSONB)  # Input features that triggered anomaly
-    metadata = Column(JSONB)  # Additional context
+    meta_data = Column(JSONB)  # Additional context (renamed from metadata)
     resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime(timezone=True))
     

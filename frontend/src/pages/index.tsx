@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { Layout } from '@/components/layout/Layout'
@@ -32,7 +32,7 @@ export default function Home() {
   })
 
   // WebSocket for real-time updates
-  const { isConnected, lastMessage } = useWebSocket({
+  const { isConnected } = useWebSocket({
     onAnomalyReceived: (anomaly) => {
       // Handle real-time anomaly
       console.log('New anomaly:', anomaly)

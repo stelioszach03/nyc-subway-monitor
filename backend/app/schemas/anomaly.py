@@ -1,3 +1,4 @@
+# --- backend/app/schemas/anomaly.py ---
 """
 Pydantic schemas for anomaly detection results.
 """
@@ -18,7 +19,7 @@ class AnomalyBase(BaseModel):
     model_name: str
     model_version: str
     features: Dict[str, float] = Field(default_factory=dict)
-    metadata: Dict[str, any] = Field(default_factory=dict)
+    meta_data: Dict[str, any] = Field(default_factory=dict)  # Renamed from metadata
 
 
 class AnomalyCreate(AnomalyBase):

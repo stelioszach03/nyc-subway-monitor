@@ -1,3 +1,4 @@
+# --- backend/app/ml/models/lstm_autoencoder.py ---
 """
 LSTM Autoencoder for sequence anomaly detection.
 Captures temporal dependencies in subway traffic patterns.
@@ -274,7 +275,7 @@ class LSTMDetector:
                                 col: float(row[col]) for col in self.feature_columns
                                 if not pd.isna(row[col])
                             },
-                            "metadata": {
+                            "meta_data": {
                                 "reconstruction_error": float(error),
                                 "threshold": float(self.threshold),
                                 "sequence_position": pos_idx,

@@ -1,3 +1,4 @@
+# --- backend/app/ml/models/isolation_forest.py ---
 """
 Isolation Forest implementation for unsupervised anomaly detection.
 Fast baseline model for multivariate time-series anomalies.
@@ -129,7 +130,7 @@ class IsolationForestDetector:
                         col: float(row[col]) for col in self.feature_columns
                         if not pd.isna(row[col])
                     },
-                    "metadata": {
+                    "meta_data": {
                         "trip_id": row.get("trip_id"),
                         "route_id": row.get("route_id"),
                         "timestamp": row.get("timestamp").isoformat() if pd.notna(row.get("timestamp")) else None,
