@@ -1,4 +1,3 @@
-
 """
 Database connection and session management using SQLAlchemy with asyncpg.
 Includes TimescaleDB hypertable setup for time-series data.
@@ -16,13 +15,14 @@ from app.config import get_settings
 logger = structlog.get_logger()
 settings = get_settings()
 
-# Create async engine
+# Create async engine with proper isolation level for concurrent operations
 engine = create_async_engine(
     str(settings.database_url),
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=20,
     max_overflow=10,
+    isolation_level="READ COMMITTED",  # Prevent serialization errors
 )
 
 # Async session factory
@@ -54,8 +54,25 @@ async def init_db() -> None:
             # Create TimescaleDB extension
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
             
-            # Drop all tables if they exist (for clean portfolio demo)
+            # Drop foreign key constraints before dropping tables in debug mode
             if settings.debug:
+                logger.info("Dropping foreign key constraints for clean demo setup")
+                await conn.execute(text("""
+                    DO $$
+                    DECLARE
+                        r RECORD;
+                    BEGIN
+                        FOR r IN (
+                            SELECT conname, conrelid::regclass AS table_name
+                            FROM pg_constraint
+                            WHERE contype = 'f'
+                            AND connamespace = 'public'::regnamespace
+                        ) LOOP
+                            EXECUTE 'ALTER TABLE ' || r.table_name || ' DROP CONSTRAINT IF EXISTS ' || r.conname || ' CASCADE';
+                        END LOOP;
+                    END $$;
+                """))
+                
                 logger.info("Dropping existing tables for clean demo setup")
                 await conn.run_sync(Base.metadata.drop_all)
             
@@ -123,6 +140,7 @@ async def create_indexes() -> None:
         "CREATE INDEX IF NOT EXISTS idx_anomalies_station_time ON anomalies(station_id, detected_at DESC)",
         "CREATE INDEX IF NOT EXISTS idx_train_positions_line_time ON train_positions(line, timestamp DESC)",
         "CREATE INDEX IF NOT EXISTS idx_feed_updates_feed_time ON feed_updates(feed_id, timestamp DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)",  # Help with foreign key checks
     ]
     
     for index_sql in indexes:
