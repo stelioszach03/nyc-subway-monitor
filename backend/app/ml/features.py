@@ -1,15 +1,19 @@
-# --- backend/app/ml/features.py ---
 """
 Feature extraction for subway time-series data.
-Computes headway, dwell time, schedule adherence, and rolling statistics.
+Updated with new Pandas frequency aliases (2.2.0+).
 """
 
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+import re
 
 import numpy as np
 import pandas as pd
 from scipy import stats
+
+from app.config import get_settings
+
+settings = get_settings()
 
 
 class FeatureExtractor:
@@ -21,6 +25,37 @@ class FeatureExtractor:
         
         # Cache for previous trains
         self.train_cache: Dict[str, List[Dict]] = {}
+        
+        # Updated frequency mappings
+        self.freq_mapping = {
+            'H': 'h',      # Hourly
+            'T': 'min',    # Minutely  
+            'S': 's',      # Secondly
+            'L': 'ms',     # Milliseconds
+            'U': 'us',     # Microseconds
+            'N': 'ns',     # Nanoseconds
+            'D': 'D',      # Daily (unchanged)
+            'W': 'W',      # Weekly (unchanged)
+            'M': 'ME',     # Month end
+            'MS': 'MS',    # Month start
+            'Q': 'QE',     # Quarter end
+            'QS': 'QS',    # Quarter start
+            'Y': 'YE',     # Year end
+            'YS': 'YS',    # Year start
+            'A': 'YE',     # Year end (alias)
+            'AS': 'YS',    # Year start (alias)
+        }
+    
+    def update_frequency_alias(self, freq_str: str) -> str:
+        """Update deprecated frequency aliases to current standards."""
+        updated = freq_str
+        
+        for old, new in self.freq_mapping.items():
+            # Handle numeric prefixes (e.g., "3H" -> "3h")
+            pattern = r'(\d*)' + re.escape(old) + r'(?![a-zA-Z])'
+            updated = re.sub(pattern, r'\1' + new, updated)
+        
+        return updated
     
     def extract_trip_features(self, trip_data: Dict, feed_id: str) -> Optional[Dict]:
         """Extract features from single trip update."""
@@ -60,7 +95,6 @@ class FeatureExtractor:
     
     def _get_line_from_route(self, route_id: str) -> str:
         """Map route ID to line grouping."""
-        # Normalize route ID
         route = route_id.upper().strip()
         
         # Direct mapping for most lines
@@ -77,11 +111,10 @@ class FeatureExtractor:
         elif route in ["L", "G"]:
             return route
         elif route == "S" or route == "GS":
-            return "S"  # Shuttle
+            return "S"
         elif route == "SI":
             return "SI"
         else:
-            # Default to the route itself if unknown
             return route.lower()
     
     def _calculate_headway(self, cache_key: str, arrival_time: Optional[datetime]) -> Optional[int]:
@@ -115,48 +148,49 @@ class FeatureExtractor:
         ]
     
     def compute_rolling_features(self, positions_df: pd.DataFrame) -> pd.DataFrame:
-        """Compute rolling statistical features with proper window handling."""
+        """Compute rolling statistical features with updated Pandas frequencies."""
         
-        # Make a copy to avoid modifying original
         df = positions_df.copy()
         
-        # Ensure we have timestamp as index for time-based operations
+        # Ensure we have timestamp as index
         if 'timestamp' in df.columns and not isinstance(df.index, pd.DatetimeIndex):
             df = df.set_index('timestamp').sort_index()
         
         # Group by station and direction
         grouped = df.groupby(["current_station", "direction"])
         
-        # Calculate rolling statistics
+        # Calculate rolling statistics with updated frequencies
         for col in ["headway_seconds", "dwell_time_seconds", "delay_seconds"]:
             if col in df.columns:
                 try:
-                    # For time-based rolling, we need DatetimeIndex
-                    if isinstance(df.index, pd.DatetimeIndex):
-                        # Use 1 hour window
-                        df[f"{col}_zscore"] = grouped[col].transform(
-                            lambda x: (x - x.rolling('1H', min_periods=1).mean()) / 
-                                     (x.rolling('1H', min_periods=1).std() + 1e-7)
+                    # Use new frequency alias '1h' instead of '1H'
+                    window = self.update_frequency_alias('1H')  # converts to '1h'
+                    
+                    # Z-score calculation
+                    df[f"{col}_zscore"] = grouped[col].transform(
+                        lambda x: (x - x.rolling(window, min_periods=1).mean()) / 
+                                 (x.rolling(window, min_periods=1).std() + 1e-7)
+                    )
+                    
+                    # Percentile calculation
+                    df[f"{col}_percentile"] = grouped[col].transform(
+                        lambda x: x.rolling(window, min_periods=1).rank(pct=True)
+                    )
+                    
+                    # Additional rolling features with various windows
+                    for hrs in [3, 6, 12, 24]:
+                        win = self.update_frequency_alias(f'{hrs}H')  # e.g., '3H' -> '3h'
+                        
+                        df[f"{col}_rolling_{hrs}h_mean"] = grouped[col].transform(
+                            lambda x: x.rolling(win, min_periods=1).mean()
                         )
                         
-                        df[f"{col}_percentile"] = grouped[col].transform(
-                            lambda x: x.rolling('1H', min_periods=1).rank(pct=True)
-                        )
-                    else:
-                        # Fallback to integer window (12 periods = ~1 hour for 5-min intervals)
-                        window_size = min(12, len(df))
-                        
-                        df[f"{col}_zscore"] = grouped[col].transform(
-                            lambda x: (x - x.rolling(window_size, min_periods=1).mean()) / 
-                                     (x.rolling(window_size, min_periods=1).std() + 1e-7)
-                        )
-                        
-                        df[f"{col}_percentile"] = grouped[col].transform(
-                            lambda x: x.rolling(window_size, min_periods=1).rank(pct=True)
+                        df[f"{col}_rolling_{hrs}h_std"] = grouped[col].transform(
+                            lambda x: x.rolling(win, min_periods=1).std()
                         )
                         
                 except Exception as e:
-                    # If rolling fails, just use global stats
+                    # Fallback to simple calculations if rolling fails
                     print(f"Warning: Rolling calculation failed for {col}: {e}")
                     mean_val = df[col].mean()
                     std_val = df[col].std() + 1e-7
@@ -168,17 +202,6 @@ class FeatureExtractor:
             df = df.reset_index()
         
         return df
-    
-    def create_station_features(self, station_id: str, num_stations: int = 472) -> np.ndarray:
-        """Create one-hot encoded station features."""
-        # In production, would map station_id to index
-        # For now, simple hash-based index
-        station_idx = hash(station_id) % num_stations
-        
-        features = np.zeros(num_stations)
-        features[station_idx] = 1
-        
-        return features
     
     def create_temporal_features(self, timestamp: datetime) -> Dict[str, float]:
         """Extract temporal features from timestamp."""
@@ -199,3 +222,12 @@ class FeatureExtractor:
         evening_rush = 17 <= hour <= 20
         
         return is_weekday and (morning_rush or evening_rush)
+    
+    def create_station_features(self, station_id: str, num_stations: int = 472) -> np.ndarray:
+        """Create one-hot encoded station features."""
+        station_idx = hash(station_id) % num_stations
+        
+        features = np.zeros(num_stations)
+        features[station_idx] = 1
+        
+        return features

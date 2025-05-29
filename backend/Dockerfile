@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
+# Create non-root user FIRST
 RUN useradd -m -u 1000 appuser
 
 WORKDIR /app
@@ -35,8 +35,22 @@ WORKDIR /app
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache /wheels/*
 
-# Copy application code
+# CRITICAL: Create ALL directories with proper ownership BEFORE switching user
+RUN mkdir -p /app/models/artifacts && \
+    mkdir -p /app/logs && \
+    mkdir -p /app/data && \
+    mkdir -p /app/app && \
+    mkdir -p /app/app/ml && \
+    mkdir -p /app/app/ml/models && \
+    mkdir -p /app/app/ml/training && \
+    chmod -R 755 /app && \
+    chown -R appuser:appuser /app
+
+# Copy application code with correct ownership
 COPY --chown=appuser:appuser . .
+
+# Create volume mount points (optional, but ensures they exist)
+VOLUME ["/app/models/artifacts", "/app/data", "/app/logs"]
 
 # Switch to non-root user
 USER appuser
@@ -44,7 +58,7 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Health check with proper endpoint
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health/live || exit 1
 
