@@ -36,12 +36,8 @@ class FeatureExtractor:
             "timestamp": datetime.utcnow(),
         }
         
-        # Calculate delay if scheduled time available
-        if "scheduled_arrival" in trip_data and features["arrival_time"]:
-            delay = (features["arrival_time"] - trip_data["scheduled_arrival"]).total_seconds()
-            features["delay_seconds"] = int(delay)
-        else:
-            features["delay_seconds"] = 0
+        # Calculate delay
+        features["delay_seconds"] = trip_data.get("delay_seconds", 0)
         
         # Calculate headway
         cache_key = f"{features['current_station']}_{features['direction']}"
@@ -52,7 +48,9 @@ class FeatureExtractor:
         # Calculate dwell time
         if features["arrival_time"] and features["departure_time"]:
             dwell = (features["departure_time"] - features["arrival_time"]).total_seconds()
-            features["dwell_time_seconds"] = int(dwell)
+            features["dwell_time_seconds"] = int(dwell) if dwell > 0 else None
+        else:
+            features["dwell_time_seconds"] = None
         
         # Update cache
         self._update_cache(cache_key, features)
@@ -61,18 +59,29 @@ class FeatureExtractor:
     
     def _get_line_from_route(self, route_id: str) -> str:
         """Map route ID to line grouping."""
-        # Handle express/local variants
-        route_map = {
-            "6X": "6",
-            "7X": "7",
-            "Q": "nqrw",
-            "N": "nqrw",
-            "R": "nqrw",
-            "W": "nqrw",
-            # Add more mappings as needed
-        }
+        # Normalize route ID
+        route = route_id.upper().strip()
         
-        return route_map.get(route_id, route_id.lower())
+        # Direct mapping for most lines
+        if route in ["1", "2", "3", "4", "5", "6", "7"]:
+            return route
+        elif route in ["A", "C", "E"]:
+            return route
+        elif route in ["B", "D", "F", "M"]:
+            return route
+        elif route in ["N", "Q", "R", "W"]:
+            return route
+        elif route in ["J", "Z"]:
+            return route
+        elif route in ["L", "G"]:
+            return route
+        elif route == "S" or route == "GS":
+            return "S"  # Shuttle
+        elif route == "SI":
+            return "SI"
+        else:
+            # Default to the route itself if unknown
+            return route.lower()
     
     def _calculate_headway(self, cache_key: str, arrival_time: Optional[datetime]) -> Optional[int]:
         """Calculate time since previous train at same station/direction."""
