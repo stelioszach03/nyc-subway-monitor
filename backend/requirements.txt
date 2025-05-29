@@ -10,20 +10,24 @@ asyncpg==0.29.0
 sqlalchemy==2.0.36
 alembic==1.14.0
 
-# ML/Data Science
-nyctrains>=1.5.0  # This is the correct package name
+# GTFS-RT parsing (without nyctrains which is problematic)
 gtfs-realtime-bindings==1.0.0
+protobuf==5.29.3
+
+# ML/Data Science
 scikit-learn==1.6.0
 torch==2.3.0
 numpy==1.26.4
 pandas==2.2.3
 scipy==1.14.1
 
+# HTTP client
+httpx==0.28.1
+
 # Time series
 pytz==2024.2
 
 # API/Async
-httpx==0.28.1
 websockets==14.1
 redis==5.2.1
 

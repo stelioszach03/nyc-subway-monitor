@@ -1,3 +1,4 @@
+# --- backend/app/ml/train.py ---
 """
 Model training orchestrator.
 Handles periodic retraining and model versioning.
@@ -35,7 +36,7 @@ class ModelTrainer:
         self.active_models: Dict[str, any] = {}
         
     async def load_or_train_models(self):
-        """Load existing models or train new ones if needed."""
+        """Load existing models or create placeholders if no data exists."""
         async with AsyncSessionLocal() as db:
             # Check for existing models
             active_models = await crud.get_active_models(db)
@@ -69,11 +70,30 @@ class ModelTrainer:
                             logger.error(f"Failed to load model {model_record.model_type}", 
                                        error=str(e))
             
-            # Train missing models
-            for model_type, loaded in models_loaded.items():
-                if not loaded:
-                    logger.info(f"Training new {model_type} model")
-                    await self.train_model(model_type, db)
+            # Check if we have data to train with
+            end_time = datetime.utcnow()
+            start_time = end_time - timedelta(days=7)
+            
+            positions = await crud.get_train_positions_for_training(
+                db, start_time, end_time
+            )
+            
+            if len(positions) < 100:
+                logger.warning("Not enough data to train models", samples=len(positions))
+                # Create placeholder models
+                for model_type, loaded in models_loaded.items():
+                    if not loaded:
+                        logger.info(f"Creating placeholder {model_type} model")
+                        if model_type == "isolation_forest":
+                            self.active_models["isolation_forest"] = IsolationForestDetector()
+                        elif model_type == "lstm_autoencoder":
+                            self.active_models["lstm_autoencoder"] = LSTMDetector()
+            else:
+                # Train missing models
+                for model_type, loaded in models_loaded.items():
+                    if not loaded:
+                        logger.info(f"Training new {model_type} model")
+                        await self.train_model(model_type, db)
     
     async def train_model(self, model_type: str, db: AsyncSession) -> Optional[Dict]:
         """Train a specific model type."""
@@ -108,10 +128,10 @@ class ModelTrainer:
         ])
         
         # Add temporal features
-        for _, row in df.iterrows():
+        for idx, row in df.iterrows():
             temporal = self.feature_extractor.create_temporal_features(row["timestamp"])
             for key, value in temporal.items():
-                df.loc[_, key] = value
+                df.loc[idx, key] = value
         
         # Compute rolling features
         df = self.feature_extractor.compute_rolling_features(df)

@@ -1,4 +1,4 @@
-
+# --- backend/app/main.py ---
 """
 FastAPI application entry point for NYC Subway Monitor.
 Configures middleware, routers, and lifecycle events.
@@ -18,10 +18,15 @@ from app.config import get_settings
 from app.core.exceptions import SubwayMonitorException
 from app.db.database import init_db
 from app.ml.train import ModelTrainer
+from app.ml.predict import AnomalyDetector
 from app.routers import anomaly, feed, health, websocket
 
 logger = structlog.get_logger()
 settings = get_settings()
+
+# Global instances
+model_trainer = ModelTrainer()
+anomaly_detector = AnomalyDetector()
 
 
 @asynccontextmanager
@@ -35,12 +40,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await init_db()
         
         # Load ML models
-        trainer = ModelTrainer()
-        await trainer.load_or_train_models()
-        app.state.trainer = trainer
+        await model_trainer.load_or_train_models()
+        
+        # Register models with detector
+        for model_type, model in model_trainer.active_models.items():
+            anomaly_detector.register_model(model_type, model)
+        
+        # Store references in app state
+        app.state.trainer = model_trainer
+        app.state.detector = anomaly_detector
         
         # Start background tasks
         app.state.feed_task = asyncio.create_task(feed.start_feed_ingestion())
+        
+        logger.info("Application startup complete")
         
     except Exception as e:
         logger.error("Failed to start application", error=str(e))

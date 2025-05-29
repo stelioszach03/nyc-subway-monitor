@@ -1,4 +1,4 @@
-
+# --- backend/app/ml/predict.py ---
 """
 Real-time anomaly detection using trained models.
 Combines predictions from multiple models for ensemble detection.
@@ -38,6 +38,11 @@ class AnomalyDetector:
         if not positions:
             return []
         
+        # If no models are loaded, return empty list
+        if not self.models:
+            logger.warning("No models loaded for anomaly detection")
+            return []
+        
         # Convert to DataFrame
         df = pd.DataFrame([
             {
@@ -66,9 +71,19 @@ class AnomalyDetector:
         for model_name, model in self.models.items():
             try:
                 if isinstance(model, IsolationForestDetector):
-                    anomalies = model.predict(df)
+                    # Check if model is trained
+                    if hasattr(model, 'model') and model.model is not None:
+                        anomalies = model.predict(df)
+                    else:
+                        logger.warning(f"Model {model_name} not trained yet")
+                        continue
                 elif isinstance(model, LSTMDetector):
-                    anomalies = model.predict(df)
+                    # Check if model is trained
+                    if hasattr(model, 'model') and model.model is not None:
+                        anomalies = model.predict(df)
+                    else:
+                        logger.warning(f"Model {model_name} not trained yet")
+                        continue
                 else:
                     continue
                 
@@ -152,8 +167,19 @@ class AnomalyDetector:
     
     def get_model_stats(self) -> Dict:
         """Get statistics about loaded models."""
+        model_stats = {}
+        for name, model in self.models.items():
+            is_trained = False
+            if hasattr(model, 'model') and model.model is not None:
+                is_trained = True
+            model_stats[name] = {
+                "loaded": True,
+                "trained": is_trained
+            }
+            
         return {
             "loaded_models": list(self.models.keys()),
             "model_count": len(self.models),
+            "model_details": model_stats,
             "last_run": self.last_run_time.isoformat() if self.last_run_time else None,
         }

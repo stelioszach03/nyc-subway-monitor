@@ -1,3 +1,4 @@
+# --- backend/app/routers/anomaly.py ---
 """
 Anomaly detection API endpoints.
 Provides real-time and historical anomaly data.
@@ -7,12 +8,11 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import crud
 from app.db.database import get_db
-from app.ml.predict import AnomalyDetector
 from app.schemas.anomaly import (
     AnomalyListResponse,
     AnomalyResponse,
@@ -21,9 +21,6 @@ from app.schemas.anomaly import (
 
 logger = structlog.get_logger()
 router = APIRouter()
-
-# Initialize anomaly detector
-detector = AnomalyDetector()
 
 
 @router.get("/", response_model=AnomalyListResponse)
@@ -118,11 +115,15 @@ async def resolve_anomaly(
 
 @router.post("/detect")
 async def run_detection(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     line: Optional[str] = None,
     lookback_minutes: int = Query(60, ge=10, le=360),
 ) -> dict:
     """Manually trigger anomaly detection on recent data."""
+    
+    # Get detector from app state
+    detector = request.app.state.detector
     
     start_time = datetime.utcnow() - timedelta(minutes=lookback_minutes)
     
@@ -158,8 +159,11 @@ async def run_detection(
 
 
 @router.get("/models/status")
-async def get_model_status(db: AsyncSession = Depends(get_db)) -> dict:
+async def get_model_status(request: Request, db: AsyncSession = Depends(get_db)) -> dict:
     """Get status of deployed ML models."""
+    # Get detector from app state
+    detector = request.app.state.detector
+    
     models = await crud.get_active_models(db)
     
     return {
@@ -173,5 +177,5 @@ async def get_model_status(db: AsyncSession = Depends(get_db)) -> dict:
             }
             for model in models
         ],
-        "last_detection_run": detector.last_run_time,
+        "detector_stats": detector.get_model_stats(),
     }
