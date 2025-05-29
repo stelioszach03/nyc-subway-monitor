@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-Download and extract MTA GTFS static data including complete stations file.
+Download MTA GTFS static data including stops.txt
 """
 
 import io
 import os
 import zipfile
 from pathlib import Path
-
-import httpx
-import asyncio
+import requests
 
 
-async def download_gtfs_static_data(output_dir: Path = Path("data")):
+def download_gtfs_static_data(output_dir: Path = Path("data")):
     """Download and extract MTA GTFS static data."""
     
     # Create output directory
@@ -23,8 +21,8 @@ async def download_gtfs_static_data(output_dir: Path = Path("data")):
     
     print(f"Downloading GTFS static data from {url}...")
     
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.get(url)
+    try:
+        response = requests.get(url, timeout=60)
         response.raise_for_status()
         
         print(f"Downloaded {len(response.content) / 1024 / 1024:.1f} MB")
@@ -40,20 +38,21 @@ async def download_gtfs_static_data(output_dir: Path = Path("data")):
             zf.extractall(output_dir)
             print(f"\nExtracted to {output_dir}")
             
-            # Check stations.txt
-            stations_path = output_dir / "stations.txt"
-            if stations_path.exists():
-                with open(stations_path, 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-                    print(f"\nstations.txt contains {len(lines) - 1} stations")
-            
-            # Also check stops.txt which has ALL stop IDs
+            # Check stops.txt
             stops_path = output_dir / "stops.txt"
             if stops_path.exists():
-                with open(stops_path, 'r', encoding='utf-8') as f:
+                with open(stops_path, 'r', encoding='utf-8-sig') as f:
                     lines = f.readlines()
-                    print(f"stops.txt contains {len(lines) - 1} stops")
+                    print(f"\nstops.txt contains {len(lines) - 1} stops")
+                    
+    except Exception as e:
+        print(f"Error downloading GTFS data: {e}")
+        return False
+    
+    return True
 
 
 if __name__ == "__main__":
-    asyncio.run(download_gtfs_static_data())
+    success = download_gtfs_static_data()
+    if not success:
+        exit(1)

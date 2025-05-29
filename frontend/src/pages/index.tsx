@@ -7,7 +7,7 @@ import { useAnomalies } from '@/hooks/useAnomalies'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import type { Anomaly, LineInfo } from '@/types'
 
-// Dynamic import for Mapbox to avoid SSR issues
+// Dynamic import to prevent SSR issues
 const SubwayMap = dynamic(
   () => import('@/components/map/SubwayMap').then(mod => mod.SubwayMap),
   { 
@@ -25,7 +25,7 @@ export default function Home() {
   ])
   const [mounted, setMounted] = useState(false)
 
-  // Ensure client-side only rendering for dynamic content
+  // Prevent hydration errors
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -41,12 +41,11 @@ export default function Home() {
   // WebSocket for real-time updates
   const { isConnected } = useWebSocket({
     onAnomalyReceived: (anomaly: Anomaly) => {
-      // Handle real-time anomaly
       console.log('New anomaly:', anomaly)
     },
   })
 
-  // Prevent hydration errors
+  // Loading state for SSR
   if (!mounted) {
     return (
       <Layout>
@@ -74,7 +73,6 @@ export default function Home() {
               <StatCard
                 label="Active Anomalies"
                 value={stats?.total_active || 0}
-                trend={stats?.trend_24h}
                 color="text-red-400"
               />
               <StatCard
@@ -99,11 +97,13 @@ export default function Home() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
             {/* Map */}
             <div className="flex-1 relative">
-              <SubwayMap
-                anomalies={anomalies}
-                onStationClick={setSelectedStation}
-                selectedStation={selectedStation}
-              />
+              {mounted && (
+                <SubwayMap
+                  anomalies={anomalies}
+                  onStationClick={setSelectedStation}
+                  selectedStation={selectedStation}
+                />
+              )}
               
               {/* Line Filter */}
               <div className="absolute top-4 left-4 bg-gray-900/90 backdrop-blur-sm rounded-lg p-3 shadow-xl">
@@ -131,15 +131,29 @@ export default function Home() {
   )
 }
 
-// Sub-components
+// Client-only components
 interface StatCardProps {
   label: string
   value: string | number
-  trend?: any[]
   color?: string
 }
 
 function StatCard({ label, value, color = 'text-gray-100' }: StatCardProps) {
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  if (!isClient) {
+    return (
+      <div className="bg-gray-800/50 rounded-lg p-3">
+        <p className="text-xs text-gray-400 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-gray-500">-</p>
+      </div>
+    )
+  }
+  
   return (
     <div className="bg-gray-800/50 rounded-lg p-3">
       <p className="text-xs text-gray-400 mb-1">{label}</p>

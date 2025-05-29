@@ -1,4 +1,4 @@
-# Core dependencies with exact pins for reproducibility
+# Core dependencies
 fastapi==0.115.12
 uvicorn[standard]==0.32.1
 pydantic==2.10.5
@@ -10,7 +10,6 @@ sqlalchemy==2.0.36
 alembic==1.14.0
 
 # ML/Data Science
-# nyctrains>=1.5.0  # Commented out as it's not available
 gtfs-realtime-bindings==1.0.0
 scikit-learn==1.6.0
 torch==2.3.0
@@ -41,4 +40,3 @@ pytest-cov==6.0.0
 mypy==1.13.0
 black==24.10.0
 ruff==0.8.4
-pre-commit==4.0.1

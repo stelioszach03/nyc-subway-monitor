@@ -12,19 +12,19 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [lastMessage, setLastMessage] = useState<any>(null)
   const [connectionError, setConnectionError] = useState<Error | null>(null)
   
-  // Use ref to avoid re-render dependency issues
   const optionsRef = useRef(options)
   optionsRef.current = options
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return
+
     const ws = getWebSocket()
 
-    // Set up event listeners
     const handleConnected = () => {
       setIsConnected(true)
       setConnectionError(null)
       
-      // Apply filters if provided
       if (optionsRef.current.filters) {
         ws.subscribe(optionsRef.current.filters)
       }
@@ -48,6 +48,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       optionsRef.current.onStatsReceived?.(stats)
     }
 
+    // Register event listeners
     ws.on('connected', handleConnected)
     ws.on('disconnected', handleDisconnected)
     ws.on('error', handleError)
@@ -64,7 +65,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       ws.removeListener('error', handleError)
       ws.removeListener('anomaly', handleAnomaly)
       ws.removeListener('stats', handleStats)
-      // Don't disconnect as other components might be using it
     }
   }, [])
 

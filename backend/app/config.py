@@ -1,6 +1,5 @@
 """
-Application configuration using Pydantic Settings for type safety and validation.
-Loads from environment variables with sensible defaults for development.
+Fixed configuration with proper defaults and validation.
 """
 
 from functools import lru_cache
@@ -53,6 +52,7 @@ class Settings(BaseSettings):
     
     # Redis
     redis_url: str = "redis://localhost:6379/0"
+    redis_password: Optional[str] = None
     
     # ML Configuration
     model_retrain_hour: int = Field(default=3, ge=0, le=23)
@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     
     # Feed Configuration
     feed_update_interval: int = Field(default=30, ge=10, description="Seconds between feed updates")
-    feed_timeout: int = Field(default=10, ge=5)
+    feed_timeout: int = Field(default=30, ge=5)
     max_retries: int = Field(default=3, ge=1)
     
     # Feature Engineering
@@ -76,5 +76,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Cached settings instance to avoid repeated parsing."""
+    """Cached settings instance."""
     return Settings()
