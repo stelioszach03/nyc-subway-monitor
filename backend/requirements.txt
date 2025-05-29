@@ -10,8 +10,8 @@ sqlalchemy==2.0.36
 alembic==1.14.0
 
 # ML/Data Science
-nyctrains==1.5.0
 nyct-gtfs==2.0.0
+gtfs-realtime-bindings==1.0.0
 scikit-learn==1.6.0
 torch==2.3.0
 pytorch-lightning==2.3.0

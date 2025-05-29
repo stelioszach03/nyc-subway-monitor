@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import structlog
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import crud
@@ -146,6 +146,8 @@ async def run_detection(
     for anomaly_data in anomalies:
         anomaly = await crud.create_anomaly(db, anomaly_data)
         saved_anomalies.append(anomaly)
+    
+    await db.commit()
     
     return {
         "message": "Detection complete",

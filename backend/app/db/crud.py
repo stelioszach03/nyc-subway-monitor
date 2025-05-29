@@ -5,7 +5,7 @@ Database CRUD operations for async SQLAlchemy.
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy import and_, func, select, update
+from sqlalchemy import and_, func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Anomaly, FeedUpdate, ModelArtifact, Station, TrainPosition
@@ -158,7 +158,7 @@ async def get_anomalies(
     result = await db.execute(query)
     anomalies = result.scalars().all()
     
-    return anomalies, total
+    return anomalies, total or 0
 
 
 async def get_anomaly_by_id(db: AsyncSession, anomaly_id: int) -> Optional[Anomaly]:
@@ -253,8 +253,8 @@ async def get_anomaly_stats(
             severity_dist["high"] += 1
     
     return {
-        "total_today": today_count,
-        "total_active": active_count,
+        "total_today": today_count or 0,
+        "total_active": active_count or 0,
         "by_type": by_type,
         "by_line": by_line,
         "severity_distribution": severity_dist,
@@ -268,8 +268,8 @@ async def get_anomaly_trend(
 ) -> List[Dict]:
     """Get hourly anomaly trend."""
     
-    # Use raw SQL for time bucket aggregation
-    query = """
+    # Fixed: wrap SQL in text()
+    query = text("""
         SELECT 
             date_trunc('hour', detected_at) as hour,
             COUNT(*) as count,
@@ -278,7 +278,7 @@ async def get_anomaly_trend(
         WHERE detected_at >= :start_time AND detected_at <= :end_time
         GROUP BY hour
         ORDER BY hour
-    """
+    """)
     
     result = await db.execute(
         query,
@@ -287,7 +287,7 @@ async def get_anomaly_trend(
     
     trend = [
         {
-            "hour": row[0].isoformat(),
+            "hour": row[0].isoformat() if row[0] else None,
             "count": row[1],
             "avg_severity": float(row[2]) if row[2] else 0,
         }
