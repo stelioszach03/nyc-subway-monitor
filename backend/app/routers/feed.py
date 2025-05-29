@@ -1,3 +1,4 @@
+# --- backend/app/routers/feed.py ---
 """
 GTFS-RT feed ingestion router.
 Handles async fetching from MTA endpoints using nyctrains package.
@@ -12,6 +13,7 @@ from typing import Dict, List, Optional, Any
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
 from app.config import get_settings
 from app.db import crud
@@ -44,7 +46,10 @@ FEED_CODES = {
 }
 
 # Global lock for station creation to prevent deadlocks
-station_lock = asyncio.Lock()
+station_creation_lock = asyncio.Lock()
+
+# Lock for feed processing to ensure sequential processing
+feed_processing_lock = asyncio.Lock()
 
 
 def serialize_datetime(obj: Any) -> Any:
@@ -59,31 +64,62 @@ def serialize_datetime(obj: Any) -> Any:
 
 
 def load_stations_from_file() -> Dict[str, Dict]:
-    """Load station data from CSV file."""
+    """Load station data from stops.txt file (GTFS static data)."""
     stations = {}
-    stations_file = Path("data/stations.txt")
     
-    if not stations_file.exists():
-        logger.warning(f"Stations file not found at {stations_file}")
-        return stations
+    # Try stops.txt first (contains ALL stop IDs)
+    stops_file = Path("data/stops.txt")
+    
+    if not stops_file.exists():
+        # Try stations.txt as fallback
+        stations_file = Path("data/stations.txt")
+        if stations_file.exists():
+            file_to_load = stations_file
+        else:
+            logger.warning(f"Station files not found. Looking for {stops_file} or data/stations.txt")
+            logger.warning("Please download GTFS data: wget http://web.mta.info/developers/data/nyct/subway/google_transit.zip")
+            return stations
+    else:
+        file_to_load = stops_file
     
     try:
-        with open(stations_file, 'r', encoding='utf-8') as f:
+        with open(file_to_load, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                # Include ALL stations, even parent stations
                 stop_id = row['stop_id']
+                
+                # Extract parent station if exists
+                parent_station = row.get('parent_station', '')
+                
+                # Store all stops, including child stops (like S25N)
                 stations[stop_id] = {
                     "name": row['stop_name'],
                     "lat": float(row['stop_lat']),
                     "lon": float(row['stop_lon']),
                     "lines": [],  # Will be populated from feed data
-                    "parent_station": row.get('parent_station', ''),
+                    "parent_station": parent_station,
+                    "location_type": row.get('location_type', '0'),
                 }
+                
+                # Also store parent stations
+                if parent_station and parent_station not in stations:
+                    stations[parent_station] = {
+                        "name": row['stop_name'] + " (Parent)",
+                        "lat": float(row['stop_lat']),
+                        "lon": float(row['stop_lon']),
+                        "lines": [],
+                        "parent_station": '',
+                        "location_type": '1',
+                    }
         
-        logger.info(f"Loaded {len(stations)} stations from file")
+        logger.info(f"Loaded {len(stations)} stations from {file_to_load.name}")
+    except FileNotFoundError:
+        logger.error(f"Station file not found: {file_to_load}")
+        logger.error("Current directory: " + str(Path.cwd()))
+        logger.error("Files in data/: " + str(list(Path("data").glob("*")) if Path("data").exists() else "data/ not found"))
     except Exception as e:
         logger.error(f"Failed to load stations file: {e}")
+        logger.error(f"File path: {file_to_load}")
     
     return stations
 
@@ -98,6 +134,7 @@ class FeedIngester:
         # Load all stations from file
         self.station_cache = load_stations_from_file()
         self.unknown_stations = set()  # Track stations not in file
+        self.station_creation_tasks = {}  # Track ongoing station creation
     
     async def fetch_feed(self, feed_code: str) -> Dict:
         """Fetch and parse single feed with exponential backoff."""
@@ -208,12 +245,12 @@ class FeedIngester:
             if pos.get("next_station"):
                 station_ids.add(pos["next_station"])
         
-        # Use lock to prevent concurrent station creation
-        async with station_lock:
+        # Use ON CONFLICT DO NOTHING to avoid duplicate key errors
+        async with station_creation_lock:
             for station_id in station_ids:
                 if not station_id:
                     continue
-                    
+                
                 try:
                     if station_id in self.station_cache:
                         # Station exists in our file
@@ -227,13 +264,25 @@ class FeedIngester:
                                 if route_id:
                                     lines.add(route_id)
                         
-                        await crud.get_or_create_station(
-                            db,
-                            station_id=station_id,
-                            name=station_info["name"],
-                            lat=station_info["lat"],
-                            lon=station_info["lon"],
-                            lines=sorted(list(lines)),
+                        # Use raw SQL with ON CONFLICT to avoid race conditions
+                        await db.execute(
+                            text("""
+                                INSERT INTO stations (id, name, lat, lon, lines, borough)
+                                VALUES (:id, :name, :lat, :lon, :lines, :borough)
+                                ON CONFLICT (id) DO UPDATE SET
+                                    lines = CASE
+                                        WHEN stations.lines IS NULL THEN EXCLUDED.lines
+                                        ELSE stations.lines || EXCLUDED.lines
+                                    END
+                            """),
+                            {
+                                "id": station_id,
+                                "name": station_info["name"],
+                                "lat": station_info["lat"],
+                                "lon": station_info["lon"],
+                                "lines": list(lines),
+                                "borough": None
+                            }
                         )
                     else:
                         # Unknown station - create with placeholder data
@@ -248,22 +297,29 @@ class FeedIngester:
                                 route_id = pos.get("route_id", "").upper()
                                 break
                         
-                        # Create placeholder station
-                        await crud.get_or_create_station(
-                            db,
-                            station_id=station_id,
-                            name=f"Station {station_id}",
-                            lat=40.7484,  # NYC center
-                            lon=-73.9857,
-                            lines=[route_id] if route_id else [],
+                        # Create placeholder station with ON CONFLICT
+                        await db.execute(
+                            text("""
+                                INSERT INTO stations (id, name, lat, lon, lines, borough)
+                                VALUES (:id, :name, :lat, :lon, :lines, :borough)
+                                ON CONFLICT (id) DO NOTHING
+                            """),
+                            {
+                                "id": station_id,
+                                "name": f"Station {station_id}",
+                                "lat": 40.7484,  # NYC center
+                                "lon": -73.9857,
+                                "lines": [route_id] if route_id else [],
+                                "borough": None
+                            }
                         )
-                    
-                    # Commit after each station to avoid long transactions
-                    await db.commit()
                     
                 except Exception as e:
                     logger.error(f"Failed to create station {station_id}: {e}")
-                    await db.rollback()
+                    # Don't rollback here, let the outer transaction handle it
+            
+            # Commit all station inserts
+            await db.commit()
     
     async def process_feed_data(self, feed_code: str, data: Dict, db: AsyncSession):
         """Extract features and persist to database."""
@@ -281,7 +337,7 @@ class FeedIngester:
                 num_trips=len(data.get("trips", [])),
                 num_alerts=len(data.get("alerts", [])),
             )
-            await db.commit()
+            await db.flush()  # Flush but don't commit yet
             
             # Extract features for each trip
             positions = []
@@ -303,11 +359,13 @@ class FeedIngester:
             # Now bulk insert positions
             if positions:
                 await crud.bulk_create_train_positions(db, positions)
-                await db.commit()
+                await db.flush()
             
             # Calculate processing time
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
             feed_update.processing_time_ms = processing_time
+            
+            # Final commit
             await db.commit()
             
             logger.info(
@@ -335,20 +393,19 @@ async def start_feed_ingestion():
     
     while True:
         try:
-            tasks = []
-            
             # Process feeds sequentially to avoid deadlocks
-            for feed_code in FEED_CODES.keys():
-                # Check if enough time has passed since last fetch
-                last = ingester.last_fetch.get(feed_code, datetime.min)
-                if (datetime.utcnow() - last).total_seconds() >= settings.feed_update_interval:
-                    try:
-                        # Create separate session for each feed
-                        async with AsyncSessionLocal() as db:
-                            await process_single_feed(feed_code, db)
-                        ingester.last_fetch[feed_code] = datetime.utcnow()
-                    except Exception as e:
-                        logger.error(f"Failed to process feed {feed_code}: {e}")
+            async with feed_processing_lock:
+                for feed_code in FEED_CODES.keys():
+                    # Check if enough time has passed since last fetch
+                    last = ingester.last_fetch.get(feed_code, datetime.min)
+                    if (datetime.utcnow() - last).total_seconds() >= settings.feed_update_interval:
+                        try:
+                            # Create separate session for each feed
+                            async with AsyncSessionLocal() as db:
+                                await process_single_feed(feed_code, db)
+                            ingester.last_fetch[feed_code] = datetime.utcnow()
+                        except Exception as e:
+                            logger.error(f"Failed to process feed {feed_code}: {e}")
             
             # Wait before next cycle
             await asyncio.sleep(settings.feed_update_interval)

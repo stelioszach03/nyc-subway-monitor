@@ -29,7 +29,7 @@ async def create_feed_update(
         num_alerts=num_alerts,
     )
     db.add(feed_update)
-    await db.flush()  # Changed from db.flush() to await db.flush()
+    await db.flush()  # Use flush instead of commit to stay in transaction
     return feed_update
 
 
@@ -49,10 +49,47 @@ async def bulk_create_train_positions(
     positions: List[Dict]
 ) -> List[TrainPosition]:
     """Bulk insert train positions."""
-    objects = [TrainPosition(**pos) for pos in positions]
-    db.add_all(objects)
+    # Use raw SQL for better performance and to avoid ORM overhead
+    if not positions:
+        return []
+    
+    # Prepare values for bulk insert
+    values = []
+    for pos in positions:
+        values.append({
+            "timestamp": pos.get("timestamp", datetime.utcnow()),
+            "trip_id": pos["trip_id"],
+            "route_id": pos["route_id"],
+            "line": pos["line"],
+            "direction": pos.get("direction", 0),
+            "current_station": pos.get("current_station"),
+            "next_station": pos.get("next_station"),
+            "arrival_time": pos.get("arrival_time"),
+            "departure_time": pos.get("departure_time"),
+            "delay_seconds": pos.get("delay_seconds", 0),
+            "headway_seconds": pos.get("headway_seconds"),
+            "dwell_time_seconds": pos.get("dwell_time_seconds"),
+            "schedule_adherence": pos.get("schedule_adherence"),
+        })
+    
+    # Use executemany for bulk insert
+    await db.execute(
+        text("""
+            INSERT INTO train_positions (
+                timestamp, trip_id, route_id, line, direction,
+                current_station, next_station, arrival_time, departure_time,
+                delay_seconds, headway_seconds, dwell_time_seconds, schedule_adherence
+            ) VALUES (
+                :timestamp, :trip_id, :route_id, :line, :direction,
+                :current_station, :next_station, :arrival_time, :departure_time,
+                :delay_seconds, :headway_seconds, :dwell_time_seconds, :schedule_adherence
+            )
+        """),
+        values
+    )
+    
     await db.flush()
-    return objects
+    return []  # Return empty list for now, could query back if needed
 
 
 async def get_train_positions_by_line(
@@ -269,7 +306,7 @@ async def get_anomaly_trend(
 ) -> List[Dict]:
     """Get hourly anomaly trend."""
     
-    # Fixed: wrap SQL in text()
+    # Use proper parameterized query
     query = text("""
         SELECT 
             date_trunc('hour', detected_at) as hour,
@@ -364,7 +401,7 @@ async def set_active_model(
     await db.flush()
 
 
-# Station operations
+# Station operations with ON CONFLICT handling
 async def get_or_create_station(
     db: AsyncSession,
     station_id: str,
@@ -373,12 +410,31 @@ async def get_or_create_station(
     lon: float,
     lines: List[str],
 ) -> Station:
-    """Get or create station record."""
+    """Get or create station record with proper conflict handling."""
+    
+    # Try to insert with ON CONFLICT DO NOTHING
+    await db.execute(
+        text("""
+            INSERT INTO stations (id, name, lat, lon, lines, borough)
+            VALUES (:id, :name, :lat, :lon, :lines, NULL)
+            ON CONFLICT (id) DO NOTHING
+        """),
+        {
+            "id": station_id,
+            "name": name,
+            "lat": lat,
+            "lon": lon,
+            "lines": lines,
+        }
+    )
+    
+    # Now fetch the station (either newly created or existing)
     query = select(Station).where(Station.id == station_id)
     result = await db.execute(query)
     station = result.scalar_one_or_none()
     
     if not station:
+        # This shouldn't happen, but handle it
         station = Station(
             id=station_id,
             name=name,

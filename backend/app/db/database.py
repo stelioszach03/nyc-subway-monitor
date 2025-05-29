@@ -1,3 +1,4 @@
+# --- backend/app/db/database.py ---
 """
 Database connection and session management using SQLAlchemy with asyncpg.
 Includes TimescaleDB hypertable setup for time-series data.
@@ -23,11 +24,16 @@ engine = create_async_engine(
     pool_size=20,
     max_overflow=10,
     isolation_level="READ COMMITTED",  # Prevent serialization errors
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    pool_timeout=30,    # Timeout for getting connection from pool
 )
 
-# Async session factory
+# Async session factory with autoflush disabled to prevent premature flushes
 AsyncSessionLocal = sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
+    engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False,
+    autoflush=False,  # Disable autoflush to control when flushes happen
 )
 
 # Declarative base for models
@@ -39,7 +45,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
-            await session.commit()
+            # Don't auto-commit here, let the endpoint handle it
         except Exception:
             await session.rollback()
             raise
@@ -122,7 +128,8 @@ async def create_hypertables() -> None:
                                 '{table_name}',
                                 '{time_column}',
                                 chunk_time_interval => INTERVAL '1 day',
-                                create_default_indexes => FALSE
+                                create_default_indexes => FALSE,
+                                if_not_exists => TRUE
                             )
                         """)
                     )
@@ -136,16 +143,29 @@ async def create_hypertables() -> None:
 
 async def create_indexes() -> None:
     """Create additional indexes for common queries."""
+    # TimescaleDB doesn't support CONCURRENTLY on hypertables
+    # Remove CONCURRENTLY for hypertable indexes
     indexes = [
+        # Foreign key indexes to prevent deadlocks
+        "CREATE INDEX IF NOT EXISTS idx_train_positions_current_station ON train_positions(current_station)",
+        "CREATE INDEX IF NOT EXISTS idx_train_positions_next_station ON train_positions(next_station)",
+        
+        # Query performance indexes
         "CREATE INDEX IF NOT EXISTS idx_anomalies_station_time ON anomalies(station_id, detected_at DESC)",
         "CREATE INDEX IF NOT EXISTS idx_train_positions_line_time ON train_positions(line, timestamp DESC)",
         "CREATE INDEX IF NOT EXISTS idx_feed_updates_feed_time ON feed_updates(feed_id, timestamp DESC)",
-        "CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)",  # Help with foreign key checks
+        
+        # Station lookup index (regular table, can use CONCURRENTLY)
+        "CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)",
     ]
     
     for index_sql in indexes:
         try:
-            async with engine.begin() as conn:
+            # For hypertables, we need to create indexes in a separate transaction
+            async with engine.connect() as conn:
+                await conn.execute(text("COMMIT"))  # End any existing transaction
                 await conn.execute(text(index_sql))
+                await conn.commit()
+                logger.info(f"Created index: {index_sql.split('idx_')[1].split(' ')[0]}")
         except Exception as e:
             logger.warning(f"Could not create index", sql=index_sql, error=str(e))
