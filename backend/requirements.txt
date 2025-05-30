@@ -25,6 +25,9 @@ httpx==0.28.1
 websockets==14.1
 redis==5.2.1
 
+# JSON handling - optional for Python 3.12
+orjson==3.10.0 ; python_version < "3.12"
+
 # Monitoring/Logging
 structlog==24.4.0
 prometheus-client==0.21.1

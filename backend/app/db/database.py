@@ -1,5 +1,5 @@
 """
-Fixed database configuration with proper transaction management.
+Database configuration with proper JSONB codec setup.
 """
 
 from typing import AsyncGenerator
@@ -8,6 +8,7 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app.config import get_settings
 
@@ -21,9 +22,10 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=20,
     max_overflow=10,
-    isolation_level="READ COMMITTED",
     pool_recycle=3600,
     pool_timeout=30,
+    # Let SQLAlchemy choose the correct async pool
+    poolclass=NullPool if settings.debug else None,
     connect_args={
         "server_settings": {
             "jit": "off",
@@ -33,12 +35,12 @@ engine = create_async_engine(
     }
 )
 
-# Session factory with proper configuration
+# Session factory
 AsyncSessionLocal = sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
-    autoflush=False,  # Prevent automatic flushes
+    autoflush=False,
     autocommit=False,
 )
 
@@ -81,16 +83,16 @@ async def init_db() -> None:
 
 
 async def create_hypertables() -> None:
-    """Create TimescaleDB hypertables."""
+    """Create TimescaleDB hypertables with error handling."""
     hypertables = [
         ("feed_updates", "timestamp"),
         ("anomalies", "detected_at"),
         ("train_positions", "timestamp"),
     ]
     
-    for table_name, time_column in hypertables:
-        try:
-            async with engine.begin() as conn:
+    async with engine.begin() as conn:
+        for table_name, time_column in hypertables:
+            try:
                 # Check if already hypertable
                 result = await conn.execute(
                     text("""
@@ -114,8 +116,8 @@ async def create_hypertables() -> None:
                     )
                     logger.info(f"Created hypertable: {table_name}")
                     
-        except Exception as e:
-            logger.warning(f"Hypertable creation failed for {table_name}: {e}")
+            except Exception as e:
+                logger.warning(f"Hypertable creation failed for {table_name}: {e}")
 
 
 async def create_indexes() -> None:
@@ -128,10 +130,9 @@ async def create_indexes() -> None:
         "CREATE INDEX IF NOT EXISTS idx_feed_updates_feed_time ON feed_updates(feed_id, timestamp DESC)",
     ]
     
-    for index_sql in indexes:
-        try:
-            async with engine.connect() as conn:
+    async with engine.begin() as conn:
+        for index_sql in indexes:
+            try:
                 await conn.execute(text(index_sql))
-                await conn.commit()
-        except Exception as e:
-            logger.warning(f"Index creation failed: {e}")
+            except Exception as e:
+                logger.warning(f"Index creation failed: {e}")

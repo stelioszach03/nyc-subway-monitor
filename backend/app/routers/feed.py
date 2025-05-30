@@ -1,5 +1,6 @@
+# --- backend/app/routers/feed.py ---
 """
-Fixed GTFS-RT feed ingestion with proper station handling.
+GTFS-RT feed ingestion with fixed JSONB handling.
 """
 
 import asyncio
@@ -19,6 +20,7 @@ from app.db import crud
 from app.db.database import get_db, AsyncSessionLocal
 from app.ml.features import FeatureExtractor
 from app.schemas.feed import FeedUpdateResponse, TrainPositionResponse
+from app.utils.json import sanitize_for_jsonb
 
 logger = structlog.get_logger()
 settings = get_settings()
@@ -56,8 +58,6 @@ def load_stations_from_gtfs() -> Dict[str, Dict]:
         Path("/app/data/stops.txt"),
         Path("data/stops.txt"),
         Path("backend/data/stops.txt"),
-        Path("/home/stelios/nyc-subway-monitor/data/stops.txt"),
-        Path("/home/stelios/nyc-subway-monitor/backend/data/stops.txt"),
     ]
     
     stops_file = None
@@ -154,6 +154,7 @@ class FeedIngester:
                     }
                     
                     if stop_update.HasField('arrival'):
+                        # Convert timestamp to datetime
                         stop_dict["arrival_time"] = datetime.fromtimestamp(stop_update.arrival.time)
                         if stop_update.arrival.HasField('delay'):
                             stop_dict["delay"] = stop_update.arrival.delay
@@ -177,108 +178,128 @@ class FeedIngester:
             "feed_code": feed_code,
         }
     
-    async def ensure_stations_exist(self, positions: List[Dict], db: AsyncSession):
-        """Create stations with proper JSONB handling."""
+    async def ensure_stations_exist(
+        self, positions: List[Dict], db: AsyncSession
+    ):
+        """Δημιουργεί/ενημερώνει σταθμούς με JSONB χειρισμό."""
         station_ids = set()
+
         for pos in positions:
             if pos.get("current_station"):
                 station_ids.add(pos["current_station"])
             if pos.get("next_station"):
                 station_ids.add(pos["next_station"])
-        
+
         async with station_creation_lock:
             for station_id in station_ids:
                 if not station_id:
                     continue
-                
-                try:
-                    # Get station info
-                    station_info = self.station_cache.get(station_id, {
+
+                station_info = self.station_cache.get(
+                    station_id,
+                    {
                         "id": station_id,
                         "name": f"Station {station_id}",
                         "lat": 40.7484,
                         "lon": -73.9857,
-                    })
-                    
-                    # Extract lines from positions
-                    lines = []
-                    for pos in positions:
-                        if (pos.get("current_station") == station_id or 
-                            pos.get("next_station") == station_id):
-                            route = pos.get("route_id", "").upper()
-                            if route and route not in lines:
-                                lines.append(route)
-                    
-                    # Use raw SQL with JSON encoding for JSONB
+                    },
+                )
+
+                # ποιες γραμμές περνούν απ' αυτόν τον σταθμό
+                lines = []
+                for pos in positions:
+                    if pos.get("current_station") == station_id or pos.get(
+                        "next_station"
+                    ) == station_id:
+                        route = pos.get("route_id", "").upper()
+                        if route and route not in lines:
+                            lines.append(route)
+
+                try:
                     await db.execute(
                         text("""
                             INSERT INTO stations (id, name, lat, lon, lines, borough)
-                            VALUES (:id, :name, :lat, :lon, :lines::jsonb, :borough)
+                            VALUES (:id, :name, :lat, :lon, :lines, :borough)
                             ON CONFLICT (id) DO UPDATE SET
-                                lines = CASE
-                                    WHEN stations.lines IS NULL THEN EXCLUDED.lines
-                                    ELSE stations.lines || EXCLUDED.lines
-                                END
+                                lines = (
+                                    SELECT jsonb_agg(DISTINCT l)
+                                    FROM jsonb_array_elements_text(
+                                        stations.lines || EXCLUDED.lines
+                                    ) AS t(l)
+                                )
                         """),
                         {
                             "id": station_id,
                             "name": station_info.get("name", f"Station {station_id}"),
                             "lat": station_info.get("lat", 40.7484),
                             "lon": station_info.get("lon", -73.9857),
-                            "lines": json.dumps(lines),  # CRITICAL: JSON encode the list
-                            "borough": None
-                        }
+                            "lines": json.dumps(lines),
+                            "borough": None,
+                        },
                     )
-                    
                 except Exception as e:
                     logger.error(f"Failed to create station {station_id}: {e}")
-            
+
             await db.commit()
-    
-    async def process_feed_data(self, feed_code: str, data: Dict, db: AsyncSession):
-        """Process feed with proper transaction management."""
+
+    async def process_feed_data(
+        self, feed_code: str, data: Dict, db: AsyncSession
+    ):
+        """Επεξεργάζεται το feed και ενημερώνει τη ΒΔ."""
         start_time = datetime.utcnow()
-        
+
         try:
-            # Create feed update record
+            sanitized_data = sanitize_for_jsonb(data)
+
             feed_update = await crud.create_feed_update(
                 db,
                 feed_id=feed_code,
-                raw_data=data,
+                raw_data=sanitized_data,
                 num_trips=len(data.get("trips", [])),
                 num_alerts=len(data.get("alerts", [])),
             )
-            
-            # Extract positions
+
             positions = []
-            for trip_data in data.get("trips", []):
-                if "delay" in trip_data:
-                    trip_data["delay_seconds"] = trip_data["delay"]
-                
-                position = self.feature_extractor.extract_trip_features(trip_data, feed_code)
-                if position:
-                    positions.append(position)
-            
-            # Ensure stations exist
+            for trip in data.get("trips", []):
+                if "delay" in trip:
+                    trip["delay_seconds"] = trip["delay"]
+
+                pos = self.feature_extractor.extract_trip_features(
+                    trip, feed_code
+                )
+                if pos:
+                    positions.append(pos)
+
             if positions:
                 await self.ensure_stations_exist(positions, db)
                 await crud.bulk_create_train_positions(db, positions)
-            
-            # Update processing time
-            processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
-            feed_update.processing_time_ms = processing_time
-            
+
+            if feed_update and feed_update.id:
+                proc_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+                await db.execute(
+                    text(
+                        """
+                        UPDATE feed_updates
+                        SET processing_time_ms = :t
+                        WHERE id = :id AND timestamp = :ts
+                        """
+                    ),
+                    {
+                        "t": proc_ms,
+                        "id": feed_update.id,
+                        "ts": feed_update.timestamp,
+                    },
+                )
+
             await db.commit()
-            
-            logger.info(f"Processed feed {feed_code}: {len(positions)} positions in {processing_time:.0f}ms")
-            
+            logger.info(f"Processed feed {feed_code}: {len(positions)} positions")
+
         except Exception as e:
             await db.rollback()
             logger.error(f"Failed to process feed {feed_code}: {e}")
             raise
-        
-        return feed_update
 
+        return feed_update
 
 # Global ingester
 ingester = FeedIngester()
@@ -344,7 +365,10 @@ async def refresh_feed(
     if feed_code not in FEED_ENDPOINTS:
         raise HTTPException(status_code=404, detail=f"Unknown feed: {feed_code}")
     
-    data = await ingester.fetch_feed(feed_code)
-    feed_update = await ingester.process_feed_data(feed_code, data, db)
-    
-    return FeedUpdateResponse.from_orm(feed_update)
+    try:
+        data = await ingester.fetch_feed(feed_code)
+        feed_update = await ingester.process_feed_data(feed_code, data, db)
+        return FeedUpdateResponse.from_orm(feed_update)
+    except Exception as e:
+        logger.error(f"Feed refresh failed: {e}")
+        raise HTTPException(status_code=503, detail=str(e))

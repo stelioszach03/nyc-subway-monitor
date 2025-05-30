@@ -80,13 +80,16 @@ class WindowedDataset(Dataset):
         self.window_size = window_size
         self.stride = stride
         
-        # Calculate number of windows
-        self.n_windows = (len(data) - window_size) // stride + 1
+        # Calculate number of windows - FIXED to return at least 0
+        self.n_windows = max(0, (len(data) - window_size) // stride + 1)
     
     def __len__(self):
         return self.n_windows
     
     def __getitem__(self, idx):
+        if self.n_windows == 0:
+            raise IndexError("No valid windows in dataset")
+            
         start_idx = idx * self.stride
         end_idx = start_idx + self.window_size
         

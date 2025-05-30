@@ -1,8 +1,9 @@
 # --- backend/app/db/crud.py ---
 """
-Database CRUD operations for async SQLAlchemy.
+Database CRUD operations with fixed JSONB handling.
 """
 
+import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -10,6 +11,7 @@ from sqlalchemy import and_, func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Anomaly, FeedUpdate, ModelArtifact, Station, TrainPosition
+from app.utils.json import json_dumps, sanitize_for_jsonb
 
 
 # Feed operations
@@ -20,16 +22,19 @@ async def create_feed_update(
     num_trips: int,
     num_alerts: int,
 ) -> FeedUpdate:
-    """Create new feed update record."""
+    """Create new feed update record with proper JSONB encoding."""
+    # Sanitize data for JSONB storage
+    sanitized_data = sanitize_for_jsonb(raw_data)
+    
     feed_update = FeedUpdate(
         timestamp=datetime.utcnow(),
         feed_id=feed_id,
-        raw_data=raw_data,
+        raw_data=sanitized_data,  # Now properly serializable
         num_trips=num_trips,
         num_alerts=num_alerts,
     )
     db.add(feed_update)
-    await db.flush()  # Use flush instead of commit to stay in transaction
+    await db.flush()
     return feed_update
 
 
@@ -48,12 +53,11 @@ async def bulk_create_train_positions(
     db: AsyncSession,
     positions: List[Dict]
 ) -> List[TrainPosition]:
-    """Bulk insert train positions."""
-    # Use raw SQL for better performance and to avoid ORM overhead
+    """Bulk insert train positions with sanitized data."""
     if not positions:
         return []
     
-    # Prepare values for bulk insert
+    # Prepare and sanitize values
     values = []
     for pos in positions:
         values.append({
@@ -89,7 +93,7 @@ async def bulk_create_train_positions(
     )
     
     await db.flush()
-    return []  # Return empty list for now, could query back if needed
+    return []
 
 
 async def get_train_positions_by_line(
@@ -147,7 +151,13 @@ async def get_train_positions_for_training(
 
 # Anomaly operations
 async def create_anomaly(db: AsyncSession, anomaly_data: Dict) -> Anomaly:
-    """Create new anomaly record."""
+    """Create new anomaly record with sanitized JSONB fields."""
+    # Sanitize nested JSONB fields
+    if 'features' in anomaly_data:
+        anomaly_data['features'] = sanitize_for_jsonb(anomaly_data['features'])
+    if 'meta_data' in anomaly_data:
+        anomaly_data['meta_data'] = sanitize_for_jsonb(anomaly_data['meta_data'])
+    
     anomaly = Anomaly(**anomaly_data)
     db.add(anomaly)
     await db.flush()
@@ -306,7 +316,6 @@ async def get_anomaly_trend(
 ) -> List[Dict]:
     """Get hourly anomaly trend."""
     
-    # Use proper parameterized query
     query = text("""
         SELECT 
             date_trunc('hour', detected_at) as hour,
@@ -345,15 +354,15 @@ async def create_model_artifact(
     artifact_path: str,
     training_samples: int,
 ) -> ModelArtifact:
-    """Create model artifact record."""
+    """Create model artifact with sanitized metrics."""
     artifact = ModelArtifact(
         model_type=model_type,
         version=version,
         git_sha=git_sha,
-        metrics=metrics,
+        metrics=sanitize_for_jsonb(metrics),  # Sanitize metrics
         artifact_path=artifact_path,
         training_samples=training_samples,
-        hyperparameters={},  # Could be extended
+        hyperparameters={},
     )
     db.add(artifact)
     await db.flush()
@@ -401,7 +410,7 @@ async def set_active_model(
     await db.flush()
 
 
-# Station operations with ON CONFLICT handling
+# Station operations - FIXED JSONB handling
 async def get_or_create_station(
     db: AsyncSession,
     station_id: str,
@@ -410,31 +419,36 @@ async def get_or_create_station(
     lon: float,
     lines: List[str],
 ) -> Station:
-    """Get or create station record with proper conflict handling."""
+    """Get or create station with proper JSONB encoding."""
     
-    # Try to insert with ON CONFLICT DO NOTHING
+    # CRITICAL FIX: Use positional parameters only
     await db.execute(
         text("""
             INSERT INTO stations (id, name, lat, lon, lines, borough)
-            VALUES (:id, :name, :lat, :lon, :lines, NULL)
-            ON CONFLICT (id) DO NOTHING
+            VALUES ($1, $2, $3, $4, $5::jsonb, $6)
+            ON CONFLICT (id) DO UPDATE SET
+                lines = CASE
+                    WHEN stations.lines IS NULL THEN EXCLUDED.lines
+                    ELSE stations.lines || EXCLUDED.lines
+                END
         """),
-        {
-            "id": station_id,
-            "name": name,
-            "lat": lat,
-            "lon": lon,
-            "lines": lines,
-        }
+        (
+            station_id,
+            name,
+            lat,
+            lon,
+            json.dumps(lines),  # JSON encoded
+            None  # borough
+        )
     )
     
-    # Now fetch the station (either newly created or existing)
+    # Fetch the station
     query = select(Station).where(Station.id == station_id)
     result = await db.execute(query)
     station = result.scalar_one_or_none()
     
     if not station:
-        # This shouldn't happen, but handle it
+        # Fallback to ORM creation
         station = Station(
             id=station_id,
             name=name,
