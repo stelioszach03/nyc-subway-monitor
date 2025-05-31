@@ -63,16 +63,20 @@ graph TB
     WS -->|Real-time| Next
     Next --> Map
     Next --> D3
-🚀 Quick Start
-Prerequisites
+```
 
-Docker & Docker Compose
-Node.js 20+ (for local development)
-Python 3.12+ (for local development)
-Mapbox API token (free tier works)
+## 🚀 Quick Start
 
-1. Clone and Setup
-bashgit clone https://github.com/your-org/nyc-subway-monitor.git
+### Prerequisites
+
+- Docker & Docker Compose
+- Node.js 20+ (for local development)
+- Python 3.12+ (for local development)
+- Mapbox API token (free tier works)
+
+### 1. Clone and Setup
+```bash
+git clone https://github.com/stelioszach03/nyc-subway-monitor.git
 cd nyc-subway-monitor
 
 # Copy environment variables
@@ -80,39 +84,45 @@ cp .env.example .env
 
 # Add your Mapbox token to .env
 echo "MAPBOX_TOKEN=your_mapbox_token_here" >> .env
-2. Start Services
-bash# Start all services
+```
+
+### 2. Start Services
+```bash
+# Start all services
 docker-compose up --build
 
 # Or run individually
 docker-compose up -d timescaledb redis  # Start databases
 cd backend && uvicorn app.main:app --reload  # Start backend
 cd frontend && npm run dev  # Start frontend
-3. Access Dashboard
+```
 
-Dashboard: http://localhost:3000
-API Docs: http://localhost:8000/api/v1/docs
-Grafana: http://localhost:3001 (admin/admin)
-Prometheus: http://localhost:9090
+### 3. Access Dashboard
 
-📊 ML Models
-Isolation Forest
+- **Dashboard**: http://localhost:3000
+- **API Docs**: http://localhost:8000/api/v1/docs
+- **Grafana**: http://localhost:3001 (admin/admin)
+- **Prometheus**: http://localhost:9090
 
-Fast unsupervised anomaly detection
-Handles multimodal distributions
-5% contamination rate
-Features: headway, dwell time, delays
+## 📊 ML Models
 
-LSTM Autoencoder
+### Isolation Forest
+- Fast unsupervised anomaly detection
+- Handles multimodal distributions
+- 5% contamination rate
+- Features: headway, dwell time, delays
 
-Captures temporal patterns
-Sequence length: 24 time steps
-Architecture: 128 → 64 → 32 → 64 → 128
-Threshold: 95th percentile reconstruction error
+### LSTM Autoencoder
+- Captures temporal patterns
+- Sequence length: 24 time steps
+- Architecture: 128 → 64 → 32 → 64 → 128
+- Threshold: 95th percentile reconstruction error
 
-🔌 API Reference
-REST Endpoints
-bash# Get anomalies
+## 🔌 API Reference
+
+### REST Endpoints
+```bash
+# Get anomalies
 GET /api/v1/anomalies?line=6&start_date=2024-01-01
 
 # Get train positions
@@ -120,14 +130,20 @@ GET /api/v1/feeds/positions/nqrw
 
 # Trigger detection
 POST /api/v1/anomalies/detect
-WebSocket
-javascript// Subscribe to anomalies
+```
+
+### WebSocket
+```javascript
+// Subscribe to anomalies
 ws.send({
   type: 'subscribe',
   filters: { line: '6', severity_min: 0.7 }
 })
-🧪 Testing
-bash# Backend tests
+```
+
+## 🧪 Testing
+```bash
+# Backend tests
 cd backend
 pytest --cov=app
 
@@ -137,40 +153,52 @@ npm test
 
 # E2E tests
 npm run test:e2e
-📈 Performance
+```
 
-Ingestion rate: ~1000 updates/second
-Detection latency: <100ms p99
-Dashboard FPS: 60 (GPU accelerated)
-Storage: ~50GB/month with 7-day retention
+## 📈 Performance
 
-🚢 Deployment
-Kubernetes
-bash# Apply manifests
+- **Ingestion rate**: ~1000 updates/second
+- **Detection latency**: <100ms p99
+- **Dashboard FPS**: 60 (GPU accelerated)
+- **Storage**: ~50GB/month with 7-day retention
+
+## 🚢 Deployment
+
+### Kubernetes
+```bash
+# Apply manifests
 kubectl apply -f k8s/manifests/
 
 # Check status
 kubectl get pods -n subway-monitor
-Environment Variables
-VariableDescriptionDefaultPOSTGRES_HOSTTimescaleDB hostlocalhostREDIS_URLRedis connection URLredis://localhost:6379FEED_UPDATE_INTERVALSeconds between fetches30MODEL_RETRAIN_HOURHour to retrain models (UTC)3
-🤝 Contributing
+```
 
-Fork the repository
-Create a feature branch (git checkout -b feat/amazing-feature)
-Commit changes using conventional commits
-Push to branch (git push origin feat/amazing-feature)
-Open a Pull Request
+### Environment Variables
 
-📝 License
+| Variable | Description | Default |
+|----------|-------------|---------|
+| POSTGRES_HOST | TimescaleDB host | localhost |
+| REDIS_URL | Redis connection URL | redis://localhost:6379 |
+| FEED_UPDATE_INTERVAL | Seconds between fetches | 30 |
+| MODEL_RETRAIN_HOUR | Hour to retrain models (UTC) | 3 |
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/amazing-feature`)
+3. Commit changes using conventional commits
+4. Push to branch (`git push origin feat/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
 MIT License - see LICENSE file
-🙏 Acknowledgments
 
-MTA for public GTFS-RT feeds
-nyctrains package maintainers
-TimescaleDB for time-series optimization
+## 🙏 Acknowledgments
 
+- MTA for public GTFS-RT feeds
+- nyctrains package maintainers
+- TimescaleDB for time-series optimization
 
 <div align="center">
 Built with ❤️ for NYC's 4.5 million daily riders
 </div>
-```

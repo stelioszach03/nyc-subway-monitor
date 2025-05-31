@@ -14,8 +14,21 @@
     @apply border-gray-800;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-gray-950 text-gray-100;
+    @apply bg-gray-950 text-gray-100 overflow-x-hidden;
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 }
 
@@ -81,5 +94,248 @@
   /* Glass effect */
   .glass {
     @apply bg-gray-900/50 backdrop-blur-sm border border-gray-800;
+  }
+
+  /* Modern glass morphism */
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  /* Glow effects */
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+  }
+
+  /* Animated gradients */
+  .animated-gradient {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Pulse glow */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+  }
+
+  /* Text shadow effects */
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  /* Neon border */
+  .neon-border {
+    border: 2px solid;
+    border-image: linear-gradient(45deg, #00f5ff, #ff00ff, #00f5ff) 1;
+    animation: neon-border 3s linear infinite;
+  }
+
+  @keyframes neon-border {
+    0%, 100% { border-image-source: linear-gradient(45deg, #00f5ff, #ff00ff, #00f5ff); }
+    50% { border-image-source: linear-gradient(45deg, #ff00ff, #00f5ff, #ff00ff); }
+  }
+
+  /* Enhanced animations */
+  @keyframes slideInFromLeft {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideInFromRight {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideInFromTop {
+    0% { transform: translateY(-100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideInFromBottom {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes rotateIn {
+    0% { transform: rotate(-180deg) scale(0); opacity: 0; }
+    100% { transform: rotate(0deg) scale(1); opacity: 1; }
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Utility classes for animations */
+  .animate-slide-in-left { animation: slideInFromLeft 0.6s ease-out; }
+  .animate-slide-in-right { animation: slideInFromRight 0.6s ease-out; }
+  .animate-slide-in-top { animation: slideInFromTop 0.6s ease-out; }
+  .animate-slide-in-bottom { animation: slideInFromBottom 0.6s ease-out; }
+  .animate-scale-in { animation: scaleIn 0.5s ease-out; }
+  .animate-rotate-in { animation: rotateIn 0.8s ease-out; }
+  .animate-bounce-in { animation: bounceIn 0.8s ease-out; }
+  .animate-typewriter { 
+    animation: typewriter 2s steps(40, end);
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid;
+    animation-fill-mode: forwards;
+  }
+  .animate-blink { animation: blink 1s infinite; }
+
+  /* Enhanced hover effects */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.3s ease;
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+
+  .hover-rotate {
+    transition: transform 0.3s ease;
+  }
+  .hover-rotate:hover {
+    transform: rotate(5deg);
+  }
+
+  /* Text effects */
+  .text-neon {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 15px currentColor,
+      0 0 20px currentColor;
+  }
+
+  /* Background patterns */
+  .bg-dots {
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-grid {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-circuit {
+    background-image: 
+      linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Loading states */
+  .loading-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Interactive elements */
+  .interactive-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  .interactive-card:active {
+    transform: translateY(0);
+  }
+
+  /* Status indicators */
+  .status-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  .status-bounce { animation: bounce 1s infinite; }
+
+  /* Responsive utilities */
+  @media (max-width: 768px) {
+    .mobile-hidden { display: none; }
+    .mobile-full { width: 100%; }
+    .mobile-stack { flex-direction: column; }
   }
 }

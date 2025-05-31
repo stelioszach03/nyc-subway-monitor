@@ -50,7 +50,7 @@ class FeedUpdateResponse(BaseModel):
     feed_id: str
     num_trips: int
     num_alerts: int
-    processing_time_ms: float
+    processing_time_ms: Optional[float] = None
     status: str = "success"
     
     class Config:

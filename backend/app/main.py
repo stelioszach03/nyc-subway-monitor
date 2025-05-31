@@ -18,7 +18,7 @@ from app.core.exceptions import SubwayMonitorException
 from app.db.database import init_db
 from app.ml.train import ModelTrainer
 from app.ml.predict import AnomalyDetector
-from app.routers import anomaly, feed, health, websocket
+from app.routers import anomaly, feed, health, stations, websocket
 
 logger = structlog.get_logger()
 settings = get_settings()
@@ -122,6 +122,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 app.include_router(health.router, tags=["health"])
 app.include_router(feed.router, prefix=f"{settings.api_v1_prefix}/feeds", tags=["feeds"])
 app.include_router(anomaly.router, prefix=f"{settings.api_v1_prefix}/anomalies", tags=["anomalies"])
+app.include_router(stations.router, prefix=f"{settings.api_v1_prefix}/stations", tags=["stations"])
 app.include_router(websocket.router, prefix=f"{settings.api_v1_prefix}/ws", tags=["websocket"])
 
 # Prometheus metrics

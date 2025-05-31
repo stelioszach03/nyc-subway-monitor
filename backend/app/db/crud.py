@@ -460,3 +460,33 @@ async def get_or_create_station(
         await db.flush()
     
     return station
+
+
+async def get_stations(
+    db: AsyncSession,
+    line: Optional[str] = None,
+    borough: Optional[str] = None,
+    limit: int = 1000,
+) -> List[Station]:
+    """Get stations with optional filters."""
+    query = select(Station)
+    
+    if line:
+        # Filter by line using JSONB contains
+        query = query.where(
+            text("lines::jsonb ? :line").bindparam(line=line)
+        )
+    
+    if borough:
+        query = query.where(Station.borough == borough)
+    
+    query = query.limit(limit)
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
+async def get_station_by_id(db: AsyncSession, station_id: str) -> Optional[Station]:
+    """Get single station by ID."""
+    query = select(Station).where(Station.id == station_id)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
