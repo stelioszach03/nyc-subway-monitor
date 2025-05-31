@@ -99,72 +99,72 @@ class ModelTrainer:
                             self.active_models["lstm_autoencoder"] = LSTMDetector()
     
     async def train_model(self, model_type: str, db: AsyncSession) -> Optional[Dict]:
-    """Train a specific model type with error handling."""
-    
-    # Get training data
-    end_time = datetime.utcnow()
-    start_time = end_time - timedelta(days=7)
-    
-    positions = await crud.get_train_positions_for_training(
-        db, start_time, end_time
-    )
-    
-    if len(positions) < 100:
-        logger.warning(f"Insufficient data for {model_type}: {len(positions)} samples")
-        return None
-    
-    # Convert to DataFrame
-    data = []
-    for p in positions:
-        data.append({
-            "timestamp": p.timestamp,
-            "trip_id": p.trip_id,
-            "route_id": p.route_id,
-            "line": p.line,
-            "current_station": p.current_station,
-            "headway_seconds": p.headway_seconds or 0,
-            "dwell_time_seconds": p.dwell_time_seconds or 0,
-            "delay_seconds": p.delay_seconds,
-            "direction": p.direction,
-        })
-    
-    df = pd.DataFrame(data)
-    
-    # Add temporal features
-    df['hour'] = df['timestamp'].dt.hour
-    df['day_of_week'] = df['timestamp'].dt.dayofweek
-    df['is_weekend'] = (df['day_of_week'] >= 5).astype(int)
-    df['is_rush_hour'] = df['timestamp'].apply(
-        lambda x: (7 <= x.hour <= 10 or 17 <= x.hour <= 20) and x.weekday() < 5
-    ).astype(int)
-    
-    # Get git SHA
-    git_sha = self._get_git_sha()
-    
-    # Train model
-    try:
-        if model_type == "isolation_forest":
-            model = IsolationForestDetector()
-            metrics = model.train(df)
-            
-        elif model_type == "lstm_autoencoder":
-            # CRITICAL FIX: Check if we have enough samples for LSTM
-            seq_length = settings.lstm_sequence_length  # Default: 24
-            min_samples_needed = seq_length * 10  # Need at least 10 sequences
-            
-            if len(df) < min_samples_needed:
-                logger.warning(
-                    f"Not enough samples for LSTM training: {len(df)} < {min_samples_needed} "
-                    f"(need at least {seq_length} * 10 samples)"
-                )
-                return None
-            
-            model = LSTMDetector()
-            metrics = model.train(df, epochs=30)
-            
-        else:
-            raise ValueError(f"Unknown model type: {model_type}")
-            
+        """Train a specific model type with error handling."""
+        
+        # Get training data
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=7)
+        
+        positions = await crud.get_train_positions_for_training(
+            db, start_time, end_time
+        )
+        
+        if len(positions) < 100:
+            logger.warning(f"Insufficient data for {model_type}: {len(positions)} samples")
+            return None
+        
+        # Convert to DataFrame
+        data = []
+        for p in positions:
+            data.append({
+                "timestamp": p.timestamp,
+                "trip_id": p.trip_id,
+                "route_id": p.route_id,
+                "line": p.line,
+                "current_station": p.current_station,
+                "headway_seconds": p.headway_seconds or 0,
+                "dwell_time_seconds": p.dwell_time_seconds or 0,
+                "delay_seconds": p.delay_seconds,
+                "direction": p.direction,
+            })
+        
+        df = pd.DataFrame(data)
+        
+        # Add temporal features
+        df['hour'] = df['timestamp'].dt.hour
+        df['day_of_week'] = df['timestamp'].dt.dayofweek
+        df['is_weekend'] = (df['day_of_week'] >= 5).astype(int)
+        df['is_rush_hour'] = df['timestamp'].apply(
+            lambda x: (7 <= x.hour <= 10 or 17 <= x.hour <= 20) and x.weekday() < 5
+        ).astype(int)
+        
+        # Get git SHA
+        git_sha = self._get_git_sha()
+        
+        # Train model
+        try:
+            if model_type == "isolation_forest":
+                model = IsolationForestDetector()
+                metrics = model.train(df)
+                
+            elif model_type == "lstm_autoencoder":
+                # CRITICAL FIX: Check if we have enough samples for LSTM
+                seq_length = settings.lstm_sequence_length  # Default: 24
+                min_samples_needed = seq_length * 10  # Need at least 10 sequences
+                
+                if len(df) < min_samples_needed:
+                    logger.warning(
+                        f"Not enough samples for LSTM training: {len(df)} < {min_samples_needed} "
+                        f"(need at least {seq_length} * 10 samples)"
+                    )
+                    return None
+                
+                model = LSTMDetector()
+                metrics = model.train(df, epochs=30)
+                
+            else:
+                raise ValueError(f"Unknown model type: {model_type}")
+                
             # Save model
             model_path = self.models_dir / model.version
             model.save(model_path)

@@ -16,24 +16,38 @@ logger = structlog.get_logger()
 settings = get_settings()
 
 # Create async engine with proper settings
-engine = create_async_engine(
-    str(settings.database_url),
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_size=20,
-    max_overflow=10,
-    pool_recycle=3600,
-    pool_timeout=30,
-    # Let SQLAlchemy choose the correct async pool
-    poolclass=NullPool if settings.debug else None,
-    connect_args={
-        "server_settings": {
-            "jit": "off",
-            "application_name": "nyc_subway_monitor"
-        },
-        "command_timeout": 60,
-    }
-)
+if settings.debug:
+    # Use NullPool for debugging (no pooling)
+    engine = create_async_engine(
+        str(settings.database_url),
+        echo=settings.debug,
+        poolclass=NullPool,
+        connect_args={
+            "server_settings": {
+                "jit": "off",
+                "application_name": "nyc_subway_monitor"
+            },
+            "command_timeout": 60,
+        }
+    )
+else:
+    # Use connection pooling for production
+    engine = create_async_engine(
+        str(settings.database_url),
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=20,
+        max_overflow=10,
+        pool_recycle=3600,
+        pool_timeout=30,
+        connect_args={
+            "server_settings": {
+                "jit": "off",
+                "application_name": "nyc_subway_monitor"
+            },
+            "command_timeout": 60,
+        }
+    )
 
 # Session factory
 AsyncSessionLocal = sessionmaker(
@@ -63,19 +77,19 @@ async def init_db() -> None:
     """Initialize database with extensions and tables."""
     try:
         async with engine.begin() as conn:
-            # Create TimescaleDB extension
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
+            # Skip TimescaleDB extension for local development
+            # await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
             
             # Create tables
             await conn.run_sync(Base.metadata.create_all)
         
-        # Create hypertables
-        await create_hypertables()
+        # Skip hypertables for local development
+        # await create_hypertables()
         
         # Create indexes
         await create_indexes()
         
-        logger.info("Database initialized successfully")
+        logger.info("Database initialized successfully (without TimescaleDB)")
         
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")

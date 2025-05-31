@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { getWebSocket } from '@/lib/websocket'
+import { getWebSocket } from '@/lib/websocket-client'
 
 interface UseWebSocketOptions {
   onAnomalyReceived?: (anomaly: any) => void
