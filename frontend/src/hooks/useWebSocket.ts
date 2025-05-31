@@ -60,11 +60,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
     // Cleanup
     return () => {
-      ws.removeListener('connected', handleConnected)
-      ws.removeListener('disconnected', handleDisconnected)
-      ws.removeListener('error', handleError)
-      ws.removeListener('anomaly', handleAnomaly)
-      ws.removeListener('stats', handleStats)
+      ws.off('connected', handleConnected)
+      ws.off('disconnected', handleDisconnected)
+      ws.off('error', handleError)
+      ws.off('anomaly', handleAnomaly)
+      ws.off('stats', handleStats)
     }
   }, [])
 

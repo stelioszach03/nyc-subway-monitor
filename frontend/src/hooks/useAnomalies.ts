@@ -25,14 +25,17 @@ export function useAnomalies(options: UseAnomaliesOptions = {}) {
   const anomaliesQuery = useQuery<AnomalyListResponse>({
     queryKey: ['anomalies', { line, station, startDate, endDate, page, pageSize }],
     queryFn: async () => {
-      return apiClient.get<AnomalyListResponse>('/api/v1/anomalies', {
-        line: line || undefined,
-        station_id: station || undefined,
-        start_date: startDate?.toISOString(),
-        end_date: endDate?.toISOString(),
-        page,
-        page_size: pageSize,
+      const response = await apiClient.get<AnomalyListResponse>('/anomalies', {
+        params: {
+          line: line || undefined,
+          station_id: station || undefined,
+          start_date: startDate?.toISOString(),
+          end_date: endDate?.toISOString(),
+          page,
+          page_size: pageSize,
+        }
       })
+      return response.data
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   })
@@ -41,9 +44,12 @@ export function useAnomalies(options: UseAnomaliesOptions = {}) {
   const statsQuery = useQuery<AnomalyStats>({
     queryKey: ['anomaly-stats'],
     queryFn: async () => {
-      return apiClient.get<AnomalyStats>('/api/v1/anomalies/stats', {
-        hours: 24,
+      const response = await apiClient.get<AnomalyStats>('/anomalies/stats', {
+        params: {
+          hours: 24,
+        }
       })
+      return response.data
     },
     refetchInterval: 60000, // Refetch every minute
   })
