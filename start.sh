@@ -56,7 +56,23 @@ fi
 # Start backend
 print_status "Starting backend server..."
 cd backend
-source venv/bin/activate
+
+# Check for virtual environment in multiple locations
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+elif [ -f "../venv/bin/activate" ]; then
+    source ../venv/bin/activate
+elif [ -f "venv/Scripts/activate" ]; then
+    # Windows
+    source venv/Scripts/activate
+elif [ -f "../venv/Scripts/activate" ]; then
+    # Windows - parent directory
+    source ../venv/Scripts/activate
+else
+    print_error "Virtual environment not found. Please run ./setup.sh first."
+    exit 1
+fi
+
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 cd ..
