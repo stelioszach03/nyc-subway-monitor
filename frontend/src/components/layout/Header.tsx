@@ -5,7 +5,7 @@ import {
   DocumentArrowDownIcon, 
   Cog6ToothIcon,
   BellIcon,
-  TrainIcon
+  MapIcon
 } from '@heroicons/react/24/outline'
 import { GlassCard } from '../ui/GlassCard'
 import { ThemeToggle } from '../ui/ThemeToggle'
@@ -45,7 +45,7 @@ export function Header() {
               whileHover={{ scale: 1.1, rotate: 5 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <TrainIcon className="w-6 h-6 text-white" />
+              <MapIcon className="w-6 h-6 text-white" />
             </motion.div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
