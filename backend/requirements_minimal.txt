@@ -8,6 +8,7 @@ pydantic-settings==2.7.0
 aiosqlite==0.20.0
 sqlalchemy==2.0.36
 alembic==1.14.0
+greenlet==3.1.1
 
 # GTFS Real-time
 gtfs-realtime-bindings==1.0.0
