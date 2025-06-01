@@ -316,9 +316,10 @@ async def get_anomaly_trend(
 ) -> List[Dict]:
     """Get hourly anomaly trend."""
     
+    # SQLite compatible query using strftime instead of date_trunc
     query = text("""
         SELECT 
-            date_trunc('hour', detected_at) as hour,
+            strftime('%Y-%m-%d %H:00:00', detected_at) as hour,
             COUNT(*) as count,
             AVG(severity) as avg_severity
         FROM anomalies
@@ -334,7 +335,7 @@ async def get_anomaly_trend(
     
     trend = [
         {
-            "hour": row[0].isoformat() if row[0] else None,
+            "hour": row[0] if row[0] else None,
             "count": row[1],
             "avg_severity": float(row[2]) if row[2] else 0,
         }
