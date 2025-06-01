@@ -16,8 +16,16 @@ from prometheus_client import make_asgi_app
 from app.config import get_settings
 from app.core.exceptions import SubwayMonitorException
 from app.db.database import init_db
-from app.ml.train import ModelTrainer
-from app.ml.predict import AnomalyDetector
+# ML imports are optional for minimal setup
+try:
+    from app.ml.train import ModelTrainer
+    from app.ml.predict import AnomalyDetector
+    ML_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: ML modules not available - {e}")
+    ModelTrainer = None
+    AnomalyDetector = None
+    ML_AVAILABLE = False
 from app.routers import anomaly, feed, health, stations, websocket
 
 logger = structlog.get_logger()
@@ -41,16 +49,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                     raise
                 await asyncio.sleep(2)
         
-        # Initialize ML components
-        trainer = ModelTrainer()
-        await trainer.load_or_train_models()
-        app.state.trainer = trainer
-        
-        # Initialize anomaly detector
-        detector = AnomalyDetector()
-        for model_type, model in trainer.active_models.items():
-            detector.register_model(model_type, model)
-        app.state.detector = detector
+        # Initialize ML components (if available)
+        if ML_AVAILABLE:
+            trainer = ModelTrainer()
+            await trainer.load_or_train_models()
+            app.state.trainer = trainer
+            
+            # Initialize anomaly detector
+            detector = AnomalyDetector()
+            for model_type, model in trainer.active_models.items():
+                detector.register_model(model_type, model)
+            app.state.detector = detector
+        else:
+            logger.info("Running without ML components")
+            app.state.trainer = None
+            app.state.detector = None
         
         # Start background tasks
         app.state.feed_task = asyncio.create_task(feed.start_feed_ingestion())

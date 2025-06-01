@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db.database import get_db
+from app.utils.cache import get_cache
 
 logger = structlog.get_logger()
 settings = get_settings()
@@ -33,6 +34,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     """Readiness check - can we serve traffic?"""
     checks = {
         "database": False,
+        "cache": False,
         "models_loaded": False,
     }
     
@@ -42,6 +44,15 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
         checks["database"] = result.scalar() == 1
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
+    
+    # Check cache connection
+    try:
+        cache = await get_cache()
+        await cache.set("health_check", "ok", ex=10)
+        value = await cache.get("health_check")
+        checks["cache"] = value == "ok"
+    except Exception as e:
+        logger.error(f"Cache health check failed: {e}")
     
     # Check if ML models are loaded
     # This would check the global model state

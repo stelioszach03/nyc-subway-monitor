@@ -21,7 +21,7 @@ from sqlalchemy import (
     UniqueConstraint,
     PrimaryKeyConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+# from sqlalchemy.dialects.postgresql import JSONB, UUID  # Removed for SQLite compatibility
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -37,7 +37,7 @@ class Station(Base):
     name = Column(String(255), nullable=False)
     lat = Column(Float, nullable=False)
     lon = Column(Float, nullable=False)
-    lines = Column(JSONB, default=list)  # ["4", "5", "6"]
+    lines = Column(JSON, default=list)  # ["4", "5", "6"]
     borough = Column(String(50))
     
     # Relationships
@@ -49,17 +49,16 @@ class FeedUpdate(Base):
     
     __tablename__ = "feed_updates"
     
-    id = Column(Integer, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False)
     feed_id = Column(String(20), nullable=False)  # "ace", "bdfm", etc.
-    raw_data = Column(JSONB)  # Decoded protobuf as JSON
+    raw_data = Column(JSON)  # Decoded protobuf as JSON
     num_trips = Column(Integer)
     num_alerts = Column(Integer)
     processing_time_ms = Column(Float)
     
-    # Composite primary key for TimescaleDB
+    # Indexes for performance
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'timestamp'),
         Index("idx_feed_timestamp", "feed_id", "timestamp"),
     )
 
@@ -69,7 +68,7 @@ class TrainPosition(Base):
     
     __tablename__ = "train_positions"
     
-    id = Column(Integer, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False)
     trip_id = Column(String(100), nullable=False)
     route_id = Column(String(10), nullable=False)  # "6", "L", etc.
@@ -87,7 +86,6 @@ class TrainPosition(Base):
     schedule_adherence = Column(Float)  # Z-score of delay
     
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'timestamp'),
         Index("idx_train_line_time", "line", "timestamp"),
         Index("idx_train_station", "current_station", "timestamp"),
     )
@@ -98,7 +96,7 @@ class Anomaly(Base):
     
     __tablename__ = "anomalies"
     
-    id = Column(Integer, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     detected_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
     station_id = Column(String(10), ForeignKey("stations.id"))
     line = Column(String(20))
@@ -108,8 +106,8 @@ class Anomaly(Base):
     model_version = Column(String(100))
     
     # Context
-    features = Column(JSONB)  # Input features that triggered anomaly
-    meta_data = Column(JSONB)  # Additional context
+    features = Column(JSON)  # Input features that triggered anomaly
+    meta_data = Column(JSON)  # Additional context
     resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime(timezone=True))
     
@@ -117,7 +115,6 @@ class Anomaly(Base):
     station = relationship("Station", back_populates="anomalies")
     
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'detected_at'),
         Index("idx_anomaly_active", "resolved", "detected_at"),
         Index("idx_anomaly_station_time", "station_id", "detected_at"),
     )
@@ -135,8 +132,8 @@ class ModelArtifact(Base):
     git_sha = Column(String(40))
     
     # Performance metrics
-    metrics = Column(JSONB)  # {"precision": 0.85, "recall": 0.78, ...}
-    hyperparameters = Column(JSONB)
+    metrics = Column(JSON)  # {"precision": 0.85, "recall": 0.78, ...}
+    hyperparameters = Column(JSON)
     training_samples = Column(Integer)
     
     # Storage

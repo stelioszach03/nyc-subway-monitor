@@ -11,7 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import crud
 from app.db.database import get_db
-from app.ml.predict import AnomalyDetector
+# ML imports are optional
+try:
+    from app.ml.predict import AnomalyDetector
+except ImportError:
+    AnomalyDetector = None
 from app.routers.websocket import broadcast_anomaly
 from app.schemas.anomaly import (
     AnomalyListResponse,
@@ -143,13 +147,13 @@ async def run_detection(
     """Manually trigger anomaly detection."""
     
     # Get detector from app state
-    if not hasattr(request.app.state, 'detector'):
+    if not hasattr(request.app.state, 'detector') or request.app.state.detector is None:
         raise HTTPException(
             status_code=503,
-            detail="Anomaly detector not initialized"
+            detail="Anomaly detector not available - ML components not installed"
         )
     
-    detector: AnomalyDetector = request.app.state.detector
+    detector = request.app.state.detector
     
     start_time = datetime.utcnow() - timedelta(minutes=lookback_minutes)
     
@@ -209,8 +213,8 @@ async def get_model_status(
     
     # Check if detector is available
     detector_stats = {}
-    if hasattr(request.app.state, 'detector'):
-        detector: AnomalyDetector = request.app.state.detector
+    if hasattr(request.app.state, 'detector') and request.app.state.detector is not None:
+        detector = request.app.state.detector
         detector_stats = detector.get_model_stats()
     
     return {

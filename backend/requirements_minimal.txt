@@ -1,4 +1,4 @@
-# Core dependencies
+# Core FastAPI dependencies
 fastapi==0.115.12
 uvicorn[standard]==0.32.1
 pydantic==2.10.5
@@ -9,26 +9,20 @@ aiosqlite==0.20.0
 sqlalchemy==2.0.36
 alembic==1.14.0
 
-# ML/Data Science
+# GTFS Real-time
 gtfs-realtime-bindings==1.0.0
+
+# Basic ML (lightweight)
 scikit-learn==1.6.0
-torch==2.3.0
 numpy==1.26.4
 pandas==2.2.3
-scipy==1.14.1
 
-# Time series
+# Utilities
 pytz==2024.2
-
-# API/Async
 httpx==0.28.1
 websockets==14.1
-# redis==5.2.1  # Removed for local development
 
-# JSON handling - optional for Python 3.12
-orjson==3.10.0 ; python_version < "3.12"
-
-# Monitoring/Logging
+# Logging and monitoring
 structlog==24.4.0
 prometheus-client==0.21.1
 
@@ -36,7 +30,7 @@ prometheus-client==0.21.1
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 
-# Dev/Test
+# Development
 pytest==8.3.4
 pytest-asyncio==0.25.0
 pytest-cov==6.0.0

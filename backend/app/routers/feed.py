@@ -221,12 +221,11 @@ class FeedIngester:
                             INSERT INTO stations (id, name, lat, lon, lines, borough)
                             VALUES (:id, :name, :lat, :lon, :lines, :borough)
                             ON CONFLICT (id) DO UPDATE SET
-                                lines = (
-                                    SELECT jsonb_agg(DISTINCT l)
-                                    FROM jsonb_array_elements_text(
-                                        stations.lines || EXCLUDED.lines
-                                    ) AS t(l)
-                                )
+                                name = EXCLUDED.name,
+                                lat = EXCLUDED.lat,
+                                lon = EXCLUDED.lon,
+                                lines = EXCLUDED.lines,
+                                borough = EXCLUDED.borough
                         """),
                         {
                             "id": station_id,

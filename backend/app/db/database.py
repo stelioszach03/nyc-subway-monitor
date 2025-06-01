@@ -15,11 +15,20 @@ from app.config import get_settings
 logger = structlog.get_logger()
 settings = get_settings()
 
-# Create async engine with proper settings
-if settings.debug:
-    # Use NullPool for debugging (no pooling)
+# Create async engine with SQLite support
+if "sqlite" in settings.database_url:
+    # SQLite configuration
     engine = create_async_engine(
-        str(settings.database_url),
+        settings.database_url,
+        echo=settings.debug,
+        connect_args={
+            "check_same_thread": False,
+        }
+    )
+elif settings.debug:
+    # PostgreSQL debug configuration
+    engine = create_async_engine(
+        settings.database_url,
         echo=settings.debug,
         poolclass=NullPool,
         connect_args={
@@ -31,9 +40,9 @@ if settings.debug:
         }
     )
 else:
-    # Use connection pooling for production
+    # PostgreSQL production configuration
     engine = create_async_engine(
-        str(settings.database_url),
+        settings.database_url,
         echo=False,
         pool_pre_ping=True,
         pool_size=20,
@@ -74,22 +83,20 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initialize database with extensions and tables."""
+    """Initialize database with tables and indexes."""
     try:
         async with engine.begin() as conn:
-            # Skip TimescaleDB extension for local development
-            # await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
-            
             # Create tables
             await conn.run_sync(Base.metadata.create_all)
         
-        # Skip hypertables for local development
-        # await create_hypertables()
+        # Create indexes (skip TimescaleDB-specific ones for SQLite)
+        if "sqlite" not in settings.database_url:
+            await create_hypertables()
         
-        # Create indexes
         await create_indexes()
         
-        logger.info("Database initialized successfully (without TimescaleDB)")
+        db_type = "SQLite" if "sqlite" in settings.database_url else "PostgreSQL"
+        logger.info(f"Database initialized successfully ({db_type})")
         
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")

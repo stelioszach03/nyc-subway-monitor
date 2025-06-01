@@ -5,7 +5,7 @@ Fixed configuration with proper defaults and validation.
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import Field, PostgresDsn, field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,30 +28,15 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]
     
     # Database
+    database_url: str = "sqlite+aiosqlite:///./subway_monitor.db"
     postgres_host: str = "localhost"
     postgres_port: int = 5432
     postgres_user: str = "postgres"
     postgres_password: str = "postgres"
     postgres_db: str = "subway_monitor"
     
-    # Computed database URL
-    database_url: Optional[PostgresDsn] = None
-    
-    @field_validator("database_url", mode="before")
-    def assemble_db_connection(cls, v: Optional[str], info) -> str:
-        if isinstance(v, str):
-            return v
-        return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username=info.data.get("postgres_user"),
-            password=info.data.get("postgres_password"),
-            host=info.data.get("postgres_host"),
-            port=info.data.get("postgres_port"),
-            path=info.data.get("postgres_db"),
-        )
-    
-    # Redis
-    redis_url: str = "redis://localhost:6379/0"
+    # Redis (optional for local development)
+    redis_url: str = "memory://localhost"
     redis_password: Optional[str] = None
     
     # ML Configuration
