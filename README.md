@@ -1,204 +1,200 @@
-# NYC Subway Monitor 🚇
+# NYC Subway Monitor - Local Setup (No Docker)
 
-<div align="center">
-
-![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green?style=for-the-badge&logo=fastapi)
-![Next.js](https://img.shields.io/badge/Next.js-15.2-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=for-the-badge&logo=typescript)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=for-the-badge&logo=docker)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-orange?style=for-the-badge&logo=github-actions)
-
-**Real-time anomaly detection for NYC subway operations using ML models and streaming data**
-
-[Demo](https://subway-monitor.demo) • [Documentation](./docs) • [API Reference](./docs/api)
-
-</div>
-
-## 🎯 Overview
-
-NYC Subway Monitor ingests real-time GTFS-RT feeds from the MTA, engineers time-series features, and uses machine learning to detect operational anomalies. The system provides a live dashboard with interactive maps and timeline visualizations.
-
-### Key Features
-
-- **Real-time Data Ingestion**: Async polling of public MTA GTFS-RT feeds (no API key required)
-- **ML-Powered Detection**: Isolation Forest + LSTM autoencoder ensemble
-- **Interactive Dashboard**: Mapbox-powered visualization with WebSocket streaming
-- **Production-Ready**: Docker, CI/CD, monitoring, and horizontal scaling support
-
-## 🏗️ Architecture
-
-```mermaid
-graph TB
-    subgraph "Data Sources"
-        MTA[MTA GTFS-RT Feeds]
-    end
-    
-    subgraph "Backend Services"
-        API[FastAPI Server]
-        WS[WebSocket Server]
-        ML[ML Pipeline]
-        DB[(TimescaleDB)]
-        Redis[(Redis Cache)]
-    end
-    
-    subgraph "ML Models"
-        IF[Isolation Forest]
-        LSTM[LSTM Autoencoder]
-    end
-    
-    subgraph "Frontend"
-        Next[Next.js App]
-        Map[Mapbox GL]
-        D3[D3 Timeline]
-    end
-    
-    MTA -->|Async Fetch| API
-    API --> DB
-    API --> Redis
-    API --> ML
-    ML --> IF
-    ML --> LSTM
-    API --> WS
-    WS -->|Real-time| Next
-    Next --> Map
-    Next --> D3
-```
+A real-time NYC subway monitoring system that runs locally on Windows, macOS, and Linux without Docker dependencies.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- **Windows**: Git Bash or WSL
+- **macOS**: Terminal with Homebrew
+- **Linux**: Terminal with package manager (apt/yum)
 
-- Docker & Docker Compose
-- Node.js 20+ (for local development)
-- Python 3.12+ (for local development)
-- Mapbox API token (free tier works)
+### One-Command Setup
 
-### 1. Clone and Setup
 ```bash
+# Clone and setup (first time)
 git clone https://github.com/stelioszach03/nyc-subway-monitor.git
 cd nyc-subway-monitor
+git checkout local-setup-no-docker
+chmod +x setup.sh
+./setup.sh --minimal
 
-# Copy environment variables
-cp .env.example .env
-
-# Add your Mapbox token to .env
-echo "MAPBOX_TOKEN=your_mapbox_token_here" >> .env
+# Start the application
+./start.sh
 ```
 
-### 2. Start Services
+That's it! The application will be running at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/api/v1/docs
+
+## 📋 What's Included
+
+### ✅ Features
+- **Real-time MTA data ingestion** (8 subway feeds)
+- **Live train positions** for all NYC subway lines
+- **Station information** (1,497 stations)
+- **RESTful API** with comprehensive endpoints
+- **Health monitoring** and feed status
+- **Anomaly detection** (basic version without ML)
+- **Cross-platform compatibility** (Windows/macOS/Linux)
+
+### 🗂️ Architecture
+- **Backend**: FastAPI with SQLite database
+- **Frontend**: Next.js React application
+- **Database**: SQLite (no PostgreSQL required)
+- **Cache**: In-memory (no Redis required)
+- **Data Source**: Live MTA GTFS-RT feeds
+
+## 🛠️ Setup Options
+
+### Minimal Setup (Recommended)
 ```bash
-# Start all services
-docker-compose up --build
-
-# Or run individually
-docker-compose up -d timescaledb redis  # Start databases
-cd backend && uvicorn app.main:app --reload  # Start backend
-cd frontend && npm run dev  # Start frontend
+./setup.sh --minimal
 ```
+- Installs only essential dependencies
+- Faster setup (~2-3 minutes)
+- No ML/PyTorch dependencies
+- Perfect for development and testing
 
-### 3. Access Dashboard
-
-- **Dashboard**: http://localhost:3000
-- **API Docs**: http://localhost:8000/api/v1/docs
-- **Grafana**: http://localhost:3001 (admin/admin)
-- **Prometheus**: http://localhost:9090
-
-## 📊 ML Models
-
-### Isolation Forest
-- Fast unsupervised anomaly detection
-- Handles multimodal distributions
-- 5% contamination rate
-- Features: headway, dwell time, delays
-
-### LSTM Autoencoder
-- Captures temporal patterns
-- Sequence length: 24 time steps
-- Architecture: 128 → 64 → 32 → 64 → 128
-- Threshold: 95th percentile reconstruction error
-
-## 🔌 API Reference
-
-### REST Endpoints
+### Full Setup
 ```bash
-# Get anomalies
-GET /api/v1/anomalies?line=6&start_date=2024-01-01
-
-# Get train positions
-GET /api/v1/feeds/positions/nqrw
-
-# Trigger detection
-POST /api/v1/anomalies/detect
+./setup.sh
 ```
+- Includes all dependencies including ML libraries
+- Longer setup time (~5-10 minutes)
+- Enables advanced anomaly detection features
 
-### WebSocket
-```javascript
-// Subscribe to anomalies
-ws.send({
-  type: 'subscribe',
-  filters: { line: '6', severity_min: 0.7 }
-})
-```
+## 📊 API Endpoints
 
-## 🧪 Testing
+### Core Endpoints
+- `GET /health/live` - Service health check
+- `GET /health/ready` - Readiness probe
+- `GET /api/v1/stations/` - List all subway stations
+- `GET /api/v1/feeds/positions/{line}` - Get train positions for a line
+- `GET /api/v1/feeds/status` - Feed ingestion status
+- `GET /api/v1/anomalies/stats` - Anomaly statistics
+
+### Example Usage
 ```bash
-# Backend tests
+# Get all stations
+curl http://localhost:8000/api/v1/stations/
+
+# Get train positions for line 1
+curl http://localhost:8000/api/v1/feeds/positions/1
+
+# Get feed status
+curl http://localhost:8000/api/v1/feeds/status
+```
+
+## 🔧 Development
+
+### Project Structure
+```
+nyc-subway-monitor/
+├── setup.sh              # Automated setup script
+├── start.sh               # Application startup script
+├── backend/               # FastAPI backend
+│   ├── app/
+│   │   ├── main.py       # Application entry point
+│   │   ├── routers/      # API endpoints
+│   │   ├── db/           # Database models and operations
+│   │   └── services/     # Business logic
+│   ├── requirements.txt  # Python dependencies
+│   └── requirements_minimal.txt  # Minimal dependencies
+├── frontend/              # Next.js frontend
+│   ├── src/
+│   ├── package.json
+│   └── next.config.js
+└── data/                  # GTFS static data
+```
+
+### Manual Commands
+```bash
+# Backend only
 cd backend
-pytest --cov=app
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-# Frontend tests
+# Frontend only
 cd frontend
-npm test
-
-# E2E tests
-npm run test:e2e
+npm run dev
 ```
 
-## 📈 Performance
+## 📈 Live Data
 
-- **Ingestion rate**: ~1000 updates/second
-- **Detection latency**: <100ms p99
-- **Dashboard FPS**: 60 (GPU accelerated)
-- **Storage**: ~50GB/month with 7-day retention
+The system processes real-time data from MTA's GTFS-RT feeds:
+- **Feed 1**: 4/5/6 lines (~3,000 train positions)
+- **Feed A**: A/C/E lines (~1,700 train positions)
+- **Feed B**: B/D/F/M lines (~1,400 train positions)
+- **Feed G**: G line (~300 train positions)
+- **Feed J**: J/Z lines (~300 train positions)
+- **Feed L**: L line (~400 train positions)
+- **Feed N**: N/Q/R/W lines (~1,900 train positions)
+- **Feed SI**: Staten Island Railway (~120 train positions)
 
-## 🚢 Deployment
+**Total**: ~8,000+ live train positions updated every 30 seconds
 
-### Kubernetes
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**Port already in use:**
 ```bash
-# Apply manifests
-kubectl apply -f k8s/manifests/
-
-# Check status
-kubectl get pods -n subway-monitor
+# Kill existing processes
+pkill -f uvicorn
+pkill -f "next dev"
+./start.sh
 ```
 
-### Environment Variables
+**Permission denied:**
+```bash
+chmod +x setup.sh start.sh
+```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| POSTGRES_HOST | TimescaleDB host | localhost |
-| REDIS_URL | Redis connection URL | redis://localhost:6379 |
-| FEED_UPDATE_INTERVAL | Seconds between fetches | 30 |
-| MODEL_RETRAIN_HOUR | Hour to retrain models (UTC) | 3 |
+**Python/Node not found:**
+- Run `./setup.sh` again - it will install missing dependencies
+
+**Database issues:**
+```bash
+# Reset database
+rm -f backend/subway_monitor.db
+./start.sh
+```
+
+### Logs
+- Backend logs: Real-time in terminal
+- Database file: `backend/subway_monitor.db`
+- Virtual environment: `backend/venv/`
+
+## 🌟 Key Improvements from Docker Version
+
+1. **No Docker dependency** - Runs natively on all platforms
+2. **Faster startup** - No container overhead
+3. **Easier development** - Direct file access and debugging
+4. **Automatic dependency management** - Setup script handles everything
+5. **Cross-platform compatibility** - Works on Windows, macOS, Linux
+6. **Simplified deployment** - Just run two scripts
+
+## 📝 License
+
+This project is licensed under the MIT License.
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/amazing-feature`)
-3. Commit changes using conventional commits
-4. Push to branch (`git push origin feat/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Test locally with `./setup.sh --minimal && ./start.sh`
+5. Submit a pull request
 
-## 📝 License
-MIT License - see LICENSE file
+## 📞 Support
 
-## 🙏 Acknowledgments
+For issues or questions:
+1. Check the troubleshooting section above
+2. Review the API documentation at http://localhost:8000/api/v1/docs
+3. Open an issue on GitHub
 
-- MTA for public GTFS-RT feeds
-- nyctrains package maintainers
-- TimescaleDB for time-series optimization
+---
 
-<div align="center">
-Built with ❤️ for NYC's 4.5 million daily riders
-</div>
+**Made with ❤️ for NYC subway riders**
